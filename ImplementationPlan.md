@@ -18,7 +18,7 @@ This document outlines a pragmatic implementation plan for completing Small Paws
 
 ### Simple Technology Stack
 
-- **Backend**: Express.js with TypeScript (simple REST API)
+- **Backend**: Next.js with TypeScript
 - **Database**: SQLite with better-sqlite3 (simple, file-based)
 - **Encryption**: crypto-js (battle-tested, simple)
 - **Deployment**: Single Node.js process
@@ -250,7 +250,7 @@ This document outlines a pragmatic implementation plan for completing Small Paws
 
 ### Phase 1: Backend Migration
 
-- Replace Rust server with simple Express.js
+- Migrate to fullstack Next.js app
 - Migrate existing functionality
 - No new features yet
 

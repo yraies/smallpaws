@@ -1,0 +1,28 @@
+@import "@fontsource-variable/outfit";
+@import "tailwindcss";
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Outfit Variable", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f1f5f9; /* slate-100 */
+}
+
+#__next {
+  font-family: "Outfit Variable", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.small-caps {
+  font-variant: small-caps;
+}
+
+.border-b-1 {
+  border-bottom-width: 1px;
+}

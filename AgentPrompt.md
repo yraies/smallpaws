@@ -8,21 +8,20 @@ You are implementing the Small Paws project following the detailed Implementatio
 
 - ✅ **40% Complete**: React frontend with excellent form creation/editing works
 - ✅ **Working Foundation**: Form/Category/Question data model, templates, local storage
-- ✅ **Current Tech**: React + TypeScript frontend, Rust backend (to be replaced)
+- ✅ **Current Tech**: React + TypeScript frontend
 - ❌ **Missing**: Privacy/encryption, form sharing, cloning, export functionality
 
 ## Implementation Phases (In Order)
 
-### Phase 0: Backend Migration 🔄
+### Phase 0: Migrate to Next.js
 
-**Status**: Not Started
-**Goal**: Replace Rust backend with simple Express.js + TypeScript
+**Status**: ✅ Completed  
+**Goal**: Move the React frontend to Next.js for better routing and extensibility down the line.
 
-- [ ] Setup Express.js server with TypeScript
-- [ ] Create SQLite database with better-sqlite3
-- [ ] Implement existing API endpoints (GET/POST /api/forms/:id)
-- [ ] Test that frontend still works with new backend
-- [ ] Remove Rust backend
+- [x] Set up a new Next.js project
+- [x] Migrate existing React components to Next.js pages
+- [x] Implement API routes in Next.js
+- [x] Integrate a testing framework and write tests for the current functionality
 
 ### Phase 1: Privacy & Encryption 🔒
 
@@ -80,28 +79,9 @@ You are implementing the Small Paws project following the detailed Implementatio
 - [ ] Implement simple approval process
 - [ ] Test template sharing
 
-## Progress Tracking System
-
-Update this document as you complete tasks:
-
-```
-OVERALL PROGRESS: [▓▓▓▓░░░░░░] 40% Complete (4/10 vertical slices)
-
-Phase 0: Backend Migration     [░░░░░░░░░░] 0% (0/5 tasks)
-Phase 1: Privacy/Encryption    [░░░░░░░░░░] 0% (0/5 tasks)
-Phase 2: Form Sharing          [░░░░░░░░░░] 0% (0/6 tasks)
-Phase 3: Form Cloning          [░░░░░░░░░░] 0% (0/5 tasks)
-Phase 4: Data Export           [░░░░░░░░░░] 0% (0/5 tasks)
-Phase 5: Public Templates      [░░░░░░░░░░] 0% (0/5 tasks)
-
-Last Updated: [Date] by [Agent]
-Current Focus: Phase 0 - Backend Migration
-Next Milestone: Complete Express.js server setup
-```
-
 ## Key Constraints & Guidelines
 
-- **Keep It Simple**: Use Express.js, SQLite, crypto-js - no over-engineering
+- **Keep It Simple**: Use well known libraries as much as needed - no over-engineering
 - **Preserve What Works**: Don't break existing React frontend or data model
 - **Incremental Progress**: Complete each phase fully before moving to next
 - **Privacy First**: Client-side encryption, no user accounts required
@@ -118,13 +98,14 @@ Next Milestone: Complete Express.js server setup
 
 ## Resources
 
+- **Requirements**: The requirements for this project cam be found in `FunctionalRequirements.md`
 - **Implementation Plan**: Full details in `ImplementationPlan.md`
-- **Current Codebase**: React frontend in `/frontend`, Rust backend in `/backend`
+- **Current Codebase**: React frontend in `/frontend`
 - **Data Model**: Excellent immutable Form/Category/Question classes in `/frontend/src/types/Form.tsx`
 
 ## Your First Task
 
-Start with Phase 0: Set up a new Express.js + TypeScript server that provides the same API as the current Rust backend. The goal is to replace the backend without changing any frontend code.
+Start with Phase 0: Set up a new Next.js project and migrate the existing React codebase. The goal is to allow for a backend without changing the functionality of any frontend code.
 
 Update the progress tracker above as you complete each task, and always work through the phases in order. Focus on getting each phase completely working before moving to the next one.
 
