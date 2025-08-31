@@ -1,4 +1,5 @@
 import React from "react";
+import dynamic from "next/dynamic";
 import { Selection } from "../types/Form";
 import {
   QuestionMarkCircleIcon,
@@ -24,7 +25,7 @@ interface SelectionButtonProps {
   className?: string;
 }
 
-const SelectionButton: React.FC<SelectionButtonProps> = ({
+const SelectionButtonComponent: React.FC<SelectionButtonProps> = ({
   selection,
   onClick,
   className = "",
@@ -98,5 +99,14 @@ const SelectionButton: React.FC<SelectionButtonProps> = ({
     </button>
   );
 };
+
+// Create a client-side only version using dynamic import
+const SelectionButton = dynamic(
+  () => Promise.resolve(SelectionButtonComponent),
+  {
+    ssr: false,
+    loading: () => <div>Loading...</div>,
+  }
+);
 
 export default SelectionButton;

@@ -10,6 +10,7 @@ import { TrashIcon, HomeIcon } from "@heroicons/react/16/solid";
 import { formatRelativeTime } from "../utils/RelativeDates";
 import { LineButton } from "../components/LineButton";
 import { Form } from "../types/Form";
+import EncryptionStatus from "../components/EncryptionStatus";
 
 function Spacer() {
   return <div className="col-span-2 mx-auto my-2 w-4/5" />;
@@ -20,7 +21,7 @@ export default function HomePage() {
   const [selectedTemplate, setSelectedTemplate] = React.useState("empty");
   const [formName, setFormName] = React.useState("");
   const [recentForms, setRecentForms] = React.useState<
-    { id: string; name: string; date: Date }[]
+    { id: string; name: string; date: Date; encrypted: boolean }[]
   >([]);
 
   useEffect(() => {
@@ -96,6 +97,8 @@ export default function HomePage() {
                     </span>
                   </legend>
 
+                  <EncryptionStatus isEncrypted={form.encrypted} />
+
                   <IconButton
                     onClick={() =>
                       removeRecent(form, setRecentForms, recentForms)
@@ -145,7 +148,9 @@ function renderTemplateOption(
 
 function loadRecentFormsFromLocalStorage(
   setRecentForms: React.Dispatch<
-    React.SetStateAction<{ id: string; name: string; date: Date }[]>
+    React.SetStateAction<
+      { id: string; name: string; date: Date; encrypted: boolean }[]
+    >
   >
 ) {
   console.log("loading recent forms");
@@ -155,10 +160,16 @@ function loadRecentFormsFromLocalStorage(
     .then((response) => response.json())
     .then((apiForms) => {
       const forms = apiForms.map(
-        (form: { id: string; name: string; date: string }) => ({
+        (form: {
+          id: string;
+          name: string;
+          date: string;
+          encrypted: boolean;
+        }) => ({
           id: form.id,
           name: form.name,
           date: new Date(form.date),
+          encrypted: form.encrypted,
         })
       );
       setRecentForms(forms);
@@ -173,7 +184,7 @@ function loadRecentFormsFromLocalStorage(
           const value = localStorage.getItem(key);
           if (!value) return null;
           const { name, date } = JSON.parse(value);
-          return { id, name, date: new Date(date) };
+          return { id, name, date: new Date(date), encrypted: false }; // Legacy forms are unencrypted
         })
         .filter((form) => form !== null);
       forms.sort((a, b) => b.date.getTime() - a.date.getTime());
@@ -208,11 +219,13 @@ function navigateToRecent(
 }
 
 function removeRecent(
-  form: { id: string; name: string; date: Date },
+  form: { id: string; name: string; date: Date; encrypted: boolean },
   setRecentForms: React.Dispatch<
-    React.SetStateAction<{ id: string; name: string; date: Date }[]>
+    React.SetStateAction<
+      { id: string; name: string; date: Date; encrypted: boolean }[]
+    >
   >,
-  recentForms: { id: string; name: string; date: Date }[]
+  recentForms: { id: string; name: string; date: Date; encrypted: boolean }[]
 ) {
   // Remove from both localStorage and API
   localStorage.removeItem(`${form.id}-meta`);
@@ -230,7 +243,9 @@ function removeRecent(
 
 function clearRecents(
   setRecentForms: React.Dispatch<
-    React.SetStateAction<{ id: string; name: string; date: Date }[]>
+    React.SetStateAction<
+      { id: string; name: string; date: Date; encrypted: boolean }[]
+    >
   >
 ) {
   // Clear both localStorage and API

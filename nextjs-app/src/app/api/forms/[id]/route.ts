@@ -29,7 +29,7 @@ export async function POST(
     const { id } = await context.params;
     const body = await request.json();
     
-    const { name, data, encrypted = false } = body;
+    const { name, data, encrypted = false, password_hash = null } = body;
     
     if (!name || !data) {
       return NextResponse.json({ error: 'Name and data are required' }, { status: 400 });
@@ -41,6 +41,7 @@ export async function POST(
       id,
       modification_key,
       encrypted,
+      password_hash,
       name,
       data: JSON.stringify(data)
     };

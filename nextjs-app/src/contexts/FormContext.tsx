@@ -46,15 +46,15 @@ function FormContextProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (id && !!form) {
-      // Save to both localStorage (for backward compatibility) and API
+      // Save to localStorage ONLY for draft storage (not to API)
       localStorage.setItem(
         `${id}-meta`,
         JSON.stringify({ name: form.name, date: new Date().toISOString() })
       );
       localStorage.setItem(`${id}-data`, JSON.stringify(form));
 
-      // Save to API
-      saveFormToAPI(id, form);
+      // DO NOT auto-save to API - only save when user explicitly chooses
+      // This prevents unencrypted data from being sent to server
     }
   }, [id, form]);
 
@@ -79,29 +79,21 @@ async function loadFormFromAPI(
     const response = await fetch(`/api/forms/${id}`);
     if (response.ok) {
       const storedForm = await response.json();
+
+      // If form is encrypted, don't try to load it automatically
+      // The user will need to provide password through the UI
+      if (storedForm.encrypted) {
+        console.log("Form is encrypted, password verification required");
+        // Don't load the form data - let the UI handle password verification
+        return;
+      }
+
+      // For unencrypted forms, load normally
       const form = Form.fromPOJO(JSON.parse(storedForm.data));
       setForm(form);
     }
   } catch (error) {
     console.error("Error loading form from API:", error);
-  }
-}
-
-async function saveFormToAPI(id: string, form: Form) {
-  try {
-    await fetch(`/api/forms/${id}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: form.name,
-        data: form,
-        encrypted: false,
-      }),
-    });
-  } catch (error) {
-    console.error("Error saving form to API:", error);
   }
 }
 
