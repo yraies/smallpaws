@@ -31,6 +31,12 @@ try {
   // Column already exists, ignore error
 }
 
+try {
+  db.exec(`ALTER TABLE forms ADD COLUMN cloned_from TEXT`);
+} catch {
+  // Column already exists, ignore error
+}
+
 db.exec(`
   CREATE TABLE IF NOT EXISTS form_meta (
     id TEXT PRIMARY KEY,
@@ -67,6 +73,7 @@ export interface StoredForm {
   password_hash?: string;
   name: string;
   data: string;
+  cloned_from?: string;
   created_at: string;
   updated_at: string;
 }
@@ -101,6 +108,7 @@ export class FormStorage {
       password_hash: result.password_hash,
       name: result.name,
       data: result.data,
+      cloned_from: result.cloned_from,
       created_at: result.created_at,
       updated_at: result.updated_at
     };
@@ -114,11 +122,11 @@ export class FormStorage {
     }
 
     const stmt = db.prepare(`
-      INSERT INTO forms (id, modification_key, encrypted, password_hash, name, data, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+      INSERT INTO forms (id, modification_key, encrypted, password_hash, name, data, cloned_from, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
     `);
     // Convert boolean to integer for SQLite
-    stmt.run(form.id, form.modification_key, form.encrypted ? 1 : 0, form.password_hash || null, form.name, form.data);
+    stmt.run(form.id, form.modification_key, form.encrypted ? 1 : 0, form.password_hash || null, form.name, form.data, form.cloned_from || null);
 
     // Also insert meta information
     const metaStmt = db.prepare(`

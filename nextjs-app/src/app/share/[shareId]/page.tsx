@@ -3,6 +3,7 @@
 import React from "react";
 import dynamic from "next/dynamic";
 import CategoryBox from "../../../components/CategoryPage";
+import IconButton from "../../../components/IconButton";
 import {
   FormContextProvider,
   useFormContext,
@@ -11,11 +12,10 @@ import EncryptionStatus from "../../../components/EncryptionStatus";
 import { decryptFormData } from "../../../lib/crypto";
 import {
   HomeIcon,
-  ShareIcon,
   EyeIcon,
   CalendarIcon,
   ClockIcon,
-  ChevronLeftIcon,
+  DocumentDuplicateIcon,
 } from "@heroicons/react/24/outline";
 import { Form, FormPOJO } from "../../../types/Form";
 import { formatRelativeTime } from "../../../utils/RelativeDates";
@@ -39,6 +39,7 @@ function SharedFormPageContent() {
   const [shareInfo, setShareInfo] = React.useState<ShareInfo | null>(null);
   const [isFormEncrypted, setIsFormEncrypted] = React.useState(false);
   const [formName, setFormName] = React.useState("");
+  const [isCloning, setIsCloning] = React.useState(false);
 
   const params = useParams();
   const shareId = params?.shareId as string;
@@ -131,7 +132,8 @@ function SharedFormPageContent() {
     if (shareId) {
       loadSharedForm();
     }
-  }, [shareId, loadSharedForm]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shareId]);
 
   const handlePasswordVerification = async (password: string) => {
     try {
@@ -176,6 +178,46 @@ function SharedFormPageContent() {
     } catch (error) {
       console.error("Password verification error:", error);
       throw error;
+    }
+  };
+
+  const handleCloneForm = async () => {
+    if (!shareId || !form) return;
+
+    setIsCloning(true);
+    try {
+      const response = await fetch(`/api/share/${shareId}/clone`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to clone form");
+      }
+
+      const data = await response.json();
+
+      // Store the cloned form in sessionStorage so it can be loaded
+      sessionStorage.setItem("create_new", "true");
+      sessionStorage.setItem(
+        "form",
+        JSON.stringify(Form.fromPOJO(JSON.parse(data.formData.data)))
+      );
+
+      // Navigate to the new form
+      router.push(`/form/${data.formId}`);
+    } catch (error) {
+      console.error("Error cloning form:", error);
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to clone form. Please try again."
+      );
+    } finally {
+      setIsCloning(false);
     }
   };
 
@@ -230,7 +272,7 @@ function SharedFormPageContent() {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div className="text-center mb-6">
               <div className="bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
-                <ShareIcon className="w-6 h-6 text-blue-600" />
+                <EyeIcon className="w-6 h-6 text-blue-600" />
               </div>
               <h1 className="text-xl font-semibold text-gray-900 mb-2">
                 {formName || "Shared Form"}
@@ -356,72 +398,69 @@ function SharedFormPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center">
-              <button
-                onClick={() => router.push("/")}
-                className="flex items-center text-gray-600 hover:text-gray-900 transition-colors mr-4"
-              >
-                <ChevronLeftIcon className="w-5 h-5 mr-1" />
-                <span>Back to Home</span>
-              </button>
-              <div className="flex items-center">
-                <ShareIcon className="w-5 h-5 text-blue-600 mr-2" />
-                <h1 className="text-lg font-medium text-gray-900">
-                  {formName}
-                </h1>
-                {isFormEncrypted && <EncryptionStatus isEncrypted={true} />}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+    <>
+      {/* Home Button */}
+      <IconButton
+        onClick={() => router.push("/")}
+        className="absolute top-2 left-2"
+      >
+        <HomeIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-violet-400" />
+      </IconButton>
 
-      {/* Share info bar */}
+      {/* Clone Button */}
+      <IconButton
+        onClick={handleCloneForm}
+        className="absolute top-2 right-2"
+        disabled={isCloning}
+      >
+        <DocumentDuplicateIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-blue-400" />
+      </IconButton>
+
+      {/* Share Info Overlay (top-right, below clone button) */}
       {shareInfo && (
-        <div className="bg-blue-50 border-b border-blue-200">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-            <div className="flex items-center justify-between text-sm">
-              <div className="flex items-center space-x-6 text-blue-700">
-                <div className="flex items-center">
-                  <EyeIcon className="w-4 h-4 mr-1" />
-                  <span>{shareInfo.viewCount} views</span>
-                </div>
-                <div className="flex items-center">
-                  <CalendarIcon className="w-4 h-4 mr-1" />
-                  <span>
-                    Shared {formatRelativeTime(new Date(shareInfo.createdAt))}
-                  </span>
-                </div>
-                <div className="flex items-center">
-                  <ClockIcon className="w-4 h-4 mr-1" />
-                  <span>
-                    Expires {formatRelativeTime(new Date(shareInfo.expiresAt))}
-                  </span>
-                </div>
-              </div>
-            </div>
+        <div className="absolute top-14 right-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-xs text-blue-700 space-y-1 shadow-sm">
+          <div className="flex items-center">
+            <EyeIcon className="w-3 h-3 mr-1" />
+            <span>{shareInfo.viewCount} views</span>
+          </div>
+          <div className="flex items-center">
+            <CalendarIcon className="w-3 h-3 mr-1" />
+            <span>
+              Shared {formatRelativeTime(new Date(shareInfo.createdAt))}
+            </span>
+          </div>
+          <div className="flex items-center">
+            <ClockIcon className="w-3 h-3 mr-1" />
+            <span>
+              Expires {formatRelativeTime(new Date(shareInfo.expiresAt))}
+            </span>
           </div>
         </div>
       )}
 
-      {/* Form content */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {form.categories.map((category) => (
-            <CategoryBox
-              key={category.id.toString()}
-              id={category.id}
-              advancedOptions={false}
-            />
-          ))}
+      {/* Form Title with Encryption Status */}
+      <div className="mb-4 flex items-center gap-2">
+        <div className="w-fit border-b-1 text-center text-2xl bg-transparent">
+          {formName}
         </div>
+        {isFormEncrypted && (
+          <EncryptionStatus isEncrypted={true} showText={false} />
+        )}
+        <span className="text-sm text-blue-600 font-semibold bg-blue-100 px-2 py-1 rounded">
+          Shared
+        </span>
       </div>
-    </div>
+
+      {/* Form Categories */}
+      {form.categories.map((category) => (
+        <CategoryBox
+          id={category.id}
+          key={category.id.toString()}
+          advancedOptions={false}
+          readOnly={true}
+        />
+      ))}
+    </>
   );
 }
 
