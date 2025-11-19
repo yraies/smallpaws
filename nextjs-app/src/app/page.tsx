@@ -21,7 +21,13 @@ export default function HomePage() {
   const [selectedTemplate, setSelectedTemplate] = React.useState("empty");
   const [formName, setFormName] = React.useState("");
   const [recentForms, setRecentForms] = React.useState<
-    { id: string; name: string; date: Date; encrypted: boolean }[]
+    {
+      id: string;
+      name: string;
+      date: Date;
+      encrypted: boolean;
+      isPublished?: boolean;
+    }[]
   >([]);
 
   useEffect(() => {
@@ -93,7 +99,8 @@ export default function HomePage() {
                   >
                     {form.name}{" "}
                     <span className="text-xs text-neutral-600">
-                      ({formatRelativeTime(form.date)})
+                      ({!form.isPublished && "draft - "}
+                      {formatRelativeTime(form.date)})
                     </span>
                   </legend>
 
@@ -149,17 +156,24 @@ function renderTemplateOption(
 function loadRecentFormsFromLocalStorage(
   setRecentForms: React.Dispatch<
     React.SetStateAction<
-      { id: string; name: string; date: Date; encrypted: boolean }[]
+      {
+        id: string;
+        name: string;
+        date: Date;
+        encrypted: boolean;
+        isPublished?: boolean;
+      }[]
     >
   >
 ) {
   console.log("loading recent forms");
 
-  // Try to load from API first
+  // Load from API first
   fetch("/api/forms")
     .then((response) => response.json())
     .then((apiForms) => {
-      const forms = apiForms.map(
+      // Map API forms - these are all published
+      const apiFormsList = apiForms.map(
         (form: {
           id: string;
           name: string;
@@ -170,12 +184,40 @@ function loadRecentFormsFromLocalStorage(
           name: form.name,
           date: new Date(form.date),
           encrypted: form.encrypted,
+          isPublished: true, // API forms are published
         })
       );
-      setRecentForms(forms);
+
+      // Also check localStorage for unpublished drafts
+      const keys = Object.keys(localStorage);
+      const localForms = keys
+        .filter((key) => key.endsWith("-meta"))
+        .map((key) => {
+          const id = key.split("-")[0];
+          const value = localStorage.getItem(key);
+          if (!value) return null;
+          const { name, date } = JSON.parse(value);
+          return {
+            id,
+            name,
+            date: new Date(date),
+            encrypted: false,
+            isPublished: false,
+          };
+        })
+        .filter((form) => form !== null);
+
+      // Merge: Keep API forms (they're published), add local forms that aren't in API
+      const apiFormIds = new Set(apiFormsList.map((f: { id: string }) => f.id));
+      const localOnlyForms = localForms.filter((f) => !apiFormIds.has(f.id));
+
+      const allForms = [...apiFormsList, ...localOnlyForms];
+      allForms.sort((a, b) => b.date.getTime() - a.date.getTime());
+
+      setRecentForms(allForms);
     })
     .catch(() => {
-      // Fallback to localStorage if API fails
+      // Fallback to localStorage only if API fails
       const keys = Object.keys(localStorage);
       const forms = keys
         .filter((key) => key.endsWith("-meta"))
@@ -184,7 +226,13 @@ function loadRecentFormsFromLocalStorage(
           const value = localStorage.getItem(key);
           if (!value) return null;
           const { name, date } = JSON.parse(value);
-          return { id, name, date: new Date(date), encrypted: false }; // Legacy forms are unencrypted
+          return {
+            id,
+            name,
+            date: new Date(date),
+            encrypted: false,
+            isPublished: false,
+          };
         })
         .filter((form) => form !== null);
       forms.sort((a, b) => b.date.getTime() - a.date.getTime());
@@ -210,7 +258,7 @@ function createAndNavigateForm(
 }
 
 function navigateToRecent(
-  form: { id: string; name: string; date: Date },
+  form: { id: string; name: string; date: Date; isPublished?: boolean },
   router: ReturnType<typeof useRouter>
 ) {
   sessionStorage.setItem("create_new", "false");
@@ -219,13 +267,31 @@ function navigateToRecent(
 }
 
 function removeRecent(
-  form: { id: string; name: string; date: Date; encrypted: boolean },
+  form: {
+    id: string;
+    name: string;
+    date: Date;
+    encrypted: boolean;
+    isPublished?: boolean;
+  },
   setRecentForms: React.Dispatch<
     React.SetStateAction<
-      { id: string; name: string; date: Date; encrypted: boolean }[]
+      {
+        id: string;
+        name: string;
+        date: Date;
+        encrypted: boolean;
+        isPublished?: boolean;
+      }[]
     >
   >,
-  recentForms: { id: string; name: string; date: Date; encrypted: boolean }[]
+  recentForms: {
+    id: string;
+    name: string;
+    date: Date;
+    encrypted: boolean;
+    isPublished?: boolean;
+  }[]
 ) {
   // Remove from both localStorage and API
   localStorage.removeItem(`${form.id}-meta`);
@@ -244,7 +310,13 @@ function removeRecent(
 function clearRecents(
   setRecentForms: React.Dispatch<
     React.SetStateAction<
-      { id: string; name: string; date: Date; encrypted: boolean }[]
+      {
+        id: string;
+        name: string;
+        date: Date;
+        encrypted: boolean;
+        isPublished?: boolean;
+      }[]
     >
   >
 ) {

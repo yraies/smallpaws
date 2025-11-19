@@ -23,6 +23,7 @@ function FormContextProvider({ children }: { children: React.ReactNode }) {
   const params = useParams();
   const id = params?.id as string;
   const [form, setForm] = useState<Form | undefined>(undefined);
+  const [isEncrypted, setIsEncrypted] = useState<boolean>(false);
 
   useEffect(() => {
     // Check if this is a new form creation from sessionStorage
@@ -32,31 +33,25 @@ function FormContextProvider({ children }: { children: React.ReactNode }) {
       sessionStorage.removeItem("create_new");
       sessionStorage.removeItem("form");
     } else if (id) {
-      // Try to load from localStorage first (for backward compatibility)
-      const data = localStorage.getItem(`${id}-data`);
-      if (data) {
-        const loadedForm = Form.fromPOJO(JSON.parse(data));
-        setForm(loadedForm);
-      } else {
-        // Load from API
-        loadFormFromAPI(id, setForm);
-      }
+      // First check if the form is encrypted via API
+      checkIfEncrypted(id, setIsEncrypted, setForm);
     }
   }, [id]);
 
   useEffect(() => {
-    if (id && !!form) {
-      // Save to localStorage ONLY for draft storage (not to API)
+    if (id && !!form && !isEncrypted) {
+      // ONLY save to localStorage if form is NOT encrypted
       localStorage.setItem(
         `${id}-meta`,
         JSON.stringify({ name: form.name, date: new Date().toISOString() })
       );
       localStorage.setItem(`${id}-data`, JSON.stringify(form));
-
-      // DO NOT auto-save to API - only save when user explicitly chooses
-      // This prevents unencrypted data from being sent to server
+    } else if (id && isEncrypted) {
+      // If form is encrypted, remove any cached data from localStorage
+      localStorage.removeItem(`${id}-data`);
+      localStorage.removeItem(`${id}-meta`);
     }
-  }, [id, form]);
+  }, [id, form, isEncrypted]);
 
   const reSetForm: Dispatch<SetStateAction<Form>> = (newForm) => {
     if (typeof newForm === "function")
@@ -71,8 +66,9 @@ function FormContextProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-async function loadFormFromAPI(
+async function checkIfEncrypted(
   id: string,
+  setIsEncrypted: (encrypted: boolean) => void,
   setForm: (form: Form | undefined) => void
 ) {
   try {
@@ -80,20 +76,38 @@ async function loadFormFromAPI(
     if (response.ok) {
       const storedForm = await response.json();
 
-      // If form is encrypted, don't try to load it automatically
-      // The user will need to provide password through the UI
       if (storedForm.encrypted) {
+        // Form is encrypted - do NOT load from localStorage or anywhere
+        // The form page will handle password verification
+        setIsEncrypted(true);
         console.log("Form is encrypted, password verification required");
-        // Don't load the form data - let the UI handle password verification
         return;
-      }
+      } else {
+        // Form is not encrypted, safe to load
+        setIsEncrypted(false);
 
-      // For unencrypted forms, load normally
-      const form = Form.fromPOJO(JSON.parse(storedForm.data));
-      setForm(form);
+        // Try localStorage first (for drafts/offline access)
+        const data = localStorage.getItem(`${id}-data`);
+        if (data) {
+          const loadedForm = Form.fromPOJO(JSON.parse(data));
+          setForm(loadedForm);
+        } else {
+          // Load from API
+          const form = Form.fromPOJO(JSON.parse(storedForm.data));
+          setForm(form);
+        }
+      }
+    } else {
+      // Form not found in API, try localStorage for legacy forms
+      const data = localStorage.getItem(`${id}-data`);
+      if (data) {
+        const loadedForm = Form.fromPOJO(JSON.parse(data));
+        setForm(loadedForm);
+        setIsEncrypted(false);
+      }
     }
   } catch (error) {
-    console.error("Error loading form from API:", error);
+    console.error("Error checking form encryption status:", error);
   }
 }
 

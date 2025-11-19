@@ -16,7 +16,7 @@ const IconButton: React.FC<IconButtonProps> = ({
   return (
     <button
       type="button"
-      className={`group flex h-8 w-8 cursor-pointer items-center justify-center ${disabled ? "cursor-not-allowed opacity-50" : ""} ${className}`}
+      className={`group flex h-8 w-8 cursor-pointer items-center justify-center ${disabled ? "cursor-not-allowed" : ""} ${className}`}
       onClick={disabled ? undefined : onClick}
       disabled={disabled}
     >

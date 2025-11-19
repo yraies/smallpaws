@@ -46,7 +46,17 @@ export async function POST(
       data: JSON.stringify(data)
     };
     
-    FormStorage.saveForm(formData);
+    try {
+      FormStorage.saveForm(formData);
+    } catch (error) {
+      // Check if it's the published form protection error
+      if (error instanceof Error && error.message.includes('Cannot overwrite published form')) {
+        return NextResponse.json({ 
+          error: 'This form has already been published and cannot be modified. Published forms are immutable.' 
+        }, { status: 409 }); // 409 Conflict
+      }
+      throw error; // Re-throw if it's a different error
+    }
     
     return NextResponse.json({ 
       success: true, 

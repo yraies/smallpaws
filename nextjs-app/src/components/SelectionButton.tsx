@@ -23,12 +23,14 @@ interface SelectionButtonProps {
   selection: Selection;
   onClick: () => void;
   className?: string;
+  disabled?: boolean;
 }
 
 const SelectionButtonComponent: React.FC<SelectionButtonProps> = ({
   selection,
   onClick,
   className = "",
+  disabled = false,
 }) => {
   const [showIcon] = useLocalStorage("showIcons", false);
 
@@ -78,9 +80,10 @@ const SelectionButtonComponent: React.FC<SelectionButtonProps> = ({
     return (
       <button
         type="button"
-        className={`group -m-2 flex h-12 w-12 cursor-pointer items-center justify-center`}
-        onClick={onClick}
+        className={`group -m-2 flex h-12 w-12 cursor-pointer items-center justify-center ${disabled ? "cursor-not-allowed" : ""}`}
+        onClick={disabled ? undefined : onClick}
         title={config.text}
+        disabled={disabled}
       >
         <config.Icon className={`${className} ${config.textColor}`} />
       </button>
@@ -91,9 +94,10 @@ const SelectionButtonComponent: React.FC<SelectionButtonProps> = ({
   return (
     <button
       type="button"
-      className={`h-8 w-16 cursor-pointer font-extrabold text-white ${config.bgColor} ${className}`}
-      onClick={onClick}
+      className={`h-8 w-16 cursor-pointer font-extrabold text-white ${config.bgColor} ${className} ${disabled ? "cursor-not-allowed" : ""}`}
+      onClick={disabled ? undefined : onClick}
       title={config.text}
+      disabled={disabled}
     >
       {config.shortText}
     </button>

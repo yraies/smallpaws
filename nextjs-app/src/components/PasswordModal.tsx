@@ -34,7 +34,9 @@ const PasswordModal: React.FC<PasswordModalProps> = ({
   const canSubmit =
     mode === "enter"
       ? password.length > 0
-      : validation.isValid && passwordsMatch;
+      : shouldEncrypt
+        ? validation.isValid && passwordsMatch
+        : true; // Allow submission without password if not encrypting
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -182,8 +184,8 @@ const PasswordModal: React.FC<PasswordModalProps> = ({
             >
               {mode === "set"
                 ? shouldEncrypt
-                  ? "Save with Password"
-                  : "Save without Password"
+                  ? "Publish with Password"
+                  : "Publish without Password"
                 : "Unlock"}
             </button>
           </div>
