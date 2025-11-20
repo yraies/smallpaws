@@ -26,3 +26,318 @@ body {
 .border-b-1 {
   border-bottom-width: 1px;
 }
+
+/* ===================================
+   Print Styles - REQ-19
+   =================================== */
+@media print {
+  /* Page setup */
+  @page {
+    size: a4;
+    margin: 1cm 0.5cm 0.5cm 0.5cm;
+  }
+
+  @page :first {
+    margin-top: 0.25cm;
+  }
+
+  /* Root elements */
+  html,
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 11pt;
+    line-height: 1.4;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  /* Main container should use full page width */
+  body > *,
+  #__next,
+  main {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Hide interactive elements */
+  button,
+  .no-print,
+  [class*="IconButton"],
+  nav,
+  .modal,
+  #form-status-badge {
+    display: none !important;
+  }
+
+  /* Form header - print at top */
+  [class*="FormHeader"] {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #000;
+    break-after: avoid;
+  }
+
+  /* Form title */
+  h1,
+  [class*="FormHeader"] h1 {
+    font-size: 10pt;
+    font-weight: bold;
+    margin: 0 0 0.5rem 0;
+    color: #000 !important;
+    position: absolute;
+    top: 0.21in;
+    right: 0.25in;
+  }
+
+  #form-name {
+    border: none !important;
+    margin-bottom: -3mm !important;
+  }
+
+  /* Status badges and metadata */
+  [class*="status"],
+  [class*="badge"] {
+    display: inline-block;
+    padding: 0.125rem 0.5rem;
+    border: 1px solid #666;
+    border-radius: 0.25rem;
+    font-size: 9pt;
+    background: white !important;
+    color: #666 !important;
+  }
+
+  /* Multi-column layout for categories - responsive to page size */
+  [class*="FormCategoryList"],
+  .form-categories {
+    column-width: 8cm; /* Minimum 8cm width, auto-fills based on page size */
+    column-gap: 1.5rem;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Individual categories - prevent breaks and ensure full width */
+  [class*="CategoryPage"],
+  .category {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 1rem;
+    padding: 0.5rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    display: block !important;
+    border-radius: 0.25rem;
+  }
+
+  /* Category titles */
+  [class*="CategoryPage"] h2,
+  .category h2,
+  .category header h2,
+  .category header input {
+    font-size: 13pt;
+    font-weight: bold;
+    margin: 0 0 0.5rem 0;
+    padding-bottom: 0.25rem;
+    color: #000 !important;
+    background: transparent !important;
+    break-after: avoid;
+    border: none;
+  }
+  
+  /* Category header container */
+  .category header {
+    background: transparent !important;
+    color: #000 !important;
+  }
+  
+  /* Ensure all text in categories is visible regardless of background print setting */
+  .category,
+  .category * {
+    color: #000 !important;
+  }
+
+  .category > div {
+    border-radius: 1mm;
+  }
+
+  /* Question lines - checkbox, question text, and answer field in one row */
+  [class*="QuestionsLine"],
+  .question-line {
+    margin: 0.3rem 0;
+    padding: 0.15rem 0;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: flex-start; /* Align to top for multiline text */
+    break-inside: avoid;
+    page-break-inside: avoid;
+    width: 100%;
+    gap: 0.25rem;
+  }
+
+  /* Question text - fills available space, wraps if needed */
+  [class*="QuestionsLine"] span,
+  .question-text {
+    flex: 1 1 auto;
+    font-size: 10pt;
+    line-height: 1.3;
+    color: #000 !important;
+    padding-right: 0.25rem;
+    min-width: 0; /* Allow text to shrink and wrap */
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: normal; /* Allow wrapping */
+    hyphens: auto; /* Enable hyphenation for long words */
+  }
+
+  /* Selection indicators - show as small checkboxes */
+  [class*="SelectionButton"],
+  .selection-button {
+    width: 0.4cm;
+    height: 0.4cm;
+    min-width: 0.4cm;
+    min-height: 0.4cm;
+    border: 1.5pt solid #333;
+    background: white !important;
+    flex-shrink: 0;
+    border-radius: 0.1rem;
+  }
+
+  /* Filled selection */
+  [class*="SelectionButton"][data-selected="true"],
+  .selection-button.selected {
+    background: #333 !important;
+  }
+
+  /* Response space for handwritten answers - light gray box */
+  .print-response-space {
+    width: 2cm;
+    min-width: 2cm;
+    max-width: 2cm;
+    margin: -0.5mm 0mm -0.5mm 0mm;
+    height: 0.6cm;
+    min-height: 0.4cm;
+    background-color: #f5f5f5 !important; /* Very light gray */
+    border-radius: 0.1rem;
+    flex-shrink: 0;
+    align-self: center;
+  }
+
+  /* Icons - convert to text or hide */
+  svg,
+  [class*="Icon"] {
+    display: none;
+  }
+
+  /* Selection text labels for print */
+  [class*="SelectionButton"]::after {
+    content: attr(data-label);
+    font-size: 8pt;
+    color: #666;
+    margin-left: 0.25rem;
+  }
+
+  /* Share info overlay - format for print */
+  [class*="ShareInfoOverlay"] {
+    position: static !important;
+    border: 1px solid #ddd;
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 9pt;
+    break-after: avoid;
+  }
+
+  /* Remove shadows and transitions */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+
+  /* Links - show URL */
+  a[href]:after {
+    content: " (" attr(href) ")";
+    font-size: 8pt;
+    color: #666;
+  }
+
+  /* Prevent widows and orphans */
+  p,
+  h2,
+  h3 {
+    orphans: 3;
+    widows: 3;
+  }
+
+  h2,
+  h3 {
+    page-break-after: avoid;
+  }
+
+  /* Color adjustments for better print clarity */
+  .text-green-500,
+  .text-blue-400,
+  .text-amber-400,
+  .text-red-400 {
+    color: #000 !important;
+  }
+
+  /* Border colors for print */
+  .border-green-500,
+  .border-blue-400,
+  .border-amber-400,
+  .border-red-400 {
+    border-color: #666 !important;
+  }
+
+  /* Background colors - preserve category boxes (violet), convert others to white/light gray */
+  [class*="bg-green"],
+  [class*="bg-blue"],
+  [class*="bg-red"],
+  [class*="bg-amber"],
+  [class*="bg-slate"] {
+    background-color: white !important;
+  }
+  
+  /* Preserve category box color for visual hierarchy when backgrounds are enabled */
+  .category[class*="bg-violet"] {
+    background-color: #e9d5ff !important; /* violet-200 for better print contrast */
+  }
+  
+  /* Category boxes always have border regardless of background setting */
+  .category {
+    border: 1.5pt solid #8b5cf6 !important;
+  }
+
+  /* Input fields for print */
+  input[type="text"],
+  textarea {
+    border: 1pt solid #999;
+    background: white;
+    padding: 0.125rem 0.25rem;
+  }
+
+  /* Footer with page numbers */
+  @page {
+    @bottom-center {
+      content: counter(page);
+    }
+  }
+}
+
+/* Print-specific utility classes */
+.print-only {
+  display: none;
+}
+
+@media print {
+  .print-only {
+    display: block;
+  }
+  
+  .screen-only {
+    display: none !important;
+  }
+}

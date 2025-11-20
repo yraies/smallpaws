@@ -80,12 +80,19 @@ const SelectionButtonComponent: React.FC<SelectionButtonProps> = ({
     return (
       <button
         type="button"
-        className={`group -m-2 flex h-12 w-12 cursor-pointer items-center justify-center ${disabled ? "cursor-not-allowed" : ""}`}
+        className={`group -m-2 flex h-12 w-12 cursor-pointer items-center justify-center selection-button ${disabled ? "cursor-not-allowed" : ""}`}
         onClick={disabled ? undefined : onClick}
         title={config.text}
         disabled={disabled}
+        aria-label={`Set response to ${config.text}`}
+        aria-pressed={selection !== Selection.UNSET}
+        data-selected={selection !== Selection.UNSET}
+        data-label={config.shortText}
       >
-        <config.Icon className={`${className} ${config.textColor}`} />
+        <config.Icon
+          className={`${className} ${config.textColor}`}
+          aria-hidden="true"
+        />
       </button>
     );
   }
@@ -94,10 +101,14 @@ const SelectionButtonComponent: React.FC<SelectionButtonProps> = ({
   return (
     <button
       type="button"
-      className={`h-8 w-16 cursor-pointer font-extrabold text-white ${config.bgColor} ${className} ${disabled ? "cursor-not-allowed" : ""}`}
+      className={`h-8 w-16 cursor-pointer font-extrabold text-white selection-button ${config.bgColor} ${className} ${disabled ? "cursor-not-allowed" : ""}`}
       onClick={disabled ? undefined : onClick}
       title={config.text}
       disabled={disabled}
+      aria-label={`Set response to ${config.text}`}
+      aria-pressed={selection !== Selection.UNSET}
+      data-selected={selection !== Selection.UNSET}
+      data-label={config.shortText}
     >
       {config.shortText}
     </button>

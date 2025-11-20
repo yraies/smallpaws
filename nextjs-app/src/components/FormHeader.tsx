@@ -47,11 +47,15 @@ export default function FormHeader({
       {/* Form Title with Encryption Status */}
       <div className="mb-4 flex items-center gap-2">
         {readOnly ? (
-          <div className="w-fit border-b-1 text-center text-2xl bg-transparent">
+          <div
+            id="form-name"
+            className="w-fit border-b-1 text-center text-2xl bg-transparent"
+          >
             {formName}
           </div>
         ) : (
           <input
+            id="form-name"
             type="text"
             title="Form name"
             className="w-fit border-b-1 text-center text-2xl bg-transparent focus:outline-none"
@@ -63,6 +67,7 @@ export default function FormHeader({
         )}
         <EncryptionStatus isEncrypted={isEncrypted} showText={false} />
         <span
+          id="form-status-badge"
           className={`text-sm font-semibold px-2 py-1 rounded ${config.className}`}
         >
           {config.label}

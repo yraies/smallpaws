@@ -19,7 +19,11 @@ export default function FormCategoryList({
   onAddCategory,
 }: FormCategoryListProps) {
   return (
-    <>
+    <div
+      className="form-categories not-print:flex not-print:flex-col not-print:gap-2"
+      role="main"
+      aria-label="Form categories"
+    >
       {categories.map((category) => (
         <CategoryBox
           id={category.id}
@@ -31,13 +35,14 @@ export default function FormCategoryList({
 
       {showAddButton && onAddCategory && (
         <button
-          className="flex w-fit items-center justify-center gap-2 px-2 py-1 hover:backdrop-brightness-90"
+          className="flex w-fit items-center justify-center gap-2 px-2 py-1 hover:backdrop-brightness-90 print:hidden"
           onClick={onAddCategory}
+          aria-label="Add new category"
         >
-          <PlusIcon className="h-4 w-4" />
+          <PlusIcon className="h-4 w-4" aria-hidden="true" />
           Add new Category
         </button>
       )}
-    </>
+    </div>
   );
 }

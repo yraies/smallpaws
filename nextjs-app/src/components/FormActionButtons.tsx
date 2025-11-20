@@ -32,7 +32,7 @@ export default function FormActionButtons() {
     useDisplayPreferences();
 
   return (
-    <>
+    <div className="print:hidden">
       {/* Left side buttons - Content actions */}
 
       {/* Clone Button - Only show when published */}
@@ -132,6 +132,6 @@ export default function FormActionButtons() {
           <FaceSmileIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-violet-400" />
         )}
       </IconButton>
-    </>
+    </div>
   );
 }

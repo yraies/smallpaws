@@ -42,7 +42,7 @@ function CategoryBox({
   ));
 
   const buttons = (
-    <>
+    <div className="not-print:flex not-print:flex-row print:hidden">
       <IconButton
         onClick={() => {
           if (readOnly) return;
@@ -53,8 +53,12 @@ function CategoryBox({
           );
         }}
         disabled={readOnly}
+        aria-label="Add question"
       >
-        <PlusIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-violet-400" />
+        <PlusIcon
+          className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-violet-400"
+          aria-hidden="true"
+        />
       </IconButton>
       <IconButton
         onClick={() => {
@@ -62,8 +66,12 @@ function CategoryBox({
           setForm((prev) => prev.withMovedCategory(id, "up"));
         }}
         disabled={readOnly}
+        aria-label="Move category up"
       >
-        <ArrowUpIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-violet-400" />
+        <ArrowUpIcon
+          className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-violet-400"
+          aria-hidden="true"
+        />
       </IconButton>
       <IconButton
         onClick={() => {
@@ -71,8 +79,12 @@ function CategoryBox({
           setForm((prev) => prev.withMovedCategory(id, "down"));
         }}
         disabled={readOnly}
+        aria-label="Move category down"
       >
-        <ArrowDownIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-violet-400" />
+        <ArrowDownIcon
+          className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-violet-400"
+          aria-hidden="true"
+        />
       </IconButton>
       <IconButton
         onClick={() => {
@@ -80,10 +92,14 @@ function CategoryBox({
           setForm((prev) => prev.removeCategory(id));
         }}
         disabled={readOnly}
+        aria-label={`Delete ${category.name} category`}
       >
-        <TrashIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-red-400" />
+        <TrashIcon
+          className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-red-400"
+          aria-hidden="true"
+        />
       </IconButton>
-    </>
+    </div>
   );
 
   return (
@@ -97,6 +113,9 @@ function CategoryBox({
         );
       }}
       buttons={advancedOptions ? buttons : null}
+      className="category"
+      role="region"
+      aria-label={`${category.name} category`}
     >
       {questionBlock}
     </Box>

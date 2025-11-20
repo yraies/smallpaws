@@ -22,7 +22,8 @@ function QuestionLine({
   return (
     <div
       key={question.id.toString()}
-      className="flex flex-row items-center gap-1 px-2 py-1 hover:backdrop-brightness-90"
+      className="flex flex-row items-center gap-1 px-2 py-1 hover:backdrop-brightness-90 question-line"
+      role="listitem"
     >
       <SelectionButton
         selection={question.selection}
@@ -36,9 +37,10 @@ function QuestionLine({
         disabled={readOnly}
       />
 
+      {/* Input for screen, span for print (to enable text wrapping) */}
       <input
         type="text"
-        className="mx-2 min-w-10 grow border-b-1"
+        className="mx-2 min-w-10 grow border-b-1 question-text screen-only"
         value={question.value}
         placeholder="Question"
         onChange={(e) => {
@@ -48,17 +50,36 @@ function QuestionLine({
           );
         }}
         disabled={readOnly}
+        readOnly={readOnly}
+        aria-label="Question text"
       />
 
-      <div className="flex flex-row" hidden={!advancedOptions}>
+      {/* Print-only text that can wrap */}
+      <span className="print-only question-text" aria-hidden="true">
+        {question.value}
+      </span>
+
+      {/* Handwritten response space (print only) */}
+      <div className="print-only print-response-space" aria-hidden="true"></div>
+
+      <div
+        className="flex flex-row print:hidden"
+        hidden={!advancedOptions}
+        role="toolbar"
+        aria-label="Question actions"
+      >
         <IconButton
           onClick={() => {
             if (readOnly) return;
             onChange((cat) => cat.withMovedQuestion(question.id, "up"));
           }}
           disabled={readOnly}
+          aria-label="Move question up"
         >
-          <ArrowUpIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-violet-400" />
+          <ArrowUpIcon
+            className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-violet-400"
+            aria-hidden="true"
+          />
         </IconButton>
         <IconButton
           onClick={() => {
@@ -66,8 +87,12 @@ function QuestionLine({
             onChange((cat) => cat.withMovedQuestion(question.id, "down"));
           }}
           disabled={readOnly}
+          aria-label="Move question down"
         >
-          <ArrowDownIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-violet-400" />
+          <ArrowDownIcon
+            className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-violet-400"
+            aria-hidden="true"
+          />
         </IconButton>
         <IconButton
           onClick={() => {
@@ -75,8 +100,12 @@ function QuestionLine({
             onChange((cat) => cat.removeQuestion(question.id));
           }}
           disabled={readOnly}
+          aria-label={`Delete question: ${question.value || "untitled question"}`}
         >
-          <TrashIcon className="h-4 w-4 transition-transform group-hover:scale-75 group-hover:text-red-400" />
+          <TrashIcon
+            className="h-4 w-4 transition-transform group-hover:scale-75 group-hover:text-red-400"
+            aria-hidden="true"
+          />
         </IconButton>
       </div>
     </div>
