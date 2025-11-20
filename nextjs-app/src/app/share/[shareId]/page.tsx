@@ -12,15 +12,18 @@ import DeletedFormMessage from "../../../components/DeletedFormMessage";
 import FormCategoryList from "../../../components/FormCategoryList";
 import LoadingState from "../../../components/LoadingState";
 import ErrorMessage from "../../../components/ErrorMessage";
+import ShareInfoOverlay from "../../../components/ShareInfoOverlay";
 import { decryptFormData } from "../../../lib/crypto";
 import {
+  DocumentDuplicateIcon,
   EyeIcon,
   CalendarIcon,
   ClockIcon,
-  DocumentDuplicateIcon,
+  ArrowDownTrayIcon,
 } from "@heroicons/react/24/outline";
 import { Form, FormPOJO } from "../../../types/Form";
 import { formatRelativeTime } from "../../../utils/RelativeDates";
+import { exportFormAsCSV, exportFormAsJSON } from "../../../utils/formActions";
 import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 
@@ -231,6 +234,19 @@ function SharedFormPageContent() {
     }
   };
 
+  // Export handlers
+  const handleExportCSV = () => {
+    if (form) {
+      exportFormAsCSV(form);
+    }
+  };
+
+  const handleExportJSON = () => {
+    if (form) {
+      exportFormAsJSON(form);
+    }
+  };
+
   if (isLoading) {
     return <LoadingState message="Loading shared form..." />;
   }
@@ -400,27 +416,26 @@ function SharedFormPageContent() {
         <DocumentDuplicateIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-blue-400" />
       </IconButton>
 
+      {/* Export CSV Button */}
+      <IconButton
+        onClick={handleExportCSV}
+        className="absolute top-2 right-14"
+        title="Export as CSV"
+      >
+        <ArrowDownTrayIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-green-400" />
+      </IconButton>
+
+      {/* Export JSON Button */}
+      <IconButton
+        onClick={handleExportJSON}
+        className="absolute top-2 right-26"
+        title="Export as JSON"
+      >
+        <ArrowDownTrayIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-purple-400" />
+      </IconButton>
+
       {/* Share Info Overlay (top-right, below clone button) */}
-      {shareInfo && (
-        <div className="absolute top-14 right-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-xs text-blue-700 space-y-1 shadow-sm">
-          <div className="flex items-center">
-            <EyeIcon className="w-3 h-3 mr-1" />
-            <span>{shareInfo.viewCount} views</span>
-          </div>
-          <div className="flex items-center">
-            <CalendarIcon className="w-3 h-3 mr-1" />
-            <span>
-              Shared {formatRelativeTime(new Date(shareInfo.createdAt))}
-            </span>
-          </div>
-          <div className="flex items-center">
-            <ClockIcon className="w-3 h-3 mr-1" />
-            <span>
-              Expires {formatRelativeTime(new Date(shareInfo.expiresAt))}
-            </span>
-          </div>
-        </div>
-      )}
+      {shareInfo && <ShareInfoOverlay shareInfo={shareInfo} />}
 
       {/* Form Categories */}
       <FormCategoryList

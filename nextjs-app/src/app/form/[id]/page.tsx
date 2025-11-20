@@ -20,7 +20,6 @@ import {
   PaintBrushIcon,
   WrenchScrewdriverIcon,
   CloudArrowUpIcon,
-  PlusIcon,
   ShareIcon,
   DocumentDuplicateIcon,
   TrashIcon,
@@ -418,21 +417,13 @@ function FormPageContent() {
         categories={form.categories}
         advancedOptions={advancedOptions}
         readOnly={isPublished}
+        showAddButton={advancedOptions && !isPublished}
+        onAddCategory={() =>
+          setForm((prev) =>
+            prev.addCategory(Category.new("", [Question.new("")]))
+          )
+        }
       />
-
-      {advancedOptions && !isPublished && (
-        <button
-          className="flex w-fit items-center justify-center gap-2 px-2 py-1 hover:backdrop-brightness-90"
-          onClick={() =>
-            setForm((prev) =>
-              prev.addCategory(Category.new("", [Question.new("")]))
-            )
-          }
-        >
-          <PlusIcon className="h-4 w-4" />
-          Add new Category
-        </button>
-      )}
 
       {/* Password Modal */}
       <PasswordModal
