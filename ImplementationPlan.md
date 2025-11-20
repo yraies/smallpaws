@@ -4,9 +4,22 @@
 
 This document outlines a pragmatic implementation plan for completing Small Paws, focusing on the core missing features while keeping the project simple and maintaining what already works well.
 
-**Current Status**: ~40% complete - excellent foundation with form creation/editing working
-**Target Architecture**: Simple TypeScript backend + existing React frontend
+**Current Status**: ~75% complete - Phases 0-3 done, post-Phase-3 enhancements complete
+**Target Architecture**: Next.js fullstack with TypeScript + SQLite
 **Approach**: Incremental feature addition, preserve existing working code
+
+**Completed:**
+
+- ✅ Phase 0: Next.js Migration (Nov 2025)
+- ✅ Phase 1: Privacy & Encryption (Aug 2025)
+- ✅ Phase 2: Form Sharing (Nov 2025)
+- ✅ Phase 3: Form Cloning (Nov 2025)
+- ✅ Post-Phase-3: Clone/Export/Delete + localStorage fix (Nov 2025)
+
+**Remaining:**
+
+- 🔄 Phase 4.5: UI/UX Polish & Accessibility (Next)
+- 📋 Phase 5: Public Templates (Optional)
 
 ---
 
@@ -248,28 +261,197 @@ This document outlines a pragmatic implementation plan for completing Small Paws
 
 ## Implementation Order & Approach
 
-### Phase 1: Backend Migration
+### Phase 0: Backend Migration ✅ COMPLETE
 
-- Migrate to fullstack Next.js app
-- Migrate existing functionality
-- No new features yet
+- Migrated to fullstack Next.js app
+- Replaced Rust backend with TypeScript/SQLite
+- Preserved all existing frontend functionality
 
-### Phase 2: Privacy (Encryption)
+### Phase 1: Privacy (Encryption) ✅ COMPLETE
 
-- Add optional password protection
+- Added optional password protection
 - Client-side encryption with crypto-js
 - Password prompts in UI
+- Zero-knowledge architecture
 
-### Phase 3: Sharing
+### Phase 2: Form Sharing ✅ COMPLETE
 
 - Shareable links with optional passwords
-- Share page route
-- Access tracking
+- Share page route with view tracking
+- Access control and expiry dates
+- Immutable published forms
 
-### Phase 4: Cloning & Export
+### Phase 3: Form Cloning ✅ COMPLETE
 
-- Clone shared forms
-- JSON/CSV export functionality
+- Clone shared forms functionality
+- Clone attribution tracking (cloned_from)
+- Bug fixes (infinite reload, layout consistency)
+
+### Phase 3.5: Enhanced Form Management ✅ COMPLETE
+
+- Clone from published forms
+- CSV export functionality
+- Soft delete with graceful handling
+- Critical localStorage architecture fix
+
+### Phase 4: Data Export (Partially Complete)
+
+- ✅ CSV export functionality
+- ❌ JSON export (still needed)
+
+### Phase 4.5: UI/UX Polish & Accessibility 🔄 CURRENT FOCUS
+
+**Goal**: Refactor frontend for consistency, accessibility, and print-friendly modes
+
+**Frontend Refactoring:**
+
+1. **Extract shared components** between form and share pages
+
+   - Unified form display component
+   - Shared button layouts and positioning
+   - Common loading/error states
+   - Consolidated header/navigation patterns
+
+2. **Component extraction candidates:**
+
+   ```typescript
+   // New shared components
+   <FormHeader />          // Home button, title, badges (Published/Shared/Draft)
+   <FormToolbar />         // Action buttons (Clone/Export/Delete/Share/Publish)
+   <FormDisplay />         // Categories and questions rendering
+   <EncryptionBadge />     // Unified encryption status display
+   <FormMetadata />        // Stats overlay (views, dates, expiry)
+   <PasswordPrompt />      // Unified password entry (share/verify)
+   ```
+
+3. **Create unified form viewing modes:**
+   - **Standard mode** (current): Interactive form with all features
+   - **Print mode**: Optimized for printing with handwriting space
+   - **High contrast mode**: Accessibility-focused display
+   - **Simplified mode**: Minimal UI for focus/reading
+
+**Display Mode Implementation:**
+
+```typescript
+// Add to FormContext or new DisplayModeContext
+type DisplayMode = "standard" | "print" | "high-contrast" | "simplified";
+
+interface DisplayModeConfig {
+  mode: DisplayMode;
+  showIcons: boolean;
+  compactLayout: boolean;
+  printOptimized: boolean;
+}
+
+// Mode toggle in toolbar
+<DisplayModeSelector currentMode={displayMode} onChange={setDisplayMode} />;
+```
+
+**Print-Friendly Mode (REQ-19):**
+
+1. **Print CSS with proper page breaks**
+
+   ```css
+   @media print {
+     .no-print {
+       display: none;
+     }
+     .page-break {
+       page-break-after: always;
+     }
+     .question-row {
+       display: flex;
+       justify-content: space-between;
+       min-height: 2cm; /* Space for handwriting */
+     }
+   }
+   ```
+
+2. **Print-optimized layout:**
+
+   - Hide buttons and interactive elements
+   - Add checkboxes/spaces for manual responses
+   - Clear category separators
+   - Page breaks between categories
+   - Header/footer with form name
+
+3. **Export to PDF option** (browser print to PDF)
+
+**Accessibility Features (REQ-19):**
+
+1. **High contrast mode:**
+
+   - Increased color contrast ratios (WCAG AAA)
+   - Larger text sizes
+   - Bold borders and separators
+   - Clear focus indicators
+
+2. **Keyboard navigation improvements:**
+
+   - Tab order optimization
+   - Keyboard shortcuts for common actions
+   - Skip-to-content links
+
+3. **Screen reader support:**
+   - Proper ARIA labels
+   - Semantic HTML structure
+   - Alt text for icons
+   - Form field labels
+
+**Responsive Design Verification (REQ-21):**
+
+1. **Mobile breakpoints:**
+
+   - Test at 320px, 375px, 768px, 1024px, 1440px
+   - Touch-friendly button sizes (minimum 44x44px)
+   - Responsive button positioning
+   - Stack categories vertically on mobile
+
+2. **Mobile-specific improvements:**
+   - Collapsible categories on small screens
+   - Bottom navigation for actions
+   - Swipe gestures for navigation
+   - Mobile-optimized modals
+
+**Code Quality Improvements:**
+
+1. **DRY principle enforcement:**
+
+   - Eliminate duplicate button rendering code
+   - Unified state management patterns
+   - Shared hooks for common operations (publishing, sharing, cloning)
+   - Consistent error handling
+
+2. **Type safety improvements:**
+
+   - Stricter TypeScript types for components
+   - Shared prop interfaces
+   - Better null safety
+
+3. **Performance optimizations:**
+   - Memoization for expensive renders
+   - Lazy loading for modals
+   - Code splitting for display modes
+
+**Files to Refactor:**
+
+- `src/app/form/[id]/page.tsx` (419 lines → ~200 lines)
+- `src/app/share/[shareId]/page.tsx` (408 lines → ~150 lines)
+- New: `src/components/form/FormViewer.tsx`
+- New: `src/components/form/FormToolbar.tsx`
+- New: `src/components/form/FormHeader.tsx`
+- New: `src/components/form/DisplayModeSelector.tsx`
+- New: `src/contexts/DisplayModeContext.tsx`
+- New: `src/hooks/useFormActions.ts`
+
+**Success Metrics:**
+
+- Code duplication reduced by >60%
+- Both pages use shared components
+- All 4 display modes working
+- Print layout looks professional
+- Mobile experience is smooth
+- Accessibility score >90 (Lighthouse)
 
 ### Phase 5: Public Templates (Optional)
 
