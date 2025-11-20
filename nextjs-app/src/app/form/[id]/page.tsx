@@ -13,6 +13,7 @@ import ShareModal from "../../../components/ShareModal";
 import FormHeader from "../../../components/FormHeader";
 import DeletedFormMessage from "../../../components/DeletedFormMessage";
 import FormCategoryList from "../../../components/FormCategoryList";
+import LoadingState from "../../../components/LoadingState";
 import {
   EyeIcon,
   NewspaperIcon,
@@ -139,7 +140,7 @@ function FormPageContent() {
   };
 
   if (isLoadingForm) {
-    return <h1>Loading...</h1>;
+    return <LoadingState message="Loading..." showSpinner={false} />;
   }
 
   if (needsPasswordVerification) {
