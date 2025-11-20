@@ -2,13 +2,14 @@
 
 import React from "react";
 import dynamic from "next/dynamic";
-import CategoryBox from "../../../components/CategoryPage";
 import IconButton from "../../../components/IconButton";
 import {
   FormContextProvider,
   useFormContext,
 } from "../../../contexts/FormContext";
 import FormHeader from "../../../components/FormHeader";
+import DeletedFormMessage from "../../../components/DeletedFormMessage";
+import FormCategoryList from "../../../components/FormCategoryList";
 import { decryptFormData } from "../../../lib/crypto";
 import {
   HomeIcon,
@@ -16,7 +17,6 @@ import {
   CalendarIcon,
   ClockIcon,
   DocumentDuplicateIcon,
-  TrashIcon,
 } from "@heroicons/react/24/outline";
 import { Form, FormPOJO } from "../../../types/Form";
 import { formatRelativeTime } from "../../../utils/RelativeDates";
@@ -277,23 +277,10 @@ function SharedFormPageContent() {
   // Show deleted form message if the form has been deleted
   if (isDeleted) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <TrashIcon className="h-16 w-16 text-red-400 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold mb-2">
-            This form has been deleted
-          </h1>
-          <p className="text-gray-400 mb-6">
-            The shared form you&apos;re trying to access has been removed.
-          </p>
-          <button
-            onClick={() => router.push("/")}
-            className="bg-violet-500 hover:bg-violet-600 text-white px-6 py-2 rounded-lg transition-colors"
-          >
-            Return Home
-          </button>
-        </div>
-      </div>
+      <DeletedFormMessage
+        message="The shared form you're trying to access has been removed."
+        onGoHome={() => router.push("/")}
+      />
     );
   }
 
@@ -471,14 +458,11 @@ function SharedFormPageContent() {
       )}
 
       {/* Form Categories */}
-      {form.categories.map((category) => (
-        <CategoryBox
-          id={category.id}
-          key={category.id.toString()}
-          advancedOptions={false}
-          readOnly={true}
-        />
-      ))}
+      <FormCategoryList
+        categories={form.categories}
+        advancedOptions={false}
+        readOnly={true}
+      />
     </>
   );
 }

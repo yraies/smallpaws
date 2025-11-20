@@ -2,7 +2,6 @@
 
 import React from "react";
 import dynamic from "next/dynamic";
-import CategoryBox from "../../../components/CategoryPage";
 import {
   FormContextProvider,
   useFormContext,
@@ -12,6 +11,8 @@ import IconButton from "../../../components/IconButton";
 import PasswordModal from "../../../components/PasswordModal";
 import ShareModal from "../../../components/ShareModal";
 import FormHeader from "../../../components/FormHeader";
+import DeletedFormMessage from "../../../components/DeletedFormMessage";
+import FormCategoryList from "../../../components/FormCategoryList";
 import {
   EyeIcon,
   NewspaperIcon,
@@ -162,23 +163,10 @@ function FormPageContent() {
   // (deleted forms won't be loaded into state)
   if (isDeleted) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <TrashIcon className="h-16 w-16 text-red-400 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold mb-2">
-            This form has been deleted
-          </h1>
-          <p className="text-gray-400 mb-6">
-            The form you&apos;re trying to access has been removed.
-          </p>
-          <button
-            onClick={() => router.push("/")}
-            className="bg-violet-500 hover:bg-violet-600 text-white px-6 py-2 rounded-lg transition-colors"
-          >
-            Return Home
-          </button>
-        </div>
-      </div>
+      <DeletedFormMessage
+        message="The form you're trying to access has been removed."
+        onGoHome={() => router.push("/")}
+      />
     );
   }
 
@@ -425,14 +413,11 @@ function FormPageContent() {
         )}
       </IconButton>
 
-      {form.categories.map((category) => (
-        <CategoryBox
-          id={category.id}
-          key={category.id.toString()}
-          advancedOptions={advancedOptions}
-          readOnly={isPublished}
-        />
-      ))}
+      <FormCategoryList
+        categories={form.categories}
+        advancedOptions={advancedOptions}
+        readOnly={isPublished}
+      />
 
       {advancedOptions && !isPublished && (
         <button
