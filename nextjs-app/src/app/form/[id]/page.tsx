@@ -302,6 +302,28 @@ function FormPageContent() {
     }
   };
 
+  const handleExportJSON = () => {
+    if (!form) return;
+
+    try {
+      // Export the full form data as JSON
+      const jsonContent = JSON.stringify(form, null, 2);
+      const blob = new Blob([jsonContent], { type: "application/json;charset=utf-8;" });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+
+      link.setAttribute("href", url);
+      link.setAttribute("download", `${form.name || "form"}.json`);
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Error exporting JSON:", error);
+      alert("Failed to export JSON. Please try again.");
+    }
+  };
+
   const handleDeleteForm = async () => {
     if (!form || !formId) return;
 
@@ -394,11 +416,21 @@ function FormPageContent() {
         </IconButton>
       )}
 
+      {/* Export JSON Button - Only show when published */}
+      {isPublished && (
+        <IconButton
+          onClick={handleExportJSON}
+          className="absolute top-2 left-38"
+        >
+          <ArrowDownTrayIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-blue-400" />
+        </IconButton>
+      )}
+
       {/* Delete Button - Only show when published */}
       {isPublished && (
         <IconButton
           onClick={handleDeleteForm}
-          className="absolute top-2 left-38"
+          className="absolute top-2 left-50"
           disabled={isDeleting}
         >
           <TrashIcon
