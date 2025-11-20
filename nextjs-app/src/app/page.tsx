@@ -39,6 +39,7 @@ export default function HomePage() {
       <IconButton
         onClick={() => router.push("/")}
         className="absolute top-2 left-2"
+        title="Home"
       >
         <HomeIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-violet-400" />
       </IconButton>
@@ -81,7 +82,10 @@ export default function HomePage() {
           title="Recent Forms"
           onTitleChange={() => {}}
           buttons={
-            <IconButton onClick={() => clearRecents(setRecentForms)}>
+            <IconButton
+              onClick={() => clearRecents(setRecentForms)}
+              title="Clear Recent Forms"
+            >
               <TrashIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-red-400" />
             </IconButton>
           }
@@ -110,6 +114,7 @@ export default function HomePage() {
                     onClick={() =>
                       removeRecent(form, setRecentForms, recentForms)
                     }
+                    title={"Delete Form from Recent"}
                   >
                     <TrashIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-red-400" />
                   </IconButton>

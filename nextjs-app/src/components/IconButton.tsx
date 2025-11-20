@@ -5,6 +5,7 @@ interface IconButtonProps {
   children: React.ReactElement;
   className?: string;
   disabled?: boolean;
+  title?: string;
 }
 
 const IconButton: React.FC<IconButtonProps> = ({
@@ -12,6 +13,7 @@ const IconButton: React.FC<IconButtonProps> = ({
   children,
   className,
   disabled = false,
+  title,
 }) => {
   return (
     <button
@@ -19,6 +21,7 @@ const IconButton: React.FC<IconButtonProps> = ({
       className={`group flex h-8 w-8 cursor-pointer items-center justify-center ${disabled ? "cursor-not-allowed" : ""} ${className}`}
       onClick={disabled ? undefined : onClick}
       disabled={disabled}
+      title={title}
     >
       {children}
     </button>

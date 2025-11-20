@@ -54,6 +54,7 @@ function CategoryBox({
         }}
         disabled={readOnly}
         aria-label="Add question"
+        title="Add question"
       >
         <PlusIcon
           className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-violet-400"
@@ -67,6 +68,7 @@ function CategoryBox({
         }}
         disabled={readOnly}
         aria-label="Move category up"
+        title="Move category up"
       >
         <ArrowUpIcon
           className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-violet-400"
@@ -80,6 +82,7 @@ function CategoryBox({
         }}
         disabled={readOnly}
         aria-label="Move category down"
+        title="Move category down"
       >
         <ArrowDownIcon
           className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-violet-400"
@@ -93,6 +96,7 @@ function CategoryBox({
         }}
         disabled={readOnly}
         aria-label={`Delete ${category.name} category`}
+        title={`Delete category`}
       >
         <TrashIcon
           className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-red-400"
