@@ -2,28 +2,26 @@
 
 import React from "react";
 import dynamic from "next/dynamic";
-import IconButton from "../../../components/IconButton";
 import {
   FormContextProvider,
   useFormContext,
 } from "../../../contexts/FormContext";
+import {
+  DisplayPreferencesProvider,
+  useDisplayPreferences,
+} from "../../../contexts/DisplayPreferencesContext";
+import { FormActionsProvider } from "../../../contexts/FormActionsContext";
 import FormHeader from "../../../components/FormHeader";
 import DeletedFormMessage from "../../../components/DeletedFormMessage";
 import FormCategoryList from "../../../components/FormCategoryList";
 import LoadingState from "../../../components/LoadingState";
 import ErrorMessage from "../../../components/ErrorMessage";
 import ShareInfoOverlay from "../../../components/ShareInfoOverlay";
+import FormActionButtons from "../../../components/FormActionButtons";
 import { decryptFormData } from "../../../lib/crypto";
-import {
-  DocumentDuplicateIcon,
-  EyeIcon,
-  CalendarIcon,
-  ClockIcon,
-  ArrowDownTrayIcon,
-} from "@heroicons/react/24/outline";
+import { EyeIcon, CalendarIcon, ClockIcon } from "@heroicons/react/24/outline";
 import { Form, FormPOJO } from "../../../types/Form";
 import { formatRelativeTime } from "../../../utils/RelativeDates";
-import { exportFormAsCSV, exportFormAsJSON } from "../../../utils/formActions";
 import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 
@@ -36,6 +34,7 @@ interface ShareInfo {
 
 function SharedFormPageContent() {
   const { form, setForm } = useFormContext();
+  const { advancedOptions } = useDisplayPreferences();
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -44,7 +43,6 @@ function SharedFormPageContent() {
   const [shareInfo, setShareInfo] = React.useState<ShareInfo | null>(null);
   const [isFormEncrypted, setIsFormEncrypted] = React.useState(false);
   const [formName, setFormName] = React.useState("");
-  const [isCloning, setIsCloning] = React.useState(false);
   const [isDeleted, setIsDeleted] = React.useState(false);
 
   const params = useParams();
@@ -191,59 +189,6 @@ function SharedFormPageContent() {
     } catch (error) {
       console.error("Password verification error:", error);
       throw error;
-    }
-  };
-
-  const handleCloneForm = async () => {
-    if (!shareId || !form) return;
-
-    setIsCloning(true);
-    try {
-      const response = await fetch(`/api/share/${shareId}/clone`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Failed to clone form");
-      }
-
-      const data = await response.json();
-
-      // Store the cloned form in sessionStorage so it can be loaded
-      sessionStorage.setItem("create_new", "true");
-      sessionStorage.setItem(
-        "form",
-        JSON.stringify(Form.fromPOJO(JSON.parse(data.formData.data)))
-      );
-
-      // Navigate to the new form
-      router.push(`/form/${data.formId}`);
-    } catch (error) {
-      console.error("Error cloning form:", error);
-      alert(
-        error instanceof Error
-          ? error.message
-          : "Failed to clone form. Please try again."
-      );
-    } finally {
-      setIsCloning(false);
-    }
-  };
-
-  // Export handlers
-  const handleExportCSV = () => {
-    if (form) {
-      exportFormAsCSV(form);
-    }
-  };
-
-  const handleExportJSON = () => {
-    if (form) {
-      exportFormAsJSON(form);
     }
   };
 
@@ -398,52 +343,33 @@ function SharedFormPageContent() {
   }
 
   return (
-    <>
-      <FormHeader
-        formName={formName}
-        isEncrypted={isFormEncrypted}
-        status="shared"
-        onHomeClick={() => router.push("/")}
-        readOnly={true}
-      />
+    <FormActionsProvider
+      formId={shareId}
+      initialIsPublished={true}
+      initialIsEncrypted={isFormEncrypted}
+    >
+      <>
+        <FormHeader
+          formName={formName}
+          isEncrypted={isFormEncrypted}
+          status="shared"
+          onHomeClick={() => router.push("/")}
+          readOnly={true}
+        />
 
-      {/* Clone Button */}
-      <IconButton
-        onClick={handleCloneForm}
-        className="absolute top-2 right-2"
-        disabled={isCloning}
-      >
-        <DocumentDuplicateIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-blue-400" />
-      </IconButton>
+        <FormActionButtons />
 
-      {/* Export CSV Button */}
-      <IconButton
-        onClick={handleExportCSV}
-        className="absolute top-2 right-14"
-        title="Export as CSV"
-      >
-        <ArrowDownTrayIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-green-400" />
-      </IconButton>
+        {/* Share Info Overlay (top-right, below clone button) */}
+        {shareInfo && <ShareInfoOverlay shareInfo={shareInfo} />}
 
-      {/* Export JSON Button */}
-      <IconButton
-        onClick={handleExportJSON}
-        className="absolute top-2 right-26"
-        title="Export as JSON"
-      >
-        <ArrowDownTrayIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-purple-400" />
-      </IconButton>
-
-      {/* Share Info Overlay (top-right, below clone button) */}
-      {shareInfo && <ShareInfoOverlay shareInfo={shareInfo} />}
-
-      {/* Form Categories */}
-      <FormCategoryList
-        categories={form.categories}
-        advancedOptions={false}
-        readOnly={true}
-      />
-    </>
+        {/* Form Categories */}
+        <FormCategoryList
+          categories={form.categories}
+          advancedOptions={advancedOptions}
+          readOnly={true}
+        />
+      </>
+    </FormActionsProvider>
   );
 }
 
@@ -452,7 +378,9 @@ export default dynamic(
   () =>
     Promise.resolve(() => (
       <FormContextProvider>
-        <SharedFormPageContent />
+        <DisplayPreferencesProvider initialShowIcon={true}>
+          <SharedFormPageContent />
+        </DisplayPreferencesProvider>
       </FormContextProvider>
     )),
   { ssr: false }

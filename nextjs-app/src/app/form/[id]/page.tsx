@@ -6,26 +6,19 @@ import {
   FormContextProvider,
   useFormContext,
 } from "../../../contexts/FormContext";
+import {
+  DisplayPreferencesProvider,
+  useDisplayPreferences,
+} from "../../../contexts/DisplayPreferencesContext";
+import { FormActionsProvider } from "../../../contexts/FormActionsContext";
 import { Category, Question } from "../../../types/Form";
-import IconButton from "../../../components/IconButton";
 import PasswordModal from "../../../components/PasswordModal";
 import ShareModal from "../../../components/ShareModal";
 import FormHeader from "../../../components/FormHeader";
 import DeletedFormMessage from "../../../components/DeletedFormMessage";
 import FormCategoryList from "../../../components/FormCategoryList";
 import LoadingState from "../../../components/LoadingState";
-import {
-  EyeIcon,
-  NewspaperIcon,
-  PaintBrushIcon,
-  WrenchScrewdriverIcon,
-  CloudArrowUpIcon,
-  ShareIcon,
-  DocumentDuplicateIcon,
-  TrashIcon,
-  ArrowDownTrayIcon,
-} from "@heroicons/react/16/solid";
-import { useLocalStorage } from "@uidotdev/usehooks";
+import FormActionButtons from "../../../components/FormActionButtons";
 import { useRouter, useParams } from "next/navigation";
 import {
   encryptFormData,
@@ -33,26 +26,18 @@ import {
   decryptFormData,
 } from "../../../lib/crypto";
 import { Form, FormPOJO } from "../../../types/Form";
-import {
-  prepareFormClone,
-  exportFormAsCSV,
-  exportFormAsJSON,
-} from "../../../utils/formActions";
 
 function FormPageContent() {
   const { form, setForm } = useFormContext();
-  const [advancedOptions, setAdvancedOptions] = React.useState(false);
-  const [showIcon, setShowIcon] = useLocalStorage("showIcons", false);
+  const { advancedOptions } = useDisplayPreferences();
   const [showPasswordModal, setShowPasswordModal] = React.useState(false);
   const [showShareModal, setShowShareModal] = React.useState(false);
-  const [isPublishing, setIsPublishing] = React.useState(false);
   const [isPublished, setIsPublished] = React.useState(false);
   const [isEncrypted, setIsEncrypted] = React.useState(false);
+  const [isPublishing, setIsPublishing] = React.useState(false);
   const [needsPasswordVerification, setNeedsPasswordVerification] =
     React.useState(false);
   const [isLoadingForm, setIsLoadingForm] = React.useState(true);
-  const [isCloning, setIsCloning] = React.useState(false);
-  const [isDeleting, setIsDeleting] = React.useState(false);
   const [isDeleted, setIsDeleted] = React.useState(false);
   const router = useRouter();
   const params = useParams();
@@ -234,214 +219,56 @@ function FormPageContent() {
     }
   };
 
-  const handleCloneForm = () => {
-    if (!form || !formId) return;
-
-    setIsCloning(true);
-    try {
-      const newFormId = prepareFormClone(form);
-      router.push(`/form/${newFormId}`);
-    } catch (error) {
-      console.error("Error cloning form:", error);
-      alert("Failed to clone form. Please try again.");
-    } finally {
-      setIsCloning(false);
-    }
-  };
-
-  const handleExportCSV = () => {
-    if (!form) return;
-
-    try {
-      exportFormAsCSV(form);
-    } catch (error) {
-      console.error("Error exporting CSV:", error);
-      alert("Failed to export CSV. Please try again.");
-    }
-  };
-
-  const handleExportJSON = () => {
-    if (!form) return;
-
-    try {
-      exportFormAsJSON(form);
-    } catch (error) {
-      console.error("Error exporting JSON:", error);
-      alert("Failed to export JSON. Please try again.");
-    }
-  };
-
-  const handleDeleteForm = async () => {
-    if (!form || !formId) return;
-
-    const confirmed = confirm(
-      `Are you sure you want to delete "${form.name}"? This action cannot be undone.`
-    );
-
-    if (!confirmed) return;
-
-    setIsDeleting(true);
-    try {
-      const response = await fetch(`/api/forms/${formId}`, {
-        method: "DELETE",
-      });
-
-      if (response.ok) {
-        // Also clean up any localStorage remnants
-        localStorage.removeItem(`${formId}-data`);
-        localStorage.removeItem(`${formId}-meta`);
-
-        alert("Form deleted successfully!");
-        router.push("/");
-      } else {
-        const error = await response.json();
-        console.error("Failed to delete form:", error);
-        alert("Failed to delete form. Please try again.");
-      }
-    } catch (error) {
-      console.error("Error deleting form:", error);
-      alert("An error occurred while deleting the form.");
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
   return (
-    <>
-      <FormHeader
-        formName={form?.name || ""}
-        isEncrypted={isEncrypted}
-        status={isPublished ? "published" : "draft"}
-        onFormNameChange={(name) => setForm((prev) => prev.withName(name))}
-        onHomeClick={() => router.push("/")}
-        readOnly={isPublished}
-      />
+    <FormActionsProvider
+      formId={formId}
+      initialIsPublished={isPublished}
+      initialIsEncrypted={isEncrypted}
+      onPublish={() => setShowPasswordModal(true)}
+      onShare={() => setShowShareModal(true)}
+    >
+      <>
+        <FormHeader
+          formName={form?.name || ""}
+          isEncrypted={isEncrypted}
+          status={isPublished ? "published" : "draft"}
+          onFormNameChange={(name) => setForm((prev) => prev.withName(name))}
+          onHomeClick={() => router.push("/")}
+          readOnly={isPublished}
+        />
 
-      {/* Publish Button - Only show when NOT published */}
-      {!isPublished && (
-        <IconButton
-          onClick={() => setShowPasswordModal(true)}
-          className="absolute top-2 right-26"
-          disabled={isPublishing}
-        >
-          <CloudArrowUpIcon
-            className={`h-6 w-6 transition-transform ${
-              isPublishing
-                ? "text-gray-400"
-                : "group-hover:scale-90 group-hover:text-green-400"
-            }`}
-          />
-        </IconButton>
-      )}
+        <FormActionButtons />
 
-      {/* Share Button - Only show when published */}
-      {isPublished && (
-        <IconButton
-          onClick={() => setShowShareModal(true)}
-          className="absolute top-2 right-26"
-        >
-          <ShareIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-blue-400" />
-        </IconButton>
-      )}
+        <FormCategoryList
+          categories={form.categories}
+          advancedOptions={advancedOptions}
+          readOnly={isPublished}
+          showAddButton={advancedOptions && !isPublished}
+          onAddCategory={() =>
+            setForm((prev) =>
+              prev.addCategory(Category.new("", [Question.new("")]))
+            )
+          }
+        />
 
-      {/* Clone Button - Only show when published */}
-      {isPublished && (
-        <IconButton
-          onClick={handleCloneForm}
-          className="absolute top-2 left-14"
-          disabled={isCloning}
-        >
-          <DocumentDuplicateIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-blue-400" />
-        </IconButton>
-      )}
+        {/* Password Modal */}
+        <PasswordModal
+          isOpen={showPasswordModal}
+          onClose={() => setShowPasswordModal(false)}
+          onSubmit={handlePublishForm}
+          mode="set"
+          title="Publish Form"
+          description="Choose whether to protect your form with a password"
+        />
 
-      {/* Export CSV Button - Only show when published */}
-      {isPublished && (
-        <IconButton
-          onClick={handleExportCSV}
-          className="absolute top-2 left-26"
-        >
-          <ArrowDownTrayIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-green-400" />
-        </IconButton>
-      )}
-
-      {/* Export JSON Button - Only show when published */}
-      {isPublished && (
-        <IconButton
-          onClick={handleExportJSON}
-          className="absolute top-2 left-38"
-        >
-          <ArrowDownTrayIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-blue-400" />
-        </IconButton>
-      )}
-
-      {/* Delete Button - Only show when published */}
-      {isPublished && (
-        <IconButton
-          onClick={handleDeleteForm}
-          className="absolute top-2 left-50"
-          disabled={isDeleting}
-        >
-          <TrashIcon
-            className={`h-6 w-6 transition-transform ${
-              isDeleting
-                ? "text-gray-400"
-                : "group-hover:scale-90 group-hover:text-red-400"
-            }`}
-          />
-        </IconButton>
-      )}
-
-      <IconButton
-        onClick={() => setAdvancedOptions(!advancedOptions)}
-        className="absolute top-2 right-2"
-      >
-        {!advancedOptions ? (
-          <EyeIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-violet-400" />
-        ) : (
-          <WrenchScrewdriverIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-violet-400" />
-        )}
-      </IconButton>
-      <IconButton
-        onClick={() => setShowIcon(!showIcon)}
-        className="absolute top-2 right-14"
-      >
-        {!showIcon ? (
-          <NewspaperIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-violet-400" />
-        ) : (
-          <PaintBrushIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-violet-400" />
-        )}
-      </IconButton>
-
-      <FormCategoryList
-        categories={form.categories}
-        advancedOptions={advancedOptions}
-        readOnly={isPublished}
-        showAddButton={advancedOptions && !isPublished}
-        onAddCategory={() =>
-          setForm((prev) =>
-            prev.addCategory(Category.new("", [Question.new("")]))
-          )
-        }
-      />
-
-      {/* Password Modal */}
-      <PasswordModal
-        isOpen={showPasswordModal}
-        onClose={() => setShowPasswordModal(false)}
-        onSubmit={handlePublishForm}
-        mode="set"
-        title="Publish Form"
-        description="Choose whether to protect your form with a password"
-      />
-
-      <ShareModal
-        isOpen={showShareModal}
-        onClose={() => setShowShareModal(false)}
-        formId={formId}
-        formName={form.name}
-      />
-    </>
+        <ShareModal
+          isOpen={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          formId={formId}
+          formName={form.name}
+        />
+      </>
+    </FormActionsProvider>
   );
 }
 
@@ -457,7 +284,9 @@ const FormPageContentClientOnly = dynamic(
 export default function FormPage() {
   return (
     <FormContextProvider>
-      <FormPageContentClientOnly />
+      <DisplayPreferencesProvider initialShowIcon={false}>
+        <FormPageContentClientOnly />
+      </DisplayPreferencesProvider>
     </FormContextProvider>
   );
 }

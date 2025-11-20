@@ -7,8 +7,8 @@ import {
   CheckCircleIcon,
   ExclamationCircleIcon,
 } from "@heroicons/react/16/solid";
-import { useLocalStorage } from "@uidotdev/usehooks";
 import { StopIcon } from "@heroicons/react/24/outline";
+import { useDisplayPreferences } from "../contexts/DisplayPreferencesContext";
 
 // Define selection type configuration for better organization
 type SelectionConfig = {
@@ -32,7 +32,7 @@ const SelectionButtonComponent: React.FC<SelectionButtonProps> = ({
   className = "",
   disabled = false,
 }) => {
-  const [showIcon] = useLocalStorage("showIcons", false);
+  const { showIcon } = useDisplayPreferences();
 
   // Selection configuration map for easier maintenance
   const selectionConfig: Record<Selection, SelectionConfig> = {
