@@ -11,13 +11,12 @@ import { Category, Question } from "../../../types/Form";
 import IconButton from "../../../components/IconButton";
 import PasswordModal from "../../../components/PasswordModal";
 import ShareModal from "../../../components/ShareModal";
-import EncryptionStatus from "../../../components/EncryptionStatus";
+import FormHeader from "../../../components/FormHeader";
 import {
   EyeIcon,
   NewspaperIcon,
   PaintBrushIcon,
   WrenchScrewdriverIcon,
-  HomeIcon,
   CloudArrowUpIcon,
   PlusIcon,
   ShareIcon,
@@ -321,12 +320,14 @@ function FormPageContent() {
 
   return (
     <>
-      <IconButton
-        onClick={() => router.push("/")}
-        className="absolute top-2 left-2"
-      >
-        <HomeIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-violet-400" />
-      </IconButton>
+      <FormHeader
+        formName={form?.name || ""}
+        isEncrypted={isEncrypted}
+        status={isPublished ? "published" : "draft"}
+        onFormNameChange={(name) => setForm((prev) => prev.withName(name))}
+        onHomeClick={() => router.push("/")}
+        readOnly={isPublished}
+      />
 
       {/* Publish Button - Only show when NOT published */}
       {!isPublished && (
@@ -423,30 +424,6 @@ function FormPageContent() {
           <PaintBrushIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-violet-400" />
         )}
       </IconButton>
-
-      {/* Form Title with Encryption Status */}
-      <div className="mb-4 flex items-center gap-2">
-        <input
-          type="text"
-          title="Form name"
-          className="w-fit border-b-1 text-center text-2xl bg-transparent focus:outline-none"
-          value={form?.name || ""}
-          onChange={(e) => setForm((prev) => prev.withName(e.target.value))}
-          placeholder="Form Name"
-          disabled={isPublished}
-        />
-        <EncryptionStatus isEncrypted={isEncrypted} showText={false} />
-        {isPublished && (
-          <span className="text-sm text-green-600 font-semibold bg-green-100 px-2 py-1 rounded">
-            Published
-          </span>
-        )}
-        {!isPublished && (
-          <span className="text-sm text-orange-600 font-semibold bg-orange-100 px-2 py-1 rounded">
-            Draft
-          </span>
-        )}
-      </div>
 
       {form.categories.map((category) => (
         <CategoryBox

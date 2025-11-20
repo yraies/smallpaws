@@ -8,7 +8,7 @@ import {
   FormContextProvider,
   useFormContext,
 } from "../../../contexts/FormContext";
-import EncryptionStatus from "../../../components/EncryptionStatus";
+import FormHeader from "../../../components/FormHeader";
 import { decryptFormData } from "../../../lib/crypto";
 import {
   HomeIcon,
@@ -431,13 +431,13 @@ function SharedFormPageContent() {
 
   return (
     <>
-      {/* Home Button */}
-      <IconButton
-        onClick={() => router.push("/")}
-        className="absolute top-2 left-2"
-      >
-        <HomeIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-violet-400" />
-      </IconButton>
+      <FormHeader
+        formName={formName}
+        isEncrypted={isFormEncrypted}
+        status="shared"
+        onHomeClick={() => router.push("/")}
+        readOnly={true}
+      />
 
       {/* Clone Button */}
       <IconButton
@@ -469,19 +469,6 @@ function SharedFormPageContent() {
           </div>
         </div>
       )}
-
-      {/* Form Title with Encryption Status */}
-      <div className="mb-4 flex items-center gap-2">
-        <div className="w-fit border-b-1 text-center text-2xl bg-transparent">
-          {formName}
-        </div>
-        {isFormEncrypted && (
-          <EncryptionStatus isEncrypted={true} showText={false} />
-        )}
-        <span className="text-sm text-blue-600 font-semibold bg-blue-100 px-2 py-1 rounded">
-          Shared
-        </span>
-      </div>
 
       {/* Form Categories */}
       {form.categories.map((category) => (
