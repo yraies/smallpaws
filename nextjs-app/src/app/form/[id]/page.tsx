@@ -33,6 +33,11 @@ import {
   decryptFormData,
 } from "../../../lib/crypto";
 import { Form, FormPOJO } from "../../../types/Form";
+import {
+  prepareFormClone,
+  exportFormAsCSV,
+  exportFormAsJSON,
+} from "../../../utils/formActions";
 
 function FormPageContent() {
   const { form, setForm } = useFormContext();
@@ -247,17 +252,7 @@ function FormPageContent() {
 
     setIsCloning(true);
     try {
-      // Generate a new form ID
-      const newFormId = `form_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-      // Create a copy of the current form with new name
-      const clonedForm = form.withName(`${form.name} (Copy)`);
-
-      // Store in sessionStorage for the new form page
-      sessionStorage.setItem("create_new", "true");
-      sessionStorage.setItem("form", JSON.stringify(clonedForm));
-
-      // Navigate to the new form with the new ID
+      const newFormId = prepareFormClone(form);
       router.push(`/form/${newFormId}`);
     } catch (error) {
       console.error("Error cloning form:", error);
@@ -271,31 +266,7 @@ function FormPageContent() {
     if (!form) return;
 
     try {
-      // Build CSV content: Category, Question, Selection
-      const csvLines = ["Category,Question,Selection"];
-
-      form.categories.forEach((category) => {
-        category.questions.forEach((question) => {
-          const selection =
-            question.selection === null ? "Unset" : question.selection;
-          // Escape quotes in category/question text
-          const cat = `"${category.name.replace(/"/g, '""')}"`;
-          const q = `"${question.value.replace(/"/g, '""')}"`;
-          csvLines.push(`${cat},${q},${selection}`);
-        });
-      });
-
-      const csvContent = csvLines.join("\n");
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      const link = document.createElement("a");
-      const url = URL.createObjectURL(blob);
-
-      link.setAttribute("href", url);
-      link.setAttribute("download", `${form.name || "form"}.csv`);
-      link.style.visibility = "hidden";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      exportFormAsCSV(form);
     } catch (error) {
       console.error("Error exporting CSV:", error);
       alert("Failed to export CSV. Please try again.");
@@ -306,18 +277,7 @@ function FormPageContent() {
     if (!form) return;
 
     try {
-      // Export the full form data as JSON
-      const jsonContent = JSON.stringify(form, null, 2);
-      const blob = new Blob([jsonContent], { type: "application/json;charset=utf-8;" });
-      const link = document.createElement("a");
-      const url = URL.createObjectURL(blob);
-
-      link.setAttribute("href", url);
-      link.setAttribute("download", `${form.name || "form"}.json`);
-      link.style.visibility = "hidden";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      exportFormAsJSON(form);
     } catch (error) {
       console.error("Error exporting JSON:", error);
       alert("Failed to export JSON. Please try again.");
