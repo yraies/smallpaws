@@ -16,6 +16,7 @@ import {
   CalendarIcon,
   ClockIcon,
   DocumentDuplicateIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 import { Form, FormPOJO } from "../../../types/Form";
 import { formatRelativeTime } from "../../../utils/RelativeDates";
@@ -40,6 +41,7 @@ function SharedFormPageContent() {
   const [isFormEncrypted, setIsFormEncrypted] = React.useState(false);
   const [formName, setFormName] = React.useState("");
   const [isCloning, setIsCloning] = React.useState(false);
+  const [isDeleted, setIsDeleted] = React.useState(false);
 
   const params = useParams();
   const shareId = params?.shareId as string;
@@ -60,6 +62,13 @@ function SharedFormPageContent() {
         setShareInfo(data.shareInfo);
         setIsFormEncrypted(formData.encrypted);
         setFormName(formData.name);
+
+        // Check if form has been deleted (soft delete)
+        if (formData.name === "[Deleted]" || formData.data === "{}") {
+          setIsDeleted(true);
+          setIsLoading(false);
+          return;
+        }
 
         if (formData.encrypted) {
           // Form itself is encrypted, need to prompt for form password
@@ -223,7 +232,7 @@ function SharedFormPageContent() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen  flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading shared form...</p>
@@ -234,7 +243,7 @@ function SharedFormPageContent() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen  flex items-center justify-center">
         <div className="text-center max-w-md mx-auto px-6">
           <div className="bg-red-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
             <svg
@@ -259,6 +268,29 @@ function SharedFormPageContent() {
           >
             <HomeIcon className="w-4 h-4 mr-2" />
             Go Home
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show deleted form message if the form has been deleted
+  if (isDeleted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <TrashIcon className="h-16 w-16 text-red-400 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold mb-2">
+            This form has been deleted
+          </h1>
+          <p className="text-gray-400 mb-6">
+            The shared form you&apos;re trying to access has been removed.
+          </p>
+          <button
+            onClick={() => router.push("/")}
+            className="bg-violet-500 hover:bg-violet-600 text-white px-6 py-2 rounded-lg transition-colors"
+          >
+            Return Home
           </button>
         </div>
       </div>

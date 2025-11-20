@@ -21,6 +21,9 @@ import {
   CloudArrowUpIcon,
   PlusIcon,
   ShareIcon,
+  DocumentDuplicateIcon,
+  TrashIcon,
+  ArrowDownTrayIcon,
 } from "@heroicons/react/16/solid";
 import { useLocalStorage } from "@uidotdev/usehooks";
 import { useRouter, useParams } from "next/navigation";
@@ -43,6 +46,9 @@ function FormPageContent() {
   const [needsPasswordVerification, setNeedsPasswordVerification] =
     React.useState(false);
   const [isLoadingForm, setIsLoadingForm] = React.useState(true);
+  const [isCloning, setIsCloning] = React.useState(false);
+  const [isDeleting, setIsDeleting] = React.useState(false);
+  const [isDeleted, setIsDeleted] = React.useState(false);
   const router = useRouter();
   const params = useParams();
   const formId = params?.id as string;
@@ -67,6 +73,15 @@ function FormPageContent() {
       const response = await fetch(`/api/forms/${id}`);
       if (response.ok) {
         const storedForm = await response.json();
+
+        // Check if form has been deleted (soft delete)
+        if (storedForm.name === "[Deleted]" || storedForm.data === "{}") {
+          setIsDeleted(true);
+          setIsPublished(true);
+          setIsLoadingForm(false);
+          return;
+        }
+
         setIsPublished(true); // Form exists in database, so it's published
         if (storedForm.encrypted) {
           setNeedsPasswordVerification(true);
@@ -139,6 +154,30 @@ function FormPageContent() {
     );
   }
 
+  // Check for deleted form BEFORE checking if form exists
+  // (deleted forms won't be loaded into state)
+  if (isDeleted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <TrashIcon className="h-16 w-16 text-red-400 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold mb-2">
+            This form has been deleted
+          </h1>
+          <p className="text-gray-400 mb-6">
+            The form you&apos;re trying to access has been removed.
+          </p>
+          <button
+            onClick={() => router.push("/")}
+            className="bg-violet-500 hover:bg-violet-600 text-white px-6 py-2 rounded-lg transition-colors"
+          >
+            Return Home
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (!form) return <h1>Form not found</h1>;
 
   const handlePublishForm = async (
@@ -203,6 +242,101 @@ function FormPageContent() {
     }
   };
 
+  const handleCloneForm = () => {
+    if (!form || !formId) return;
+
+    setIsCloning(true);
+    try {
+      // Generate a new form ID
+      const newFormId = `form_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+      // Create a copy of the current form with new name
+      const clonedForm = form.withName(`${form.name} (Copy)`);
+
+      // Store in sessionStorage for the new form page
+      sessionStorage.setItem("create_new", "true");
+      sessionStorage.setItem("form", JSON.stringify(clonedForm));
+
+      // Navigate to the new form with the new ID
+      router.push(`/form/${newFormId}`);
+    } catch (error) {
+      console.error("Error cloning form:", error);
+      alert("Failed to clone form. Please try again.");
+    } finally {
+      setIsCloning(false);
+    }
+  };
+
+  const handleExportCSV = () => {
+    if (!form) return;
+
+    try {
+      // Build CSV content: Category, Question, Selection
+      const csvLines = ["Category,Question,Selection"];
+
+      form.categories.forEach((category) => {
+        category.questions.forEach((question) => {
+          const selection =
+            question.selection === null ? "Unset" : question.selection;
+          // Escape quotes in category/question text
+          const cat = `"${category.name.replace(/"/g, '""')}"`;
+          const q = `"${question.value.replace(/"/g, '""')}"`;
+          csvLines.push(`${cat},${q},${selection}`);
+        });
+      });
+
+      const csvContent = csvLines.join("\n");
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+
+      link.setAttribute("href", url);
+      link.setAttribute("download", `${form.name || "form"}.csv`);
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Error exporting CSV:", error);
+      alert("Failed to export CSV. Please try again.");
+    }
+  };
+
+  const handleDeleteForm = async () => {
+    if (!form || !formId) return;
+
+    const confirmed = confirm(
+      `Are you sure you want to delete "${form.name}"? This action cannot be undone.`
+    );
+
+    if (!confirmed) return;
+
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`/api/forms/${formId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        // Also clean up any localStorage remnants
+        localStorage.removeItem(`${formId}-data`);
+        localStorage.removeItem(`${formId}-meta`);
+
+        alert("Form deleted successfully!");
+        router.push("/");
+      } else {
+        const error = await response.json();
+        console.error("Failed to delete form:", error);
+        alert("Failed to delete form. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error deleting form:", error);
+      alert("An error occurred while deleting the form.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <>
       <IconButton
@@ -212,28 +346,70 @@ function FormPageContent() {
         <HomeIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-violet-400" />
       </IconButton>
 
-      {/* Publish Button */}
-      <IconButton
-        onClick={() => setShowPasswordModal(true)}
-        className="absolute top-2 right-32"
-        disabled={isPublishing || isPublished}
-      >
-        <CloudArrowUpIcon
-          className={`h-6 w-6 transition-transform ${
-            isPublishing || isPublished
-              ? "text-gray-400"
-              : "group-hover:scale-90 group-hover:text-green-400"
-          }`}
-        />
-      </IconButton>
+      {/* Publish Button - Only show when NOT published */}
+      {!isPublished && (
+        <IconButton
+          onClick={() => setShowPasswordModal(true)}
+          className="absolute top-2 right-26"
+          disabled={isPublishing}
+        >
+          <CloudArrowUpIcon
+            className={`h-6 w-6 transition-transform ${
+              isPublishing
+                ? "text-gray-400"
+                : "group-hover:scale-90 group-hover:text-green-400"
+            }`}
+          />
+        </IconButton>
+      )}
 
-      {/* Share Button */}
-      <IconButton
-        onClick={() => setShowShareModal(true)}
-        className="absolute top-2 right-20"
-      >
-        <ShareIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-blue-400" />
-      </IconButton>
+      {/* Share Button - Only show when published */}
+      {isPublished && (
+        <IconButton
+          onClick={() => setShowShareModal(true)}
+          className="absolute top-2 right-26"
+        >
+          <ShareIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-blue-400" />
+        </IconButton>
+      )}
+
+      {/* Clone Button - Only show when published */}
+      {isPublished && (
+        <IconButton
+          onClick={handleCloneForm}
+          className="absolute top-2 left-14"
+          disabled={isCloning}
+        >
+          <DocumentDuplicateIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-blue-400" />
+        </IconButton>
+      )}
+
+      {/* Export CSV Button - Only show when published */}
+      {isPublished && (
+        <IconButton
+          onClick={handleExportCSV}
+          className="absolute top-2 left-26"
+        >
+          <ArrowDownTrayIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-green-400" />
+        </IconButton>
+      )}
+
+      {/* Delete Button - Only show when published */}
+      {isPublished && (
+        <IconButton
+          onClick={handleDeleteForm}
+          className="absolute top-2 left-38"
+          disabled={isDeleting}
+        >
+          <TrashIcon
+            className={`h-6 w-6 transition-transform ${
+              isDeleting
+                ? "text-gray-400"
+                : "group-hover:scale-90 group-hover:text-red-400"
+            }`}
+          />
+        </IconButton>
+      )}
 
       <IconButton
         onClick={() => setAdvancedOptions(!advancedOptions)}
@@ -247,7 +423,7 @@ function FormPageContent() {
       </IconButton>
       <IconButton
         onClick={() => setShowIcon(!showIcon)}
-        className="absolute top-2 right-10"
+        className="absolute top-2 right-14"
       >
         {!showIcon ? (
           <NewspaperIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-violet-400" />

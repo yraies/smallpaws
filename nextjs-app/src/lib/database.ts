@@ -137,8 +137,24 @@ export class FormStorage {
   }
 
   static deleteForm(id: string): void {
-    const stmt = db.prepare('DELETE FROM forms WHERE id = ?');
+    // Soft delete: clear form data but keep entry for statistics
+    // This preserves cloned_from references and allows for usage analytics
+    const stmt = db.prepare(`
+      UPDATE forms 
+      SET data = '{}', 
+          name = '[Deleted]',
+          updated_at = datetime('now')
+      WHERE id = ?
+    `);
     stmt.run(id);
+    
+    // Also update form_meta to mark as deleted
+    const metaStmt = db.prepare(`
+      UPDATE form_meta 
+      SET name = '[Deleted]'
+      WHERE id = ?
+    `);
+    metaStmt.run(id);
   }
 
   static getRecentForms(): FormMeta[] {

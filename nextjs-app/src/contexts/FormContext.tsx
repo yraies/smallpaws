@@ -39,18 +39,14 @@ function FormContextProvider({ children }: { children: React.ReactNode }) {
   }, [id]);
 
   useEffect(() => {
-    if (id && !!form && !isEncrypted) {
-      // ONLY save to localStorage if form is NOT encrypted
-      localStorage.setItem(
-        `${id}-meta`,
-        JSON.stringify({ name: form.name, date: new Date().toISOString() })
-      );
-      localStorage.setItem(`${id}-data`, JSON.stringify(form));
-    } else if (id && isEncrypted) {
-      // If form is encrypted, remove any cached data from localStorage
-      localStorage.removeItem(`${id}-data`);
-      localStorage.removeItem(`${id}-meta`);
-    }
+    // DO NOT save to localStorage for published forms
+    // Published forms should ONLY exist in the database
+    // This prevents:
+    // 1. Published forms from being modified via localStorage
+    // 2. Deleted forms from being restored from localStorage
+    // 3. Stale data from overwriting database versions
+    // We no longer use localStorage for form storage - database only
+    // This effect is kept for backwards compatibility but does nothing
   }, [id, form, isEncrypted]);
 
   const reSetForm: Dispatch<SetStateAction<Form>> = (newForm) => {
@@ -76,6 +72,13 @@ async function checkIfEncrypted(
     if (response.ok) {
       const storedForm = await response.json();
 
+      // Check if form has been deleted (soft delete)
+      if (storedForm.name === "[Deleted]" || storedForm.data === "{}") {
+        console.log("Form has been deleted");
+        // Don't try to parse - let the page handle the deleted state
+        return;
+      }
+
       if (storedForm.encrypted) {
         // Form is encrypted - do NOT load from localStorage or anywhere
         // The form page will handle password verification
@@ -86,25 +89,15 @@ async function checkIfEncrypted(
         // Form is not encrypted, safe to load
         setIsEncrypted(false);
 
-        // Try localStorage first (for drafts/offline access)
-        const data = localStorage.getItem(`${id}-data`);
-        if (data) {
-          const loadedForm = Form.fromPOJO(JSON.parse(data));
-          setForm(loadedForm);
-        } else {
-          // Load from API
-          const form = Form.fromPOJO(JSON.parse(storedForm.data));
-          setForm(form);
-        }
+        // Always load from API/database - never use localStorage
+        // This ensures published forms are never modified from stale cache
+        const form = Form.fromPOJO(JSON.parse(storedForm.data));
+        setForm(form);
       }
     } else {
-      // Form not found in API, try localStorage for legacy forms
-      const data = localStorage.getItem(`${id}-data`);
-      if (data) {
-        const loadedForm = Form.fromPOJO(JSON.parse(data));
-        setForm(loadedForm);
-        setIsEncrypted(false);
-      }
+      // Form not found in database
+      // No localStorage fallback - forms must be published to be saved
+      console.log("Form not found in database");
     }
   } catch (error) {
     console.error("Error checking form encryption status:", error);
