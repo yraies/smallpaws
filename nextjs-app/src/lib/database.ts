@@ -1,7 +1,18 @@
 import Database from 'better-sqlite3';
 import path from 'path';
+import fs from 'fs';
 
-const dbPath = path.join(process.cwd(), 'data.db');
+// Use /app/data directory in Docker, fallback to current directory for local development
+const dataDir = process.env.NODE_ENV === 'production' 
+  ? '/app/data' 
+  : process.cwd();
+
+// Ensure the directory exists
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { recursive: true });
+}
+
+const dbPath = path.join(dataDir, 'data.db');
 const db = Database(dbPath);
 
 // Initialize the database schema
