@@ -1,0 +1,21 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": ["AGENTS.md", "SPEC.md"],
+  "watcher": {
+    "ignore": ["node_modules/**", ".next/**", "data/**"]
+  },
+  "command": {
+    "test": {
+      "template": "Run the test suite with `npm test` and report any failures.",
+      "description": "Run Jest tests"
+    },
+    "build": {
+      "template": "Run `npm run build` and report any errors.",
+      "description": "Production build"
+    },
+    "lint": {
+      "template": "Run `npm run lint` and fix any issues found.",
+      "description": "Run Biome check"
+    }
+  }
+}
