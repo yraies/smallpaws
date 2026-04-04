@@ -21,6 +21,7 @@ Detailed historical notes are preserved in `CHANGELOG_ARCHIVE.md`.
 - Root-level docs now reflect the current Biome-based toolchain and shipped JSON export support.
 - Recent forms now remain browser-local only; the server no longer exposes a recent-forms listing endpoint.
 - The main UI now uses a warmer, narrower, blockier document-centered visual system so templates and forms stay visually primary without drifting into polished dashboard styling.
+- Top-level form controls now sit in labeled left/right side stacks outside the center column on larger screens, keeping the document area cleaner while preserving a compact in-column fallback on smaller screens.
 
 ### Fixed
 

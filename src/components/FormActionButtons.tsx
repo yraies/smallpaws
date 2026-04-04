@@ -7,9 +7,20 @@ import {
   ShareIcon,
   TrashIcon,
 } from "@heroicons/react/16/solid";
+import type React from "react";
 import { useDisplayPreferences } from "../contexts/DisplayPreferencesContext";
 import { useFormActions } from "../contexts/FormActionsContext";
-import IconButton from "./IconButton";
+import EdgeActionButton from "./EdgeActionButton";
+
+type ActionConfig = {
+  key: string;
+  label: string;
+  onClick: () => void;
+  title: string;
+  disabled?: boolean;
+  variant: "default" | "success" | "info" | "danger";
+  icon: React.ReactElement;
+};
 
 export default function FormActionButtons() {
   const {
@@ -27,105 +38,144 @@ export default function FormActionButtons() {
 
   const { showIcon, setShowIcon } = useDisplayPreferences();
 
+  const leftActions: ActionConfig[] = [];
+  if (isPublished) {
+    leftActions.push(
+      {
+        key: "clone",
+        label: "New Draft",
+        onClick: handleClone,
+        title: "Create New Draft",
+        disabled: isCloning,
+        variant: "default",
+        icon: <DocumentDuplicateIcon className="h-5 w-5" />,
+      },
+      {
+        key: "csv",
+        label: "Export CSV",
+        onClick: handleExportCSV,
+        title: "Export as CSV",
+        variant: "success",
+        icon: <ArrowDownTrayIcon className="h-5 w-5" />,
+      },
+      {
+        key: "json",
+        label: "Export JSON",
+        onClick: handleExportJSON,
+        title: "Export as JSON",
+        variant: "info",
+        icon: <ArrowDownTrayIcon className="h-5 w-5" />,
+      },
+    );
+
+    if (handleDelete) {
+      leftActions.push({
+        key: "delete",
+        label: "Delete",
+        onClick: handleDelete,
+        title: "Delete Form",
+        disabled: isDeleting,
+        variant: "danger",
+        icon: <TrashIcon className="h-5 w-5" />,
+      });
+    }
+  }
+
+  const rightActions: ActionConfig[] = [];
+  if (!isPublished && handlePublish) {
+    rightActions.push({
+      key: "publish",
+      label: "Publish",
+      onClick: handlePublish,
+      title: "Publish Form",
+      disabled: isPublishing,
+      variant: "success",
+      icon: <CloudArrowUpIcon className="h-5 w-5" />,
+    });
+  }
+
+  if (isPublished && handleShare) {
+    rightActions.push({
+      key: "share",
+      label: "Share",
+      onClick: handleShare,
+      title: "Share Form",
+      variant: "info",
+      icon: <ShareIcon className="h-5 w-5" />,
+    });
+  }
+
+  rightActions.push({
+    key: "display",
+    label: showIcon ? "Text Labels" : "Icons",
+    onClick: () => setShowIcon(!showIcon),
+    title: showIcon ? "Show Text Labels" : "Show Icons",
+    variant: "default",
+    icon: !showIcon ? (
+      <NewspaperIcon className="h-5 w-5" />
+    ) : (
+      <FaceSmileIcon className="h-5 w-5" />
+    ),
+  });
+
   return (
     <div className="print:hidden">
-      {/* Left side buttons - Content actions */}
+      <div className="fixed top-20 left-6 z-10 hidden flex-col gap-2 lg:flex xl:left-10">
+        {leftActions.map((action) => (
+          <EdgeActionButton
+            key={action.key}
+            onClick={action.onClick}
+            label={action.label}
+            title={action.title}
+            disabled={action.disabled}
+            variant={action.variant}
+          >
+            {action.icon}
+          </EdgeActionButton>
+        ))}
+      </div>
 
-      {/* Clone Button - Only show when published */}
-      {isPublished && (
-        <IconButton
-          onClick={handleClone}
-          className="absolute top-2 left-14"
-          disabled={isCloning}
-          title="Create New Draft"
-        >
-          <DocumentDuplicateIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-violet-400" />
-        </IconButton>
-      )}
+      <div className="fixed top-20 right-6 z-10 hidden flex-col gap-2 lg:flex xl:right-10">
+        {rightActions.map((action) => (
+          <EdgeActionButton
+            key={action.key}
+            onClick={action.onClick}
+            label={action.label}
+            title={action.title}
+            disabled={action.disabled}
+            variant={action.variant}
+          >
+            {action.icon}
+          </EdgeActionButton>
+        ))}
+      </div>
 
-      {/* Export CSV Button - Only show when published */}
-      {isPublished && (
-        <IconButton
-          onClick={handleExportCSV}
-          className="absolute top-2 left-26"
-          title="Export as CSV"
-        >
-          <ArrowDownTrayIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-green-400" />
-        </IconButton>
-      )}
-
-      {/* Export JSON Button - Only show when published */}
-      {isPublished && (
-        <IconButton
-          onClick={handleExportJSON}
-          className="absolute top-2 left-38"
-          title="Export as JSON"
-        >
-          <ArrowDownTrayIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-blue-400" />
-        </IconButton>
-      )}
-
-      {/* Delete Button - Only show when published and handler provided */}
-      {isPublished && handleDelete && (
-        <IconButton
-          onClick={handleDelete}
-          className="absolute top-2 left-50"
-          disabled={isDeleting}
-          title="Delete Form"
-        >
-          <TrashIcon
-            className={`h-6 w-6 transition-transform ${
-              isDeleting
-                ? "text-gray-400"
-                : "group-hover:scale-90 group-hover:text-red-400"
-            }`}
-          />
-        </IconButton>
-      )}
-
-      {/* Right side buttons - View/Meta actions */}
-
-      {/* Publish Button - Only show when NOT published and handler provided */}
-      {!isPublished && handlePublish && (
-        <IconButton
-          onClick={handlePublish}
-          className="absolute top-2 right-26"
-          disabled={isPublishing}
-          title="Publish Form"
-        >
-          <CloudArrowUpIcon
-            className={`h-6 w-6 transition-transform ${
-              isPublishing
-                ? "text-gray-400"
-                : "group-hover:scale-90 group-hover:text-green-400"
-            }`}
-          />
-        </IconButton>
-      )}
-
-      {/* Share Button - Only show when published and handler provided */}
-      {isPublished && handleShare && (
-        <IconButton
-          onClick={handleShare}
-          className="absolute top-2 right-26"
-          title="Share Form"
-        >
-          <ShareIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-blue-400" />
-        </IconButton>
-      )}
-
-      {/* Show Icon Toggle */}
-      <IconButton
-        onClick={() => setShowIcon(!showIcon)}
-        className="absolute top-2 right-2"
-        title={showIcon ? "Show Text Labels" : "Show Icons"}
-      >
-        {!showIcon ? (
-          <NewspaperIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-violet-400" />
-        ) : (
-          <FaceSmileIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-violet-400" />
-        )}
-      </IconButton>
+      <div className="mb-3 flex flex-wrap items-center justify-center gap-2 lg:hidden">
+        {leftActions.map((action) => (
+          <EdgeActionButton
+            key={action.key}
+            onClick={action.onClick}
+            label={action.label}
+            title={action.title}
+            disabled={action.disabled}
+            variant={action.variant}
+          >
+            {action.icon}
+          </EdgeActionButton>
+        ))}
+        {rightActions.map((action) => (
+          <EdgeActionButton
+            key={action.key}
+            onClick={action.onClick}
+            label={action.label}
+            title={action.title}
+            disabled={action.disabled}
+            variant={action.variant}
+          >
+            {action.icon}
+          </EdgeActionButton>
+        ))}
+      </div>
     </div>
   );
 }

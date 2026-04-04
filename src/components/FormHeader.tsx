@@ -1,4 +1,5 @@
 import { HomeIcon } from "@heroicons/react/16/solid";
+import EdgeActionButton from "./EdgeActionButton";
 import EncryptionStatus from "./EncryptionStatus";
 import IconButton from "./IconButton";
 
@@ -44,12 +45,23 @@ export default function FormHeader({
     <div className="document-sheet relative mb-4">
       <IconButton
         onClick={onHomeClick}
-        className="absolute top-2 left-2"
+        className="absolute top-2 left-2 lg:hidden"
         title="Home"
         aria-label="Go home"
       >
         <HomeIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-violet-400" />
       </IconButton>
+
+      <div className="fixed top-6 left-6 z-10 hidden lg:flex xl:left-10">
+        <EdgeActionButton
+          onClick={onHomeClick}
+          label="Home"
+          title="Home"
+          variant="default"
+        >
+          <HomeIcon className="h-5 w-5" />
+        </EdgeActionButton>
+      </div>
 
       <div className="mb-4 flex items-center justify-center gap-2 text-center">
         {readOnly ? (

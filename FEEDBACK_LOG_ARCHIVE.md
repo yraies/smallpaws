@@ -57,6 +57,8 @@ Required fields for new entries:
 - **Action taken (follow-up):** Tightened the visual language away from pill-heavy rounding and treated print efficiency as a first-class constraint for the design-system pass.
 - **Follow-up (2026-04-04):** Stakeholder added, "I think the new ui is looking a bit too polished still... I could have drawn that very design with 2-3 pens and a ruler or square-grid sheet of paper... it had blocky colors and hadn't had as many gradients and pills/tags/badges... I also kind of liked that the app was somewhat narrow... it looked more deliberate."
 - **Action taken (follow-up):** Re-centered the visual rollback around the older narrow, hand-crafted, blocky qualities instead of continuing toward a glossy paper-card system.
+- **Follow-up (2026-04-04):** Stakeholder suggested that the top controls may work better as left/right vertical stacks outside the center column, with labels next to the icons, rather than as a row near the document header.
+- **Action taken (follow-up):** Logged the preferred control placement so the next layout pass can move the utility chrome out toward the screen edges while keeping the document column visually clean.
 
 ### F-007 (2026-04-04) - Browser validation is the final gate
 
