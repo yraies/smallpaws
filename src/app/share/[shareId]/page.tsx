@@ -354,7 +354,6 @@ function SharedFormPageContent() {
       <FormHeader
         formName={formName}
         isEncrypted={isFormEncrypted}
-        status="shared"
         onHomeClick={() => router.push("/")}
         readOnly={true}
       />

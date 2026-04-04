@@ -6,7 +6,6 @@ import IconButton from "./IconButton";
 interface FormHeaderProps {
   formName: string;
   isEncrypted: boolean;
-  status: "draft" | "finalized" | "published" | "shared";
   onFormNameChange?: (name: string) => void;
   onHomeClick: () => void;
   readOnly?: boolean;
@@ -15,32 +14,10 @@ interface FormHeaderProps {
 export default function FormHeader({
   formName,
   isEncrypted,
-  status,
   onFormNameChange,
   onHomeClick,
   readOnly = false,
 }: FormHeaderProps) {
-  const statusConfig = {
-    draft: {
-      label: "Draft",
-      className: "bg-orange-100 text-orange-700",
-    },
-    finalized: {
-      label: "Finalized",
-      className: "bg-violet-100 text-violet-700",
-    },
-    published: {
-      label: "Published",
-      className: "bg-green-100 text-green-700",
-    },
-    shared: {
-      label: "Shared",
-      className: "bg-blue-100 text-blue-700",
-    },
-  };
-
-  const config = statusConfig[status];
-
   return (
     <div className="document-sheet relative mb-4">
       <IconButton
@@ -85,12 +62,6 @@ export default function FormHeader({
           />
         )}
         <EncryptionStatus isEncrypted={isEncrypted} showText={false} />
-        <span
-          id="form-status-badge"
-          className={`px-2 py-1 text-sm font-semibold ${config.className}`}
-        >
-          {config.label}
-        </span>
       </div>
     </div>
   );

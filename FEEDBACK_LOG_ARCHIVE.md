@@ -61,6 +61,8 @@ Required fields for new entries:
 - **Action taken (follow-up):** Logged the preferred control placement so the next layout pass can move the utility chrome out toward the screen edges while keeping the document column visually clean.
 - **Follow-up (2026-04-04):** Stakeholder highlighted remaining inconsistencies where some pages still kept unlabeled or duplicated actions in the center column instead of using the rails.
 - **Action taken (follow-up):** Standardized the rule that center-column notices are informational only while page actions belong in the side rails (with mobile fallback), and removed duplicated primary actions from the document body.
+- **Follow-up (2026-04-04):** Stakeholder said, "I am not quite sure what the 'Published', 'Shared' and 'Finalized' Badges next to the name are for. So lets remove them"
+- **Action taken (follow-up):** Removed the title-adjacent lifecycle badges from the shared document header so phase context lives in the page notices instead of next to the document name.
 
 ### F-007 (2026-04-04) - Browser validation is the final gate
 

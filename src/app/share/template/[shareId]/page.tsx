@@ -91,7 +91,6 @@ function SharedTemplatePageContent() {
       <FormHeader
         formName={template.name}
         isEncrypted={false}
-        status="shared"
         onHomeClick={() => router.push("/")}
         readOnly={true}
       />

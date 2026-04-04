@@ -122,7 +122,6 @@ function TemplatePageContent() {
       <FormHeader
         formName={template.name}
         isEncrypted={false}
-        status={isFinalized ? "finalized" : "draft"}
         onFormNameChange={(name) => setTemplate((prev) => prev.withName(name))}
         onHomeClick={() => router.push("/")}
         readOnly={isFinalized}

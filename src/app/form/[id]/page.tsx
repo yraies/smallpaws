@@ -244,7 +244,6 @@ function FormPageContent() {
       <FormHeader
         formName={form?.name || ""}
         isEncrypted={isEncrypted}
-        status={isPublished ? "published" : "draft"}
         onFormNameChange={(name) => setForm((prev) => prev.withName(name))}
         onHomeClick={() => router.push("/")}
         readOnly={isPublished}
