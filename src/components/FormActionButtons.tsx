@@ -2,12 +2,10 @@ import {
   ArrowDownTrayIcon,
   CloudArrowUpIcon,
   DocumentDuplicateIcon,
-  EyeIcon,
   FaceSmileIcon,
   NewspaperIcon,
   ShareIcon,
   TrashIcon,
-  WrenchScrewdriverIcon,
 } from "@heroicons/react/16/solid";
 import { useDisplayPreferences } from "../contexts/DisplayPreferencesContext";
 import { useFormActions } from "../contexts/FormActionsContext";
@@ -27,8 +25,7 @@ export default function FormActionButtons() {
     handleShare,
   } = useFormActions();
 
-  const { advancedOptions, setAdvancedOptions, showIcon, setShowIcon } =
-    useDisplayPreferences();
+  const { showIcon, setShowIcon } = useDisplayPreferences();
 
   return (
     <div className="print:hidden">
@@ -40,7 +37,7 @@ export default function FormActionButtons() {
           onClick={handleClone}
           className="absolute top-2 left-14"
           disabled={isCloning}
-          title="Clone Form"
+          title="Create New Draft"
         >
           <DocumentDuplicateIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-blue-400" />
         </IconButton>
@@ -117,27 +114,10 @@ export default function FormActionButtons() {
         </IconButton>
       )}
 
-      {/* Advanced Options Toggle - Only show when NOT published (edit mode only) */}
-      {!isPublished && (
-        <IconButton
-          onClick={() => setAdvancedOptions(!advancedOptions)}
-          className="absolute top-2 right-2"
-          title={
-            advancedOptions ? "Switch to View Mode" : "Switch to Edit Mode"
-          }
-        >
-          {!advancedOptions ? (
-            <EyeIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-violet-400" />
-          ) : (
-            <WrenchScrewdriverIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-violet-400" />
-          )}
-        </IconButton>
-      )}
-
       {/* Show Icon Toggle */}
       <IconButton
         onClick={() => setShowIcon(!showIcon)}
-        className="absolute top-2 right-14"
+        className="absolute top-2 right-2"
         title={showIcon ? "Show Text Labels" : "Show Icons"}
       >
         {!showIcon ? (

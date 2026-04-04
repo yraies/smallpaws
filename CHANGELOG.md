@@ -19,12 +19,14 @@ Detailed historical notes are preserved in `CHANGELOG_ARCHIVE.md`.
 ### Changed
 
 - Root-level docs now reflect the current Biome-based toolchain and shipped JSON export support.
+- Recent forms now remain browser-local only; the server no longer exposes a recent-forms listing endpoint.
 
 ### Fixed
 
 - Fixed recent-form draft IDs so hyphenated form IDs round-trip correctly through local storage.
 - Fixed recent-form navigation to read draft payloads from the correct storage key.
 - Fixed "Clear Recent Forms" so it clears only recent-form browser entries instead of wiping unrelated local storage or deleting server data.
+- Fixed the recent-form delete button so removing an entry no longer also navigates into that form.
 
 ## [v0.1.0] — 2025-11 (Post-Phase 3)
 

@@ -5,7 +5,7 @@ import IconButton from "./IconButton";
 interface FormHeaderProps {
   formName: string;
   isEncrypted: boolean;
-  status: "draft" | "published" | "shared";
+  status: "draft" | "finalized" | "published" | "shared";
   onFormNameChange?: (name: string) => void;
   onHomeClick: () => void;
   readOnly?: boolean;
@@ -23,6 +23,10 @@ export default function FormHeader({
     draft: {
       label: "Draft",
       className: "text-orange-600 bg-orange-100",
+    },
+    finalized: {
+      label: "Finalized",
+      className: "text-violet-600 bg-violet-100",
     },
     published: {
       label: "Published",
@@ -56,11 +60,11 @@ export default function FormHeader({
           <input
             id="form-name"
             type="text"
-            title="Form name"
+            title="Title"
             className="w-fit border-b-1 text-center text-2xl bg-transparent focus:outline-none"
             value={formName}
             onChange={(e) => onFormNameChange?.(e.target.value)}
-            placeholder="Form Name"
+            placeholder="Title"
             disabled={readOnly}
           />
         )}

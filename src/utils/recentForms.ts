@@ -1,16 +1,22 @@
-export type RecentFormMeta = {
+export type RecentItemKind = "form" | "template";
+
+export type RecentItemMeta = {
   id: string;
   name: string;
   date: Date;
   encrypted: boolean;
   isPublished: boolean;
+  kind: RecentItemKind;
 };
+
+export type RecentFormMeta = RecentItemMeta;
 
 type RecentFormMetaRecord = {
   name: string;
   date: string;
   encrypted?: boolean;
   isPublished?: boolean;
+  kind?: RecentItemKind;
 };
 
 type StorageLike = Pick<
@@ -40,6 +46,7 @@ export function saveRecentFormMeta(
       date: (meta.date ?? new Date()).toISOString(),
       encrypted: meta.encrypted,
       isPublished: meta.isPublished,
+      kind: meta.kind,
     }),
   );
 }
@@ -57,6 +64,13 @@ export function loadDraftFormData(
   id: string,
 ): string | null {
   return storage.getItem(getRecentFormDataKey(id));
+}
+
+export function hasDraftFormData(
+  storage: Pick<StorageLike, "getItem">,
+  id: string,
+): boolean {
+  return loadDraftFormData(storage, id) !== null;
 }
 
 export function removeRecentFormFromStorage(
@@ -82,8 +96,8 @@ export function clearRecentFormsFromStorage(storage: StorageLike): void {
 
 export function loadRecentForms(
   storage: Pick<StorageLike, "getItem" | "key" | "length">,
-): RecentFormMeta[] {
-  const forms: RecentFormMeta[] = [];
+): RecentItemMeta[] {
+  const forms: RecentItemMeta[] = [];
 
   for (const id of getRecentFormIds(storage)) {
     const rawMeta = storage.getItem(getRecentFormMetaKey(id));
@@ -97,6 +111,7 @@ export function loadRecentForms(
         date: new Date(parsed.date),
         encrypted: parsed.encrypted ?? false,
         isPublished: parsed.isPublished ?? false,
+        kind: parsed.kind ?? "form",
       });
     } catch (error) {
       console.error("Error parsing recent form metadata:", error);

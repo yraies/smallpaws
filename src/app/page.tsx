@@ -8,13 +8,12 @@ import FormTemplates from "../assets/FormTemplates";
 import Box from "../components/Box";
 import EncryptionStatus from "../components/EncryptionStatus";
 import IconButton from "../components/IconButton";
-import { LineButton } from "../components/LineButton";
 import type { Form } from "../types/Form";
 import { formatRelativeTime } from "../utils/RelativeDates";
 import {
   clearRecentFormsFromStorage,
   loadRecentForms,
-  type RecentFormMeta,
+  type RecentItemMeta,
   removeRecentFormFromStorage,
 } from "../utils/recentForms";
 
@@ -25,11 +24,11 @@ function Spacer() {
 export default function HomePage() {
   const router = useRouter();
   const [selectedTemplate, setSelectedTemplate] = React.useState("empty");
-  const [formName, setFormName] = React.useState("");
-  const [recentForms, setRecentForms] = React.useState<RecentFormMeta[]>([]);
+  const [templateName, setTemplateName] = React.useState("");
+  const [recentItems, setRecentItems] = React.useState<RecentItemMeta[]>([]);
 
   useEffect(() => {
-    loadRecentFormsFromLocalStorage(setRecentForms);
+    loadRecentFormsFromLocalStorage(setRecentItems);
   }, []);
 
   return (
@@ -42,16 +41,16 @@ export default function HomePage() {
         <HomeIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-violet-400" />
       </IconButton>
       <div className="flex w-full flex-col items-center gap-4">
-        <Box title="New Form" onTitleChange={() => {}} buttons={null}>
+        <Box title="New Template" onTitleChange={() => {}} buttons={null}>
           <div className="grid w-full grid-cols-2">
             <div className="col-span-2 flex flex-row gap-2 px-2">
-              <legend className="text-lg font-semibold">Form Title</legend>
+              <legend className="text-lg font-semibold">Template Title</legend>
               <input
                 type="text"
                 className="min-w-1 grow border-b-1"
-                placeholder="My Form"
-                value={formName}
-                onChange={(e) => setFormName(e.target.value)}
+                placeholder="My Template"
+                value={templateName}
+                onChange={(e) => setTemplateName(e.target.value)}
               />
             </div>
             <Spacer />
@@ -70,58 +69,65 @@ export default function HomePage() {
               type="button"
               className="col-start-2 px-2 py-1 hover:backdrop-brightness-90"
               onClick={() =>
-                createAndNavigateForm(selectedTemplate, formName, router)
+                createAndNavigateTemplate(
+                  selectedTemplate,
+                  templateName,
+                  router,
+                )
               }
             >
-              <legend className="text-lg font-semibold">Create</legend>
+              <legend className="text-lg font-semibold">Create Draft</legend>
             </button>
           </div>
         </Box>
         <Box
-          title="Recent Forms"
+          title="Recent Work"
           onTitleChange={() => {}}
           buttons={
             <IconButton
-              onClick={() => clearRecents(setRecentForms)}
-              title="Clear Recent Forms"
+              onClick={() => clearRecents(setRecentItems)}
+              title="Clear Recent Work"
             >
               <TrashIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-red-400" />
             </IconButton>
           }
         >
           <div className="grid w-full grid-cols-1 gap-2">
-            {recentForms.length > 0 ? (
-              recentForms.map((form) => (
-                <LineButton
-                  key={form.id}
-                  onClick={() => navigateToRecent(form, router)}
-                >
-                  <legend
-                    className="grow font-semibold"
-                    title={form.date.toLocaleString()}
+            {recentItems.length > 0 ? (
+              recentItems.map((item) => (
+                <div key={item.id} className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    className="flex grow cursor-pointer flex-row items-center px-2 py-1 text-center hover:backdrop-brightness-90"
+                    onClick={() => navigateToRecent(item, router)}
                   >
-                    {form.name}{" "}
-                    <span className="text-xs text-neutral-600">
-                      ({!form.isPublished && "draft - "}
-                      {formatRelativeTime(form.date)})
-                    </span>
-                  </legend>
+                    <legend
+                      className="grow font-semibold"
+                      title={item.date.toLocaleString()}
+                    >
+                      {item.name}{" "}
+                      <span className="text-xs text-neutral-600">
+                        ({describeRecentItem(item)} -{" "}
+                        {formatRelativeTime(item.date)})
+                      </span>
+                    </legend>
 
-                  <EncryptionStatus isEncrypted={form.encrypted} />
+                    <EncryptionStatus isEncrypted={item.encrypted} />
+                  </button>
 
                   <IconButton
                     onClick={() =>
-                      removeRecent(form, setRecentForms, recentForms)
+                      removeRecent(item, setRecentItems, recentItems)
                     }
-                    title={"Delete Form from Recent"}
+                    title={"Delete Item from Recent Work"}
                   >
                     <TrashIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-red-400" />
                   </IconButton>
-                </LineButton>
+                </div>
               ))
             ) : (
               <legend className="place-self-center px-2 py-1 text-center italic">
-                No recent forms
+                No recent work
               </legend>
             )}
           </div>
@@ -158,48 +164,57 @@ function renderTemplateOption(
 }
 
 function loadRecentFormsFromLocalStorage(
-  setRecentForms: React.Dispatch<React.SetStateAction<RecentFormMeta[]>>,
+  setRecentForms: React.Dispatch<React.SetStateAction<RecentItemMeta[]>>,
 ) {
-  console.log("loading recent forms");
   setRecentForms(loadRecentForms(localStorage));
 }
 
-function createAndNavigateForm(
+function createAndNavigateTemplate(
   selectedTemplate: string,
-  formName: string,
+  templateName: string,
   router: ReturnType<typeof useRouter>,
 ) {
   const template =
     FormTemplates.find((t) => t.id === selectedTemplate)?.template ||
     FormTemplates[0].template;
-  const id = typeid("form");
-  sessionStorage.setItem("create_new", "true");
+  const id = typeid("template");
+  sessionStorage.setItem("create_new_template", "true");
   sessionStorage.setItem(
-    "form",
-    JSON.stringify(formName !== "" ? template.withName(formName) : template),
+    "template",
+    JSON.stringify(
+      templateName !== "" ? template.withName(templateName) : template,
+    ),
   );
-  router.push(`/form/${id}`);
+  router.push(`/template/${id}`);
 }
 
 function navigateToRecent(
-  form: RecentFormMeta,
+  item: RecentItemMeta,
   router: ReturnType<typeof useRouter>,
 ) {
-  router.push(`/form/${form.id}`);
+  router.push(`/${item.kind}/${item.id}`);
 }
 
 function removeRecent(
-  form: RecentFormMeta,
-  setRecentForms: React.Dispatch<React.SetStateAction<RecentFormMeta[]>>,
-  recentForms: RecentFormMeta[],
+  item: RecentItemMeta,
+  setRecentForms: React.Dispatch<React.SetStateAction<RecentItemMeta[]>>,
+  recentForms: RecentItemMeta[],
 ) {
-  removeRecentFormFromStorage(localStorage, form.id);
-  setRecentForms(recentForms.filter((f) => f.id !== form.id));
+  removeRecentFormFromStorage(localStorage, item.id);
+  setRecentForms(recentForms.filter((f) => f.id !== item.id));
 }
 
 function clearRecents(
-  setRecentForms: React.Dispatch<React.SetStateAction<RecentFormMeta[]>>,
+  setRecentForms: React.Dispatch<React.SetStateAction<RecentItemMeta[]>>,
 ) {
   clearRecentFormsFromStorage(localStorage);
   setRecentForms([]);
+}
+
+function describeRecentItem(item: RecentItemMeta): string {
+  if (item.kind === "template") {
+    return item.isPublished ? "finalized template" : "template draft";
+  }
+
+  return item.isPublished ? "published form" : "form draft";
 }

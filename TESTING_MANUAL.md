@@ -2,57 +2,63 @@
 
 Use this checklist for manual verification of high-value workflows.
 
+Run this checklist in a real Chrome instance when it is used as the final validation pass for changed user-facing work.
+
 ## Startup
 
 - [ ] `npm run dev` starts without errors on localhost:3000.
-- [ ] Home page loads and displays template list and recent forms.
+- [ ] Home page loads and explains the three phases: template creation, form filling, and reading results.
 - [ ] No console errors in browser dev tools.
+- [ ] Recent work is sourced from browser local storage; there is no recent-items listing API request.
 
-## Form Creation
+## Template Creation
 
-- [ ] Create form from a predefined template — form appears with correct categories and questions.
-- [ ] Create empty form — prompts for name, creates editable blank form.
-- [ ] Form is listed in recent forms on the home page.
+- [ ] Create a template from scratch.
+- [ ] Create a template from an existing template.
+- [ ] Edit template title, categories, questions, and ordering.
+- [ ] Template drafts cannot contain filled answers.
+- [ ] Recent local drafts appear in recent work on the home page.
+- [ ] Deleting a recent item removes it from the list without navigating into it.
 
-## Form Editing
+## Template Finalization and Sharing
 
-- [ ] Add/remove/reorder categories.
-- [ ] Add/remove/reorder questions within a category.
-- [ ] Edit form title.
-- [ ] Edit question text.
-- [ ] Changes persist after page reload (saved to API + localStorage).
+- [ ] Templates require at least one category and one question before finalization.
+- [ ] Finalizing a template freezes structure and answer schema.
+- [ ] Shared template links show read-only structure.
+- [ ] Recipients can create their own local form from a shared finalized template.
 
-## Form Responses
+## Form Filling
 
+- [ ] Starting a form from a finalized template creates an independent fillable copy.
+- [ ] Form structure is fixed; categories/questions cannot be edited in the form-filling phase.
 - [ ] Select answer options (must / would like / maybe / off limits / unset) for questions.
 - [ ] Visual indicators correctly reflect selected answer state.
-- [ ] Once responses are added, form structure becomes read-only.
+- [ ] Draft answers persist locally until the form is shared/finalized.
 
 ## Encryption
 
-- [ ] Enable encryption on a form — password prompt appears.
+- [ ] Enable protection on a template or form — password prompt appears.
 - [ ] Encrypted form shows encryption status indicator.
 - [ ] Accessing encrypted form requires correct password.
 - [ ] Wrong password shows appropriate error.
 - [ ] Encryption/decryption round-trip preserves all form data.
+- [ ] Shared-link access control uses the same password model as the protected template/form.
 
-## Sharing
+## Reading Results and Sharing
 
-- [ ] Share button generates a unique shareable URL.
-- [ ] Shared link shows read-only form view.
-- [ ] Password-protected shared forms prompt for password.
-- [ ] Share info overlay shows view count, dates, expiry.
+- [ ] Sharing a filled form generates a unique shareable URL.
+- [ ] Shared filled-form links show a read-only results view.
+- [ ] Shared/published forms cannot be edited in place.
+- [ ] To revise a shared result, the user creates a new local copy/draft.
 
-## Cloning
-
-- [ ] Clone button on shared form creates a new independent form.
-- [ ] Cloned form has cloned_from attribution.
-- [ ] Cloned form is fully editable.
-- [ ] Original form is unaffected by changes to clone.
-
-## Export and Delete
+## Export and Print
 
 - [ ] CSV export downloads correct file with response data.
+- [ ] JSON export downloads correct file with structure and response data.
+- [ ] Browser print renders the print-friendly layout with handwritten response space.
+
+## Delete
+
 - [ ] Delete form — soft-deletes; form no longer appears in recent list.
 - [ ] Shared links to deleted forms show "form deleted" message.
 

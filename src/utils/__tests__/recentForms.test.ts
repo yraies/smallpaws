@@ -2,6 +2,7 @@ import {
   clearRecentFormsFromStorage,
   getRecentFormDataKey,
   getRecentFormMetaKey,
+  hasDraftFormData,
   loadDraftFormData,
   loadRecentForms,
   removeRecentFormFromStorage,
@@ -43,6 +44,7 @@ describe("recent forms storage", () => {
       name: "Draft Form",
       encrypted: false,
       isPublished: false,
+      kind: "form",
       date: new Date("2026-04-03T10:00:00.000Z"),
     });
 
@@ -54,6 +56,7 @@ describe("recent forms storage", () => {
       name: "Draft Form",
       encrypted: false,
       isPublished: false,
+      kind: "form",
     });
   });
 
@@ -68,6 +71,17 @@ describe("recent forms storage", () => {
     expect(storage.getItem(getRecentFormDataKey(id))).toBe(payload);
   });
 
+  test("detects whether draft form data exists for a local draft", () => {
+    const storage = new MockStorage();
+    const id = "form_01jz-example-hyphenated-id";
+
+    expect(hasDraftFormData(storage, id)).toBe(false);
+
+    saveDraftFormData(storage, id, JSON.stringify({ name: "Draft Form" }));
+
+    expect(hasDraftFormData(storage, id)).toBe(true);
+  });
+
   test("removes both metadata and data for one recent form", () => {
     const storage = new MockStorage();
     const id = "form_01jz-example-hyphenated-id";
@@ -77,6 +91,7 @@ describe("recent forms storage", () => {
       name: "Draft Form",
       encrypted: false,
       isPublished: false,
+      kind: "form",
     });
     saveDraftFormData(storage, id, JSON.stringify({ name: "Draft Form" }));
 
@@ -95,6 +110,7 @@ describe("recent forms storage", () => {
       name: "Draft Form",
       encrypted: false,
       isPublished: false,
+      kind: "form",
     });
     saveDraftFormData(storage, id, JSON.stringify({ name: "Draft Form" }));
     storage.setItem("display-preferences", JSON.stringify({ showIcon: true }));
@@ -106,5 +122,23 @@ describe("recent forms storage", () => {
     expect(storage.getItem("display-preferences")).toBe(
       JSON.stringify({ showIcon: true }),
     );
+  });
+
+  test("preserves the recent item kind when loading metadata", () => {
+    const storage = new MockStorage();
+    const id = "template_01jz-example-hyphenated-id";
+
+    saveRecentFormMeta(storage, {
+      id,
+      name: "Template Draft",
+      encrypted: false,
+      isPublished: false,
+      kind: "template",
+    });
+
+    const recentForms = loadRecentForms(storage);
+
+    expect(recentForms).toHaveLength(1);
+    expect(recentForms[0]?.kind).toBe("template");
   });
 });

@@ -162,6 +162,18 @@ class Category {
       this.questions.filter((q) => q.id !== questionID),
     );
   }
+
+  withoutAnswers(): Category {
+    return new Category(
+      this.id,
+      this.name,
+      this.questions.map((question) =>
+        question.selection === Selection.UNSET
+          ? question
+          : question.withSelection(Selection.UNSET),
+      ),
+    );
+  }
 }
 
 export type FormPOJO = {
@@ -235,6 +247,24 @@ class Form {
       this.name,
       this.categories.filter((c) => c.id !== categoryID),
     );
+  }
+
+  withoutAnswers(): Form {
+    return new Form(
+      this.name,
+      this.categories.map((category) => category.withoutAnswers()),
+    );
+  }
+
+  questionCount(): number {
+    return this.categories.reduce(
+      (count, category) => count + category.questions.length,
+      0,
+    );
+  }
+
+  hasValidStructure(): boolean {
+    return this.categories.length > 0 && this.questionCount() > 0;
   }
 
   getStatistics(): Record<Selection, number> {

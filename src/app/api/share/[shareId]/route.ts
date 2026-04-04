@@ -39,8 +39,7 @@ export async function GET(
     // Increment view count
     FormStorage.incrementShareViewCount(shareId);
 
-    // Check if password protection is enabled
-    if (sharedForm.password_hash) {
+    if (form.encrypted) {
       return NextResponse.json({
         requiresPassword: true,
         formName: form.name,
@@ -118,18 +117,21 @@ export async function POST(
       }
     }
 
-    // Verify password
-    if (
-      !sharedForm.password_hash ||
-      !verifyPassword(password, sharedForm.password_hash)
-    ) {
-      return NextResponse.json({ error: "Invalid password" }, { status: 401 });
-    }
-
     // Get the actual form
     const form = FormStorage.getForm(sharedForm.form_id);
     if (!form) {
       return NextResponse.json({ error: "Form not found" }, { status: 404 });
+    }
+
+    if (!form.encrypted || !form.password_hash) {
+      return NextResponse.json(
+        { error: "Form is not password protected" },
+        { status: 400 },
+      );
+    }
+
+    if (!verifyPassword(password, form.password_hash)) {
+      return NextResponse.json({ error: "Invalid password" }, { status: 401 });
     }
 
     // Increment view count

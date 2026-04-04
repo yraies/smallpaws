@@ -27,6 +27,16 @@ db.exec(`
   )
 `);
 
+db.exec(`
+  CREATE TABLE IF NOT EXISTS templates (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    data TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
 // Add migration for existing databases to add new columns
 try {
   db.exec(`ALTER TABLE forms ADD COLUMN encrypted BOOLEAN DEFAULT false`);
@@ -75,6 +85,16 @@ db.exec(`
   )
 `);
 
+db.exec(`
+  CREATE TABLE IF NOT EXISTS shared_templates (
+    share_id TEXT PRIMARY KEY,
+    template_id TEXT NOT NULL,
+    view_count INTEGER DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (template_id) REFERENCES templates (id) ON DELETE CASCADE
+  )
+`);
+
 export interface StoredForm {
   id: string;
   modification_key: string;
@@ -83,6 +103,14 @@ export interface StoredForm {
   name: string;
   data: string;
   cloned_from?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StoredTemplate {
+  id: string;
+  name: string;
+  data: string;
   created_at: string;
   updated_at: string;
 }
@@ -99,6 +127,13 @@ export interface SharedForm {
   form_id: string;
   password_hash: string | null;
   expires_at: string | null;
+  view_count: number;
+  created_at: string;
+}
+
+export interface SharedTemplate {
+  share_id: string;
+  template_id: string;
   view_count: number;
   created_at: string;
 }
@@ -199,6 +234,8 @@ export class FormStorage {
     db.exec("DELETE FROM forms");
     db.exec("DELETE FROM form_meta");
     db.exec("DELETE FROM shared_forms");
+    db.exec("DELETE FROM templates");
+    db.exec("DELETE FROM shared_templates");
   }
 
   // Shared Forms Operations
@@ -298,6 +335,73 @@ export class FormStorage {
       view_count: row.view_count,
       created_at: row.created_at,
     }));
+  }
+}
+
+// biome-ignore lint/complexity/noStaticOnlyClass: used as a namespace for DB operations
+export class TemplateStorage {
+  static getTemplate(id: string): StoredTemplate | null {
+    const stmt = db.prepare("SELECT * FROM templates WHERE id = ?");
+    const result = stmt.get(id) as StoredTemplate | undefined;
+    return result ?? null;
+  }
+
+  static saveTemplate(
+    template: Omit<StoredTemplate, "created_at" | "updated_at">,
+  ): void {
+    const existingTemplate = TemplateStorage.getTemplate(template.id);
+    if (existingTemplate) {
+      throw new Error(
+        "Cannot overwrite finalized template. This template has already been finalized.",
+      );
+    }
+
+    const stmt = db.prepare(`
+      INSERT INTO templates (id, name, data, updated_at)
+      VALUES (?, ?, ?, datetime('now'))
+    `);
+
+    stmt.run(template.id, template.name, template.data);
+  }
+
+  static createSharedTemplate(
+    templateId: string,
+    shareId: string,
+  ): SharedTemplate {
+    const stmt = db.prepare(`
+      INSERT INTO shared_templates (share_id, template_id)
+      VALUES (?, ?)
+    `);
+
+    stmt.run(shareId, templateId);
+
+    const result = db
+      .prepare("SELECT * FROM shared_templates WHERE share_id = ?")
+      .get(shareId) as SharedTemplate;
+
+    return result;
+  }
+
+  static getSharedTemplate(shareId: string): SharedTemplate | null {
+    const stmt = db.prepare(
+      "SELECT * FROM shared_templates WHERE share_id = ?",
+    );
+    const result = stmt.get(shareId) as SharedTemplate | undefined;
+    return result ?? null;
+  }
+
+  static incrementSharedTemplateViewCount(shareId: string): void {
+    const stmt = db.prepare(
+      "UPDATE shared_templates SET view_count = view_count + 1 WHERE share_id = ?",
+    );
+    stmt.run(shareId);
+  }
+
+  static getSharedTemplatesForTemplate(templateId: string): SharedTemplate[] {
+    const stmt = db.prepare(
+      "SELECT * FROM shared_templates WHERE template_id = ? ORDER BY created_at DESC",
+    );
+    return stmt.all(templateId) as SharedTemplate[];
   }
 }
 

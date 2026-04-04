@@ -3,12 +3,14 @@ import {
   createContext,
   type Dispatch,
   type SetStateAction,
+  useCallback,
   useContext,
   useEffect,
   useState,
 } from "react";
 import { Form } from "../types/Form";
 import {
+  hasDraftFormData,
   loadDraftFormData,
   removeDraftFormData,
   saveDraftFormData,
@@ -56,17 +58,20 @@ function FormContextProvider({ children }: { children: React.ReactNode }) {
         name: form.name,
         encrypted: false,
         isPublished: false,
+        kind: "form",
       });
       saveDraftFormData(localStorage, id, JSON.stringify(form));
       console.log("Saved draft form to localStorage");
     }
   }, [id, form, isEncrypted, isPublished]);
 
-  const reSetForm: Dispatch<SetStateAction<Form>> = (newForm) => {
-    if (typeof newForm === "function")
+  const reSetForm = useCallback<Dispatch<SetStateAction<Form>>>((newForm) => {
+    if (typeof newForm === "function") {
       return setForm((prev) => (prev ? newForm(prev) : prev));
-    else return setForm(newForm);
-  };
+    }
+
+    return setForm(newForm);
+  }, []);
 
   return (
     <FormContext.Provider value={{ form, setForm: reSetForm }}>
@@ -82,6 +87,24 @@ async function checkIfEncrypted(
   setIsPublished: (published: boolean) => void,
 ) {
   try {
+    if (hasDraftFormData(localStorage, id)) {
+      setIsPublished(false);
+      const storedData = loadDraftFormData(localStorage, id);
+      if (!storedData) {
+        return;
+      }
+
+      try {
+        const form = Form.fromPOJO(JSON.parse(storedData));
+        setForm(form);
+        setIsEncrypted(false);
+        console.log("Loaded draft form from localStorage");
+        return;
+      } catch (error) {
+        console.error("Error loading form from localStorage:", error);
+      }
+    }
+
     const response = await fetch(`/api/forms/${id}`);
     if (response.ok) {
       const storedForm = await response.json();
@@ -101,6 +124,7 @@ async function checkIfEncrypted(
         name: storedForm.name,
         encrypted: Boolean(storedForm.encrypted),
         isPublished: true,
+        kind: "form",
       });
       removeDraftFormData(localStorage, id);
 
@@ -120,24 +144,9 @@ async function checkIfEncrypted(
         setForm(form);
       }
     } else {
-      // Form not found in database - check localStorage for draft
+      // Form not found in database and no draft was recovered locally.
       setIsPublished(false);
-      console.log(
-        "Form not found in database, checking localStorage for draft",
-      );
-      const storedData = loadDraftFormData(localStorage, id);
-      if (storedData) {
-        try {
-          const form = Form.fromPOJO(JSON.parse(storedData));
-          setForm(form);
-          setIsEncrypted(false);
-          console.log("Loaded draft form from localStorage");
-        } catch (error) {
-          console.error("Error loading form from localStorage:", error);
-        }
-      } else {
-        console.log("No draft form found in localStorage either");
-      }
+      console.log("No draft form found in localStorage or database");
     }
   } catch (error) {
     console.error("Error checking form encryption status:", error);

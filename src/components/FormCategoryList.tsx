@@ -1,19 +1,22 @@
 import { PlusIcon } from "@heroicons/react/16/solid";
-import type { Category } from "../types/Form";
+import type { Dispatch, SetStateAction } from "react";
+import type { Category, Form } from "../types/Form";
 import CategoryBox from "./CategoryPage";
 
 interface FormCategoryListProps {
+  setDocument?: Dispatch<SetStateAction<Form>>;
   categories: Category[];
-  advancedOptions: boolean;
-  readOnly: boolean;
+  answerMode: "hidden" | "editable" | "readonly";
+  structureEditable: boolean;
   showAddButton?: boolean;
   onAddCategory?: () => void;
 }
 
 export default function FormCategoryList({
+  setDocument,
   categories,
-  advancedOptions,
-  readOnly,
+  answerMode,
+  structureEditable,
   showAddButton = false,
   onAddCategory,
 }: FormCategoryListProps) {
@@ -24,10 +27,11 @@ export default function FormCategoryList({
     >
       {categories.map((category) => (
         <CategoryBox
-          id={category.id}
+          category={category}
           key={category.id.toString()}
-          advancedOptions={advancedOptions}
-          readOnly={readOnly}
+          setDocument={setDocument}
+          answerMode={answerMode}
+          structureEditable={structureEditable}
         />
       ))}
 

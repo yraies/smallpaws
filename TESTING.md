@@ -1,6 +1,6 @@
 # Testing Strategy
 
-This file defines default automated validation gates.
+This file defines default automated validation gates and the required final browser gate.
 
 Detailed manual checks are in `TESTING_MANUAL.md`.
 
@@ -31,7 +31,8 @@ Note: There is no `test:full`, `test:e2e`, or separate integration test command 
 For code changes:
 
 1. Run the smallest relevant targeted scope first (e.g. `npm test -- --testPathPattern=crypto`).
-2. Before handoff, run: `npm run build && npm test && npm run lint`.
+2. Before browser QA, run: `npm run build && npm test && npm run lint`.
+3. Before handoff, verify the changed user-facing workflow in a real Chrome instance as the final quality gate.
 
 For docs-only changes:
 
@@ -41,19 +42,28 @@ For backlog-control and small-command turns with no code changes:
 
 - No tests required.
 
+## Final Browser Gate
+
+- For any new feature, bug fix, or meaningful UI/workflow rework that affects user-facing behavior, finish validation with a real Chrome instance.
+- Treat this Chrome run as the final gate after automated checks, not a substitute for them.
+- Cover the specific flow changed in the turn and note any blocker if Chrome validation cannot be completed.
+
 ## High-Risk Change Triggers
 
 - Database schema changes (`src/lib/database.ts`).
 - API route changes (`src/app/api/**`).
 - Encryption/decryption logic (`src/lib/crypto.ts`).
-- Form state management (`src/contexts/FormContext.tsx`, `src/contexts/FormActionsContext.tsx`).
+- Template/form state management (`src/contexts/FormContext.tsx`, `src/contexts/FormActionsContext.tsx`).
 - Type system changes (`src/types/Form.tsx`).
 
 ## Required Automated Coverage Areas
 
 - Encryption/decryption round-trip (crypto.test.ts — exists).
-- Form type system invariants (to be added).
+- Template/form type system invariants (to be added): templates carry no answers; forms carry fixed structure plus answers.
 - API route request/response contracts (to be added).
+- Recent-forms storage semantics (to be added): browser-local metadata/drafts only; no server-side recent-forms listing.
+- Template finalization invariants (to be added): forms can only be created from finalized templates; finalized/shared artifacts are immutable.
+- Unified access-control coverage (to be added): protected shared links use the same password model as the protected artifact.
 
 ## Failure Handling
 

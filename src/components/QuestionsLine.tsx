@@ -10,31 +10,33 @@ import SelectionButton from "./SelectionButton";
 function QuestionLine({
   question,
   onChange,
-  advancedOptions,
-  readOnly = false,
+  answerMode,
+  structureEditable,
 }: {
   question: Question;
   categoryID: CategoryID;
   onChange: (mapper: (category: Category) => Category) => void;
-  advancedOptions: boolean;
-  readOnly?: boolean;
+  answerMode: "hidden" | "editable" | "readonly";
+  structureEditable: boolean;
 }) {
   return (
     <li
       key={question.id.toString()}
       className="flex flex-row items-center gap-1 px-2 py-1 hover:backdrop-brightness-90 question-line"
     >
-      <SelectionButton
-        selection={question.selection}
-        onClick={() => {
-          if (readOnly) return;
-          onChange((cat) =>
-            cat.withQuestion(question.id, (q) => q.withNextSelection()),
-          );
-        }}
-        className="h-6 w-6 min-w-4 shrink-0 transition-transform group-hover:scale-75"
-        disabled={readOnly}
-      />
+      {answerMode !== "hidden" && (
+        <SelectionButton
+          selection={question.selection}
+          onClick={() => {
+            if (answerMode !== "editable") return;
+            onChange((cat) =>
+              cat.withQuestion(question.id, (q) => q.withNextSelection()),
+            );
+          }}
+          className="h-6 w-6 min-w-4 shrink-0 transition-transform group-hover:scale-75"
+          disabled={answerMode !== "editable"}
+        />
+      )}
 
       {/* Input for screen, span for print (to enable text wrapping) */}
       <input
@@ -43,13 +45,13 @@ function QuestionLine({
         value={question.value}
         placeholder="Question"
         onChange={(e) => {
-          if (readOnly) return;
+          if (!structureEditable) return;
           onChange((cat) =>
             cat.withQuestion(question.id, (q) => q.withValue(e.target.value)),
           );
         }}
-        disabled={readOnly}
-        readOnly={readOnly}
+        disabled={!structureEditable}
+        readOnly={!structureEditable}
         aria-label="Question text"
       />
 
@@ -59,20 +61,25 @@ function QuestionLine({
       </span>
 
       {/* Handwritten response space (print only) */}
-      <div className="print-only print-response-space" aria-hidden="true"></div>
+      {answerMode !== "hidden" && (
+        <div
+          className="print-only print-response-space"
+          aria-hidden="true"
+        ></div>
+      )}
 
       <div
         className="flex flex-row print:hidden"
-        hidden={!advancedOptions}
+        hidden={!structureEditable}
         role="toolbar"
         aria-label="Question actions"
       >
         <IconButton
           onClick={() => {
-            if (readOnly) return;
+            if (!structureEditable) return;
             onChange((cat) => cat.withMovedQuestion(question.id, "up"));
           }}
-          disabled={readOnly}
+          disabled={!structureEditable}
           aria-label="Move question up"
           title="Move question up"
         >
@@ -83,10 +90,10 @@ function QuestionLine({
         </IconButton>
         <IconButton
           onClick={() => {
-            if (readOnly) return;
+            if (!structureEditable) return;
             onChange((cat) => cat.withMovedQuestion(question.id, "down"));
           }}
-          disabled={readOnly}
+          disabled={!structureEditable}
           aria-label="Move question down"
           title="Move question down"
         >
@@ -97,10 +104,10 @@ function QuestionLine({
         </IconButton>
         <IconButton
           onClick={() => {
-            if (readOnly) return;
+            if (!structureEditable) return;
             onChange((cat) => cat.removeQuestion(question.id));
           }}
-          disabled={readOnly}
+          disabled={!structureEditable}
           aria-label={`Delete question: ${question.value || "untitled question"}`}
           title="Delete question"
         >

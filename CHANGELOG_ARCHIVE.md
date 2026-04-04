@@ -85,3 +85,5 @@ Stabilized browser-local recent-form tracking after the root-level repo migratio
 - Moved recent-form listing back to browser-local metadata instead of treating all server forms as "recent".
 - Prevented "clear recents" actions from deleting server-side forms or unrelated browser storage.
 - Added automated tests for recent-form storage helpers.
+- Removed the unused server-side recent-forms listing endpoint to keep recent-form tracking browser-local only.
+- Fixed the home-page recent-form delete action so it does not trigger row navigation.

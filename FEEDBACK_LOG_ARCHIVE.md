@@ -36,6 +36,65 @@ Required fields for new entries:
 
 ## Entries
 
+### F-009 (2026-04-04) - Commit work regularly
+
+- **Date:** 2026-04-04
+- **Source:** Chat-driven
+- **Exact Quote:** "please make sure that you regularly commit stuff by the way. not sure if you do that"
+- **Normalized Intent:** Create git commits regularly at coherent implementation checkpoints instead of letting work accumulate indefinitely.
+- **Feedback:** The stakeholder expects regular commits as part of the working style.
+- **Action taken:** Logged the workflow preference and will start committing at sensible checkpoints when implementing ongoing work.
+
+### F-008 (2026-04-04) - Restore cozy, centered visual identity
+
+- **Date:** 2026-04-04
+- **Source:** Chat-driven
+- **Exact Quote:** "I think the app should have a cozy feeling UI. Lots of warmish colors, somewhat haptic paper-like feelings, etc. kind of playful, but definetely not corporate or alike. I also want to have the template or forms be the center of attention in the middle of the page. And everything else should either be at the top or the top left and top right out of the way."
+- **Normalized Intent:** Re-establish a stronger visual identity built around a warm, tactile, playful document-first UI with the form/template centered and peripheral controls pushed to the top edges.
+- **Feedback:** The current design has drifted toward generic gray/blue product UI. The app should feel cozy and paper-like, with the main document as the visual focus and supporting controls de-emphasized spatially.
+- **Action taken:** Logged the design-system direction so upcoming UI work can align with it before further visual implementation.
+
+### F-007 (2026-04-04) - Browser validation is the final gate
+
+- **Date:** 2026-04-04
+- **Source:** Chat-driven
+- **Exact Quote:** "please always test new/reworked features in an actual browser as the final quality gate to make sure we did not accidentally break anything. besides that please continue with the next tasks"
+- **Normalized Intent:** Treat real browser validation as the final acceptance gate for new or significantly reworked features, then continue implementing the next backlog slice.
+- **Feedback:** Automated tests, linting, and builds are not enough on their own; browser testing should be the final quality check for changed user-facing workflows.
+- **Action taken:** Logged the validation requirement and continued with the next implementation task.
+- **Follow-up (2026-04-04):** Stakeholder clarified, "please always test with a real chrome instance as a final quality gate!"
+- **Action taken (follow-up):** Updated the active testing guidance to require a real Chrome instance, not just a generic browser run, for the final manual quality gate on changed user-facing work.
+
+### F-006 (2026-04-03) - Define template vs form model and open publication question
+
+- **Date:** 2026-04-03
+- **Source:** Chat-driven
+- **Exact Quote:** "A template is a list of categories and questions without any answers. And in the future, we might also provide template-wide answers... a form is a fixed set of categories, questions and answer types, but we're now able to fill them in. In templates the structure is editable, in forms only the contents/answers... templates have to be published before they can be filled in, right?"
+- **Normalized Intent:** Establish a clearer conceptual distinction between templates and forms, with templates owning editable structure and forms owning answerable instances of fixed structure, while deciding whether forms can only be created from published templates.
+- **Feedback:** Templates should be modeled as structure-only objects, possibly with template-wide answer enumerations later. Forms should be answerable instances with fixed structure and answer options. The product should consider whether only published templates are eligible for creating fillable forms.
+- **Action taken:** Logged the conceptual model and analyzed the publication gate as an open workflow decision before changing requirements or implementation.
+- **Follow-up (2026-04-03):** Stakeholder approved a phase-oriented framing: template creation, form filling, and reading results, and accepted the recommendation that forms should come from finalized templates while publishing/sharing remains a separate concept.
+- **Action taken (follow-up):** Updated canonical requirements, backlog, and testing docs to use the new template/finalization/form model and phase-oriented workflow.
+
+### F-005 (2026-04-03) - Clarify workflow expectations and explore compare/forms model
+
+- **Date:** 2026-04-03
+- **Source:** Chat-driven
+- **Exact Quote:** "a print mode is actually already implemented through some css and the browser print functionality!... One last thing: I've noticed that it would be great if one could compare two or more filled out forms, especially if they sprung of from the same template. This makes me think that it would indeed be useful to differentiate between fillable forms and templates. What do you think?"
+- **Normalized Intent:** Clarify current intended behavior around print mode, recent forms, draft recovery, shared vs published presentation, sharing passwords, and export UX; explore whether future comparison workflows strengthen the need for a stronger template vs fillable-form distinction.
+- **Feedback:** Print mode should be treated as already present via CSS/browser printing. Recent-form state should remain browser-local for now. Draft recovery is explicitly intended. Published forms must remain non-editable from the user's perspective. Shared and published views should probably remain visually similar. Sharing access control should converge on one password model rather than separate systems. CSV/JSON export is acceptable if user-friendly. Comparing completed forms could become a useful future workflow.
+- **Action taken:** Captured stakeholder clarifications and used them to refine the product interpretation before further implementation planning.
+- **Follow-up (2026-04-03):** Stakeholder questioned whether fillable forms should ever be structurally rootless and suggested that forms should always derive from a template or inherited "mother-template", while templates can be created from scratch, templates, or forms.
+
+### F-004 (2026-04-03) - Improve onboarding clarity and accessibility
+
+- **Date:** 2026-04-03
+- **Source:** Chat-driven
+- **Exact Quote:** "I think accessibility or self-explanation of the application is pretty bad at the moment. So please suggest some changes that would help new users understand what's going on and what the application is intended for."
+- **Normalized Intent:** Improve the app's first-run clarity and accessibility so new users can quickly understand the product's purpose and the basic workflow.
+- **Feedback:** The current interface does not explain itself well enough and needs stronger onboarding, clearer labels, and more accessible guidance.
+- **Action taken:** Reviewed the current landing and form UI and provided concrete UX/accessibility recommendations before implementation.
+
 ### F-003 (2026-04-03) - Finish current worktree and fix recent forms storage
 
 - **Date:** 2026-04-03
@@ -44,6 +103,8 @@ Required fields for new entries:
 - **Normalized Intent:** Finish the in-progress root-level repo work and make recent-forms persistence reliable, with browser local storage behaving correctly.
 - **Feedback:** Recent forms are expected to be a trustworthy browser-local convenience layer, not a destructive control path or a broken draft cache.
 - **Action taken:** Investigated recent-form persistence, fixed local storage key handling and clear-recents behavior, added automated tests, and aligned active docs/backlog with the current repo state before commit.
+- **Follow-up (2026-04-03):** Stakeholder asked, "are the recent forms somehow sent to the server or something? because I dont think i want that. besides that pls fix the bug".
+- **Action taken (follow-up):** Confirmed the home page reads recent forms from browser local storage, removed the unused server-side `/api/forms` recent-list endpoint, and fixed the recent-form delete control so it no longer navigates into the deleted draft.
 
 ### F-002 (2025-08) - Project principles from original agent prompt
 

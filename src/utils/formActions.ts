@@ -1,4 +1,5 @@
 import type { Form } from "../types/Form";
+import { saveDraftFormData, saveRecentFormMeta } from "./recentForms";
 
 /**
  * Prepares a form for cloning by creating a new ID and storing it in sessionStorage
@@ -10,6 +11,15 @@ export function prepareFormClone(form: Form): string {
 
   // Create a copy of the current form with new name
   const clonedForm = form.withName(`${form.name} (Copy)`);
+
+  saveRecentFormMeta(localStorage, {
+    id: newFormId,
+    name: clonedForm.name,
+    encrypted: false,
+    isPublished: false,
+    kind: "form",
+  });
+  saveDraftFormData(localStorage, newFormId, JSON.stringify(clonedForm));
 
   // Store in sessionStorage for the new form page
   sessionStorage.setItem("create_new", "true");

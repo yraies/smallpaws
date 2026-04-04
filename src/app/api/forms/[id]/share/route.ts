@@ -1,6 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { typeid } from "typeid-js";
-import { hashPassword } from "../../../../../lib/crypto";
 import { FormStorage } from "../../../../../lib/database";
 
 export async function POST(
@@ -11,7 +10,7 @@ export async function POST(
     const { id } = await context.params;
     const body = await request.json();
 
-    const { password, expiresInDays } = body;
+    const { expiresInDays } = body;
 
     // Check if form exists
     const form = FormStorage.getForm(id);
@@ -19,14 +18,10 @@ export async function POST(
       return NextResponse.json({ error: "Form not found" }, { status: 404 });
     }
 
+    const requiresPassword = form.encrypted;
+
     // Generate a unique share ID
     const shareId = typeid("share").toString();
-
-    // Hash password if provided
-    let passwordHash: string | null = null;
-    if (password?.trim()) {
-      passwordHash = hashPassword(password);
-    }
 
     // Calculate expiry date if provided
     let expiresAt: string | null = null;
@@ -40,7 +35,7 @@ export async function POST(
     const sharedForm = FormStorage.createSharedForm({
       shareId,
       formId: id,
-      passwordHash,
+      passwordHash: null,
       expiresAt,
     });
 
@@ -53,7 +48,7 @@ export async function POST(
       success: true,
       shareId,
       shareUrl,
-      hasPassword: !!passwordHash,
+      requiresPassword,
       expiresAt,
       viewCount: sharedForm.view_count,
       createdAt: sharedForm.created_at,
@@ -76,12 +71,14 @@ export async function GET(
 
     // Get all shares for this form
     const shares = FormStorage.getSharedFormsForForm(id);
+    const form = FormStorage.getForm(id);
+    const requiresPassword = !!form?.encrypted;
 
     return NextResponse.json({
       success: true,
       shares: shares.map((share) => ({
         shareId: share.share_id,
-        hasPassword: !!share.password_hash,
+        requiresPassword,
         expiresAt: share.expires_at,
         viewCount: share.view_count,
         createdAt: share.created_at,

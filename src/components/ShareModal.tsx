@@ -4,12 +4,10 @@ import {
   DocumentDuplicateIcon,
   EyeIcon,
   LinkIcon,
-  LockClosedIcon,
   ShareIcon,
   XMarkIcon,
 } from "@heroicons/react/16/solid";
 import React, { useState } from "react";
-import { validatePassword } from "../lib/crypto";
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -21,7 +19,7 @@ interface ShareModalProps {
 interface ShareInfo {
   shareId: string;
   shareUrl: string;
-  hasPassword: boolean;
+  requiresPassword: boolean;
   expiresAt: string | null;
   viewCount: number;
   createdAt: string;
@@ -33,7 +31,6 @@ const ShareModal: React.FC<ShareModalProps> = ({
   formId,
   formName,
 }) => {
-  const [password, setPassword] = useState("");
   const [expiresInDays, setExpiresInDays] = useState<number | "">("");
   const [shareInfo, setShareInfo] = useState<ShareInfo | null>(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -51,14 +48,14 @@ const ShareModal: React.FC<ShareModalProps> = ({
             data.shares.map(
               (share: {
                 shareId: string;
-                hasPassword: boolean;
+                requiresPassword: boolean;
                 expiresAt: string | null;
                 viewCount: number;
                 createdAt: string;
               }) => ({
                 shareId: share.shareId,
                 shareUrl: `${window.location.origin}/share/${share.shareId}`,
-                hasPassword: share.hasPassword,
+                requiresPassword: share.requiresPassword,
                 expiresAt: share.expiresAt,
                 viewCount: share.viewCount,
                 createdAt: share.createdAt,
@@ -88,10 +85,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          password: password.trim() || undefined,
-          expiresInDays: expiresInDays || undefined,
-        }),
+        body: JSON.stringify({ expiresInDays: expiresInDays || undefined }),
       });
 
       if (response.ok) {
@@ -99,7 +93,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
         setShareInfo({
           shareId: data.shareId,
           shareUrl: data.shareUrl,
-          hasPassword: data.hasPassword,
+          requiresPassword: data.requiresPassword,
           expiresAt: data.expiresAt,
           viewCount: data.viewCount,
           createdAt: data.createdAt,
@@ -128,7 +122,6 @@ const ShareModal: React.FC<ShareModalProps> = ({
   };
 
   const resetForm = () => {
-    setPassword("");
     setExpiresInDays("");
     setShareInfo(null);
     setError("");
@@ -183,28 +176,9 @@ const ShareModal: React.FC<ShareModalProps> = ({
                   Create New Share Link
                 </h3>
 
-                {/* Optional Password */}
-                <div>
-                  <label
-                    htmlFor="share-password"
-                    className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2"
-                  >
-                    <LockClosedIcon className="h-4 w-4" />
-                    Password Protection (Optional)
-                  </label>
-                  <input
-                    id="share-password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Leave empty for no password"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                  {password && !validatePassword(password).isValid && (
-                    <p className="mt-1 text-sm text-amber-600">
-                      Password should be at least 1 character
-                    </p>
-                  )}
+                <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800">
+                  Shared links use the form's own protection settings. If the
+                  form is encrypted, recipients will need that same password.
                 </div>
 
                 {/* Expiry */}
@@ -269,8 +243,10 @@ const ShareModal: React.FC<ShareModalProps> = ({
                           <div className="flex items-center gap-2 text-sm text-gray-600">
                             <LinkIcon className="h-4 w-4" />
                             Share #{index + 1}
-                            {share.hasPassword && (
-                              <LockClosedIcon className="h-3 w-3 text-amber-600" />
+                            {share.requiresPassword && (
+                              <span className="rounded bg-amber-100 px-2 py-0.5 text-xs text-amber-700">
+                                Uses form password
+                              </span>
                             )}
                           </div>
                           <div className="flex items-center gap-2 text-sm text-gray-500">
@@ -354,7 +330,9 @@ const ShareModal: React.FC<ShareModalProps> = ({
                 </div>
                 <div className="text-center">
                   <div className="text-lg font-semibold text-blue-600">
-                    {shareInfo.hasPassword ? "Protected" : "Public"}
+                    {shareInfo.requiresPassword
+                      ? "Uses form password"
+                      : "Public"}
                   </div>
                   <div className="text-sm text-blue-800">Access</div>
                 </div>

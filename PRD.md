@@ -8,6 +8,12 @@ Canonical requirement source: `SPEC.md`.
 
 Small Paws is a privacy-first conversation starter tool for complex personal topics (especially relationship discussions). It helps users identify areas of agreement/disagreement and ensures important topics aren't overlooked during sensitive conversations.
 
+## Workflow Model
+
+- **Template creation**: users design structure-only templates containing categories, questions, and answer schema.
+- **Form filling**: users create fillable forms from finalized templates and answer them without changing structure.
+- **Reading results**: users review finalized templates or shared/published forms in read-only form and branch backward by creating new local drafts/copies.
+
 ## Users
 
 - Individuals or partners exploring complex relationship topics.
@@ -18,6 +24,8 @@ Small Paws is a privacy-first conversation starter tool for complex personal top
 
 - Client-side encryption; server is zero-knowledge.
 - No user accounts; access via shareable links and optional passwords.
+- Recent forms are browser-local only; the server does not provide a synced or global recent-forms list.
+- Templates are finalized before forms are created from them; forms hold answers while templates hold structure.
 - Single-user form interaction (no real-time collaboration).
 - Self-hosted via Docker/Podman with persistent SQLite storage.
 
@@ -32,11 +40,11 @@ Small Paws is a privacy-first conversation starter tool for complex personal top
 
 ## Current Delivery Scope
 
-1. Form creation (from templates and blank), editing, category/question management — **done**.
-2. Client-side encryption, password protection, zero-knowledge sharing — **done**.
-3. Shareable links, form cloning with attribution, soft delete — **done**.
-4. UI/UX polish, accessibility modes, print-friendly display — **next**.
-5. Public template system — **future/optional**.
+1. Template/form lifecycle refactor: explicit template creation, template finalization, and fixed-structure form filling — **next**.
+2. Client-side encryption and one coherent password/access-control model — **next**.
+3. Shareable template and form links with read-only result views — **partial**.
+4. UI/UX polish, onboarding clarity, and accessibility improvements — **next**.
+5. Public template system and form comparison — **future/optional**.
 
 ## Form Factor
 
@@ -60,7 +68,7 @@ Small Paws is a privacy-first conversation starter tool for complex personal top
 
 See `SPEC.md` section 3 for detailed acceptance behaviors. Key outcomes:
 
-- Forms are creatable, editable, encryptable, shareable, and clonable.
+- Templates are editable structure-only artifacts; forms are fixed-structure answerable artifacts created from finalized templates.
 - All encryption is client-side; server never sees plaintext.
-- CSV and JSON export work for form response data.
+- JSON and CSV export are available through user-friendly UI.
 - UI is responsive on desktop and mobile.

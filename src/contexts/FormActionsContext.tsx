@@ -46,6 +46,7 @@ interface FormActionsProviderProps {
   initialIsEncrypted?: boolean;
   onPublish?: () => void;
   onShare?: () => void;
+  allowDelete?: boolean;
 }
 
 export function FormActionsProvider({
@@ -55,6 +56,7 @@ export function FormActionsProvider({
   initialIsEncrypted = false,
   onPublish,
   onShare,
+  allowDelete = true,
 }: FormActionsProviderProps) {
   const { form } = useFormContext();
   const router = useRouter();
@@ -149,7 +151,7 @@ export function FormActionsProvider({
         handleClone,
         handleExportCSV,
         handleExportJSON,
-        handleDelete: formId ? handleDelete : undefined,
+        handleDelete: formId && allowDelete ? handleDelete : undefined,
         handlePublish: onPublish,
         handleShare: onShare,
       }}

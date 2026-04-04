@@ -9,12 +9,10 @@ import ErrorMessage from "../../../components/ErrorMessage";
 import FormActionButtons from "../../../components/FormActionButtons";
 import FormCategoryList from "../../../components/FormCategoryList";
 import FormHeader from "../../../components/FormHeader";
+import FormPhaseBanner from "../../../components/FormPhaseBanner";
 import LoadingState from "../../../components/LoadingState";
 import ShareInfoOverlay from "../../../components/ShareInfoOverlay";
-import {
-  DisplayPreferencesProvider,
-  useDisplayPreferences,
-} from "../../../contexts/DisplayPreferencesContext";
+import { DisplayPreferencesProvider } from "../../../contexts/DisplayPreferencesContext";
 import { FormActionsProvider } from "../../../contexts/FormActionsContext";
 import {
   FormContextProvider,
@@ -28,12 +26,11 @@ interface ShareInfo {
   shareId: string;
   viewCount: number;
   createdAt: string;
-  expiresAt: string;
+  expiresAt: string | null;
 }
 
 function SharedFormPageContent() {
   const { form, setForm } = useFormContext();
-  const { advancedOptions } = useDisplayPreferences();
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -324,7 +321,9 @@ function SharedFormPageContent() {
                 <div className="flex items-center text-sm text-gray-500">
                   <ClockIcon className="w-4 h-4 mr-2" />
                   <span>
-                    Expires {formatRelativeTime(new Date(shareInfo.expiresAt))}
+                    {shareInfo.expiresAt
+                      ? `Expires ${formatRelativeTime(new Date(shareInfo.expiresAt))}`
+                      : "No expiry"}
                   </span>
                 </div>
               </div>
@@ -350,6 +349,7 @@ function SharedFormPageContent() {
       formId={shareId}
       initialIsPublished={true}
       initialIsEncrypted={isFormEncrypted}
+      allowDelete={false}
     >
       <FormHeader
         formName={formName}
@@ -361,14 +361,16 @@ function SharedFormPageContent() {
 
       <FormActionButtons />
 
+      <FormPhaseBanner phase="shared" />
+
       {/* Share Info Overlay (top-right, below clone button) */}
       {shareInfo && <ShareInfoOverlay shareInfo={shareInfo} />}
 
       {/* Form Categories */}
       <FormCategoryList
         categories={form.categories}
-        advancedOptions={advancedOptions}
-        readOnly={true}
+        answerMode="readonly"
+        structureEditable={false}
       />
     </FormActionsProvider>
   );

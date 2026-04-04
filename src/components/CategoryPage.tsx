@@ -4,42 +4,39 @@ import {
   PlusIcon,
   TrashIcon,
 } from "@heroicons/react/16/solid";
-import { useFormContext } from "@/contexts/FormContext";
-import { type CategoryID, Question } from "../types/Form";
+import type { Dispatch, SetStateAction } from "react";
+import { type Category, type Form, Question } from "../types/Form";
 import Box from "./Box";
 import IconButton from "./IconButton";
 import QuestionLine from "./QuestionsLine";
 
 function CategoryBox({
-  id,
-  advancedOptions,
-  readOnly = false,
+  category,
+  setDocument,
+  answerMode,
+  structureEditable,
 }: {
-  id: CategoryID;
-  advancedOptions: boolean;
-  readOnly?: boolean;
+  category: Category;
+  setDocument?: Dispatch<SetStateAction<Form>>;
+  answerMode: "hidden" | "editable" | "readonly";
+  structureEditable: boolean;
 }) {
-  const { form, setForm } = useFormContext();
-  const category = form?.getCategory(id);
-
-  if (!category) return null;
-
   const questionBlock = category.questions.map((question) => (
     <QuestionLine
       question={question}
-      categoryID={id}
+      categoryID={category.id}
       key={question.id.toString()}
       onChange={(categoryMapper) =>
-        setForm((prev) => {
-          const category =
+        setDocument?.((prev) => {
+          const previousCategory =
             // biome-ignore lint/style/noNonNullAssertion: category is guaranteed by form data model
-            prev.getCategory(id)!;
-          const updatedCategory = categoryMapper(category);
-          return prev.withCategory(id, () => updatedCategory);
+            prev.getCategory(category.id)!;
+          const updatedCategory = categoryMapper(previousCategory);
+          return prev.withCategory(category.id, () => updatedCategory);
         })
       }
-      advancedOptions={advancedOptions}
-      readOnly={readOnly}
+      answerMode={answerMode}
+      structureEditable={structureEditable}
     />
   ));
 
@@ -47,14 +44,14 @@ function CategoryBox({
     <div className="not-print:flex not-print:flex-row print:hidden">
       <IconButton
         onClick={() => {
-          if (readOnly) return;
-          setForm((prev) =>
-            prev.withCategory(id, (category) =>
-              category.addQuestion(Question.new("")),
+          if (!structureEditable) return;
+          setDocument?.((prev) =>
+            prev.withCategory(category.id, (currentCategory) =>
+              currentCategory.addQuestion(Question.new("")),
             ),
           );
         }}
-        disabled={readOnly}
+        disabled={!structureEditable}
         aria-label="Add question"
         title="Add question"
       >
@@ -65,10 +62,10 @@ function CategoryBox({
       </IconButton>
       <IconButton
         onClick={() => {
-          if (readOnly) return;
-          setForm((prev) => prev.withMovedCategory(id, "up"));
+          if (!structureEditable) return;
+          setDocument?.((prev) => prev.withMovedCategory(category.id, "up"));
         }}
-        disabled={readOnly}
+        disabled={!structureEditable}
         aria-label="Move category up"
         title="Move category up"
       >
@@ -79,10 +76,10 @@ function CategoryBox({
       </IconButton>
       <IconButton
         onClick={() => {
-          if (readOnly) return;
-          setForm((prev) => prev.withMovedCategory(id, "down"));
+          if (!structureEditable) return;
+          setDocument?.((prev) => prev.withMovedCategory(category.id, "down"));
         }}
-        disabled={readOnly}
+        disabled={!structureEditable}
         aria-label="Move category down"
         title="Move category down"
       >
@@ -93,10 +90,10 @@ function CategoryBox({
       </IconButton>
       <IconButton
         onClick={() => {
-          if (readOnly) return;
-          setForm((prev) => prev.removeCategory(id));
+          if (!structureEditable) return;
+          setDocument?.((prev) => prev.removeCategory(category.id));
         }}
-        disabled={readOnly}
+        disabled={!structureEditable}
         aria-label={`Delete ${category.name} category`}
         title={`Delete category`}
       >
@@ -110,17 +107,17 @@ function CategoryBox({
 
   return (
     <Box
-      editableTitle={!readOnly}
+      editableTitle={structureEditable}
       title={category.name}
       onTitleChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-        if (readOnly) return;
-        setForm((prev) =>
-          prev.withCategory(id, (category) =>
-            category.withName(e.target.value),
+        if (!structureEditable) return;
+        setDocument?.((prev) =>
+          prev.withCategory(category.id, (currentCategory) =>
+            currentCategory.withName(e.target.value),
           ),
         );
       }}
-      buttons={advancedOptions ? buttons : null}
+      buttons={structureEditable ? buttons : null}
       className="category"
       role="region"
       aria-label={`${category.name} category`}

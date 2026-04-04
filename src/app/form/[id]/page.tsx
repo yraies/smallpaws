@@ -7,13 +7,11 @@ import DeletedFormMessage from "../../../components/DeletedFormMessage";
 import FormActionButtons from "../../../components/FormActionButtons";
 import FormCategoryList from "../../../components/FormCategoryList";
 import FormHeader from "../../../components/FormHeader";
+import FormPhaseBanner from "../../../components/FormPhaseBanner";
 import LoadingState from "../../../components/LoadingState";
 import PasswordModal from "../../../components/PasswordModal";
 import ShareModal from "../../../components/ShareModal";
-import {
-  DisplayPreferencesProvider,
-  useDisplayPreferences,
-} from "../../../contexts/DisplayPreferencesContext";
+import { DisplayPreferencesProvider } from "../../../contexts/DisplayPreferencesContext";
 import { FormActionsProvider } from "../../../contexts/FormActionsContext";
 import {
   FormContextProvider,
@@ -24,15 +22,15 @@ import {
   encryptFormData,
   hashPassword,
 } from "../../../lib/crypto";
-import { Category, Form, type FormPOJO, Question } from "../../../types/Form";
+import { Form, type FormPOJO } from "../../../types/Form";
 import {
+  hasDraftFormData,
   removeDraftFormData,
   saveRecentFormMeta,
 } from "../../../utils/recentForms";
 
 function FormPageContent() {
   const { form, setForm } = useFormContext();
-  const { advancedOptions } = useDisplayPreferences();
   const [showPasswordModal, setShowPasswordModal] = React.useState(false);
   const [showShareModal, setShowShareModal] = React.useState(false);
   const [isPublished, setIsPublished] = React.useState(false);
@@ -48,6 +46,12 @@ function FormPageContent() {
 
   const checkFormStatus = React.useCallback(async (id: string) => {
     try {
+      if (hasDraftFormData(localStorage, id)) {
+        setIsPublished(false);
+        setIsLoadingForm(false);
+        return;
+      }
+
       const response = await fetch(`/api/forms/${id}`);
       if (response.ok) {
         const storedForm = await response.json();
@@ -201,6 +205,7 @@ function FormPageContent() {
           name: form.name,
           encrypted,
           isPublished: true,
+          kind: "form",
         });
         removeDraftFormData(localStorage, formId);
         setIsEncrypted(encrypted);
@@ -247,16 +252,13 @@ function FormPageContent() {
 
       <FormActionButtons />
 
+      <FormPhaseBanner phase={isPublished ? "published" : "draft"} />
+
       <FormCategoryList
+        setDocument={setForm}
         categories={form.categories}
-        advancedOptions={advancedOptions}
-        readOnly={isPublished}
-        showAddButton={advancedOptions && !isPublished}
-        onAddCategory={() =>
-          setForm((prev) =>
-            prev.addCategory(Category.new("", [Question.new("")])),
-          )
-        }
+        answerMode={isPublished ? "readonly" : "editable"}
+        structureEditable={false}
       />
 
       {/* Password Modal */}

@@ -462,7 +462,7 @@ const PenAndPaperTemplate = Form.new("Pen and Paper Preferences", [
   ]),
 ]);
 
-const Empty = Form.new("New Form", []);
+const Empty = Form.new("New Template", []);
 
 const FormTemplates = [
   { id: "empty", name: "Empty", template: Empty },
