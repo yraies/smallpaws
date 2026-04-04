@@ -1,6 +1,6 @@
 "use client";
 
-import { PlayIcon } from "@heroicons/react/16/solid";
+import { PlayIcon, PrinterIcon } from "@heroicons/react/16/solid";
 import dynamic from "next/dynamic";
 import { useParams, useRouter } from "next/navigation";
 import React from "react";
@@ -14,6 +14,7 @@ import PageActionRails, {
   type RailAction,
 } from "../../../../components/PageActionRails";
 import { Form, type FormPOJO } from "../../../../types/Form";
+import { printCurrentView } from "../../../../utils/formActions";
 import {
   saveDraftFormData,
   saveRecentFormMeta,
@@ -98,6 +99,14 @@ function SharedTemplatePageContent() {
       <PageActionRails
         rightActions={
           [
+            {
+              key: "print-template",
+              label: "Print",
+              onClick: printCurrentView,
+              title: "Print this template",
+              variant: "default",
+              icon: <PrinterIcon className="h-5 w-5" />,
+            },
             {
               key: "create-my-form",
               label: "Create My Form",

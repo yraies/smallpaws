@@ -4,12 +4,14 @@ import {
   DocumentDuplicateIcon,
   FaceSmileIcon,
   NewspaperIcon,
+  PrinterIcon,
   ShareIcon,
   TrashIcon,
 } from "@heroicons/react/16/solid";
 import type React from "react";
 import { useDisplayPreferences } from "../contexts/DisplayPreferencesContext";
 import { useFormActions } from "../contexts/FormActionsContext";
+import { printCurrentView } from "../utils/formActions";
 import PageActionRails from "./PageActionRails";
 
 type ActionConfig = {
@@ -82,6 +84,15 @@ export default function FormActionButtons() {
   }
 
   const rightActions: ActionConfig[] = [];
+  rightActions.push({
+    key: "print",
+    label: "Print",
+    onClick: printCurrentView,
+    title: "Print this view",
+    variant: "default",
+    icon: <PrinterIcon className="h-5 w-5" />,
+  });
+
   if (!isPublished && handlePublish) {
     rightActions.push({
       key: "publish",

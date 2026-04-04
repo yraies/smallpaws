@@ -24,6 +24,7 @@ Detailed historical notes are preserved in `CHANGELOG_ARCHIVE.md`.
 - Top-level form controls now sit in labeled left/right side stacks outside the center column on larger screens, keeping the document area cleaner while preserving a compact in-column fallback on smaller screens.
 - Finalized templates, shared templates, and reading-results views now follow the same layout rule: the center column shows status/info, while primary actions live in the side rails.
 - The document header no longer shows Published/Shared/Finalized badges next to the title; phase context now lives only in the page notices.
+- Finalized templates, shared templates, and form views now expose printing directly in the action rails, and published/shared forms keep export actions visible alongside print.
 
 ### Fixed
 

@@ -91,4 +91,5 @@ Stabilized browser-local recent-form tracking after the root-level repo migratio
 - Moved form utility controls into labeled left/right side stacks on larger screens so the narrow document column stays visually clean while the actions remain explicit and easy to scan.
 - Extended that side-rail rule across finalized templates and shared templates, and removed duplicated primary actions from center-column phase notices so page chrome stays consistent across workflow phases.
 - Removed the small Published/Shared/Finalized header badges so phase context is conveyed only by the page notices instead of being repeated next to the document name.
+- Made print a first-class action in the side rails for finalized templates, shared templates, and form views, keeping export/print affordances visible in the phases where they matter.
 - Fixed the published/shared form toolbar to react to the live publication state instead of leaving stale publish actions visible after publication.

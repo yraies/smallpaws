@@ -4,6 +4,7 @@ import {
   CloudArrowUpIcon,
   DocumentDuplicateIcon,
   PlayIcon,
+  PrinterIcon,
   ShareIcon,
 } from "@heroicons/react/16/solid";
 import dynamic from "next/dynamic";
@@ -24,6 +25,7 @@ import {
 } from "../../../contexts/TemplateContext";
 import { Category, Question } from "../../../types/Form";
 import { hasValidStructure } from "../../../utils/documentStructure";
+import { printCurrentView } from "../../../utils/formActions";
 import {
   removeDraftFormData,
   saveDraftFormData,
@@ -132,6 +134,14 @@ function TemplatePageContent() {
           isFinalized
             ? ([
                 {
+                  key: "print-template",
+                  label: "Print",
+                  onClick: printCurrentView,
+                  title: "Print this template",
+                  variant: "default",
+                  icon: <PrinterIcon className="h-5 w-5" />,
+                },
+                {
                   key: "start-form",
                   label: "Start Form",
                   onClick: startForm,
@@ -157,6 +167,14 @@ function TemplatePageContent() {
                 },
               ] satisfies RailAction[])
             : ([
+                {
+                  key: "print-template",
+                  label: "Print",
+                  onClick: printCurrentView,
+                  title: "Print this template",
+                  variant: "default",
+                  icon: <PrinterIcon className="h-5 w-5" />,
+                },
                 {
                   key: "finalize-template",
                   label: isFinalizing ? "Finalizing..." : "Finalize",

@@ -77,3 +77,10 @@ export function exportFormAsJSON(form: Form): void {
   link.click();
   document.body.removeChild(link);
 }
+
+/**
+ * Opens the browser print dialog for the current document view.
+ */
+export function printCurrentView(): void {
+  window.print();
+}
