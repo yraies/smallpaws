@@ -35,11 +35,11 @@ export default function FormActionButtons() {
       {isPublished && (
         <IconButton
           onClick={handleClone}
-          className="absolute top-4 left-16"
+          className="absolute top-2 left-14"
           disabled={isCloning}
           title="Create New Draft"
         >
-          <DocumentDuplicateIcon className="h-5 w-5 text-[var(--plum)] transition-transform group-hover:scale-90" />
+          <DocumentDuplicateIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-violet-400" />
         </IconButton>
       )}
 
@@ -47,10 +47,10 @@ export default function FormActionButtons() {
       {isPublished && (
         <IconButton
           onClick={handleExportCSV}
-          className="absolute top-4 left-29"
+          className="absolute top-2 left-26"
           title="Export as CSV"
         >
-          <ArrowDownTrayIcon className="h-5 w-5 text-[#8d5b2c] transition-transform group-hover:scale-90" />
+          <ArrowDownTrayIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-green-400" />
         </IconButton>
       )}
 
@@ -58,10 +58,10 @@ export default function FormActionButtons() {
       {isPublished && (
         <IconButton
           onClick={handleExportJSON}
-          className="absolute top-4 left-42"
+          className="absolute top-2 left-38"
           title="Export as JSON"
         >
-          <ArrowDownTrayIcon className="h-5 w-5 text-[var(--paper-accent)] transition-transform group-hover:scale-90" />
+          <ArrowDownTrayIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-blue-400" />
         </IconButton>
       )}
 
@@ -69,15 +69,15 @@ export default function FormActionButtons() {
       {isPublished && handleDelete && (
         <IconButton
           onClick={handleDelete}
-          className="absolute top-4 left-55"
+          className="absolute top-2 left-50"
           disabled={isDeleting}
           title="Delete Form"
         >
           <TrashIcon
-            className={`h-5 w-5 transition-transform ${
+            className={`h-6 w-6 transition-transform ${
               isDeleting
-                ? "text-[#b39a84]"
-                : "text-[var(--paper-accent)] group-hover:scale-90"
+                ? "text-gray-400"
+                : "group-hover:scale-90 group-hover:text-red-400"
             }`}
           />
         </IconButton>
@@ -89,15 +89,15 @@ export default function FormActionButtons() {
       {!isPublished && handlePublish && (
         <IconButton
           onClick={handlePublish}
-          className="absolute top-4 right-16"
+          className="absolute top-2 right-26"
           disabled={isPublishing}
           title="Publish Form"
         >
           <CloudArrowUpIcon
-            className={`h-5 w-5 transition-transform ${
+            className={`h-6 w-6 transition-transform ${
               isPublishing
-                ? "text-[#b39a84]"
-                : "text-[#8d5b2c] group-hover:scale-90"
+                ? "text-gray-400"
+                : "group-hover:scale-90 group-hover:text-green-400"
             }`}
           />
         </IconButton>
@@ -107,23 +107,23 @@ export default function FormActionButtons() {
       {isPublished && handleShare && (
         <IconButton
           onClick={handleShare}
-          className="absolute top-4 right-16"
+          className="absolute top-2 right-26"
           title="Share Form"
         >
-          <ShareIcon className="h-5 w-5 text-[var(--plum)] transition-transform group-hover:scale-90" />
+          <ShareIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-blue-400" />
         </IconButton>
       )}
 
       {/* Show Icon Toggle */}
       <IconButton
         onClick={() => setShowIcon(!showIcon)}
-        className="absolute top-4 right-4"
+        className="absolute top-2 right-2"
         title={showIcon ? "Show Text Labels" : "Show Icons"}
       >
         {!showIcon ? (
-          <NewspaperIcon className="h-5 w-5 text-[var(--plum)] transition-transform group-hover:scale-90" />
+          <NewspaperIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-violet-400" />
         ) : (
-          <FaceSmileIcon className="h-5 w-5 text-[var(--plum)] transition-transform group-hover:scale-90" />
+          <FaceSmileIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-violet-400" />
         )}
       </IconButton>
     </div>

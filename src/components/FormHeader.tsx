@@ -22,62 +22,49 @@ export default function FormHeader({
   const statusConfig = {
     draft: {
       label: "Draft",
-      className: "bg-[var(--paper-accent-soft)] text-[var(--paper-accent)]",
+      className: "bg-orange-100 text-orange-700",
     },
     finalized: {
       label: "Finalized",
-      className: "bg-[var(--plum-soft)] text-[var(--plum)]",
+      className: "bg-violet-100 text-violet-700",
     },
     published: {
       label: "Published",
-      className: "bg-[rgba(198,144,85,0.18)] text-[#8d5b2c]",
+      className: "bg-green-100 text-green-700",
     },
     shared: {
       label: "Shared",
-      className: "bg-[rgba(198,144,85,0.18)] text-[#8d5b2c]",
+      className: "bg-blue-100 text-blue-700",
     },
   };
 
   const config = statusConfig[status];
 
   return (
-    <header className="document-sheet relative mb-4 pt-12">
+    <div className="document-sheet relative mb-4">
       <IconButton
         onClick={onHomeClick}
-        className="absolute top-4 left-4"
+        className="absolute top-2 left-2"
         title="Home"
         aria-label="Go home"
       >
-        <HomeIcon className="h-5 w-5 text-[var(--plum)] transition-transform group-hover:scale-90" />
+        <HomeIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-violet-400" />
       </IconButton>
 
-      <div className="flex flex-col items-center gap-3 text-center">
-        <div className="flex flex-wrap items-center justify-center gap-2">
-          <EncryptionStatus
-            isEncrypted={isEncrypted}
-            showText={false}
-            className="h-4 w-4"
-          />
-          <span
-            id="form-status-badge"
-            className={`rounded-sm px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${config.className}`}
-          >
-            {config.label}
-          </span>
-        </div>
+      <div className="mb-4 flex items-center justify-center gap-2 text-center">
         {readOnly ? (
-          <h2
+          <div
             id="form-name"
-            className="max-w-full border-b border-[rgba(124,79,115,0.18)] px-4 pb-2 text-center text-3xl font-semibold text-[var(--ink)]"
+            className="max-w-full border-b-1 bg-transparent text-center text-2xl"
           >
             {formName}
-          </h2>
+          </div>
         ) : (
           <input
             id="form-name"
             type="text"
             title="Title"
-            className="min-w-[14rem] max-w-full border-b border-[rgba(124,79,115,0.18)] bg-transparent px-4 pb-2 text-center text-3xl font-semibold text-[var(--ink)] focus:outline-none"
+            className="w-fit max-w-full border-b-1 bg-transparent text-center text-2xl focus:outline-none"
             value={formName}
             onChange={(e) => onFormNameChange?.(e.target.value)}
             placeholder="Title"
@@ -85,11 +72,14 @@ export default function FormHeader({
             name="form-name"
           />
         )}
-        <p className="max-w-2xl text-sm ink-muted">
-          Keep the document itself in focus. Navigation and utilities stay near
-          the edges while the template or form remains centered.
-        </p>
+        <EncryptionStatus isEncrypted={isEncrypted} showText={false} />
+        <span
+          id="form-status-badge"
+          className={`px-2 py-1 text-sm font-semibold ${config.className}`}
+        >
+          {config.label}
+        </span>
       </div>
-    </header>
+    </div>
   );
 }

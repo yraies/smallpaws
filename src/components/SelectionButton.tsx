@@ -80,7 +80,7 @@ const SelectionButtonComponent: React.FC<SelectionButtonProps> = ({
     return (
       <button
         type="button"
-        className={`selection-button group -m-2 flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-[rgba(170,108,103,0.15)] bg-[rgba(255,253,248,0.9)] ${disabled ? "cursor-not-allowed" : ""}`}
+        className={`selection-button group -m-2 flex h-12 w-12 cursor-pointer items-center justify-center border border-neutral-300 bg-white ${disabled ? "cursor-not-allowed" : ""}`}
         onClick={disabled ? undefined : onClick}
         title={config.text}
         disabled={disabled}
@@ -101,7 +101,7 @@ const SelectionButtonComponent: React.FC<SelectionButtonProps> = ({
   return (
     <button
       type="button"
-      className={`selection-button h-9 w-16 cursor-pointer rounded-full font-extrabold text-white ${config.bgColor} ${className} ${disabled ? "cursor-not-allowed" : ""}`}
+      className={`selection-button h-8 w-16 cursor-pointer font-extrabold text-white ${config.bgColor} ${className} ${disabled ? "cursor-not-allowed" : ""}`}
       onClick={disabled ? undefined : onClick}
       title={config.text}
       disabled={disabled}

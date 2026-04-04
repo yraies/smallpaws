@@ -20,7 +20,7 @@ const IconButton: React.FC<IconButtonProps> = ({
   return (
     <button
       type="button"
-      className={`tactile-button group flex h-10 w-10 cursor-pointer items-center justify-center ${disabled ? "cursor-not-allowed" : ""} ${className}`}
+      className={`tactile-button group flex h-8 w-8 cursor-pointer items-center justify-center ${disabled ? "cursor-not-allowed" : ""} ${className}`}
       onClick={disabled ? undefined : onClick}
       disabled={disabled}
       title={title}

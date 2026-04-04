@@ -14,8 +14,7 @@ export default function FormPhaseBanner({ phase }: FormPhaseBannerProps) {
   const config = {
     draft: {
       badge: "Form Filling",
-      badgeClassName:
-        "bg-[var(--paper-accent-soft)] text-[var(--paper-accent)]",
+      badgeClassName: "text-orange-700",
       description:
         "Answers are editable here, but the structure comes from a finalized template and stays fixed while you fill it out.",
       actionLabel: "Publish Form",
@@ -24,7 +23,7 @@ export default function FormPhaseBanner({ phase }: FormPhaseBannerProps) {
     },
     published: {
       badge: "Reading Results",
-      badgeClassName: "bg-[var(--plum-soft)] text-[var(--plum)]",
+      badgeClassName: "text-green-700",
       description:
         "This published form is locked. To revise it, create a new local draft copy instead of editing the published result in place.",
       actionLabel: "Create New Draft",
@@ -33,7 +32,7 @@ export default function FormPhaseBanner({ phase }: FormPhaseBannerProps) {
     },
     shared: {
       badge: "Reading Results",
-      badgeClassName: "bg-[var(--plum-soft)] text-[var(--plum)]",
+      badgeClassName: "text-blue-700",
       description:
         "This shared form is read-only. Create a new local draft if you want to explore your own answers without changing the shared result.",
       actionLabel: "Create New Draft",
@@ -45,18 +44,18 @@ export default function FormPhaseBanner({ phase }: FormPhaseBannerProps) {
   const current = config[phase];
 
   return (
-    <div className="paper-panel mb-4 flex w-full max-w-4xl flex-wrap items-center gap-3 px-4 py-3 print:hidden">
-      <span
-        className={`rounded-sm px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${current.badgeClassName}`}
+    <div className="mb-3 w-full max-w-lg border-l-4 border-violet-400 bg-white px-3 py-2 print:hidden">
+      <p
+        className={`text-sm font-semibold uppercase tracking-widest ${current.badgeClassName}`}
       >
         {current.badge}
-      </span>
-      <p className="grow text-sm ink-muted">{current.description}</p>
+      </p>
+      <p className="text-sm text-neutral-700">{current.description}</p>
       {current.action && (
         <button
           type="button"
           onClick={current.action}
-          className="tactile-button inline-flex cursor-pointer items-center gap-2 px-4 py-2 font-semibold text-[var(--plum)]"
+          className="mt-2 inline-flex cursor-pointer items-center gap-2 border-b border-violet-400 px-0 py-1 font-semibold text-violet-700"
         >
           {current.actionIcon}
           {current.actionLabel}

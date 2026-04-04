@@ -14,17 +14,17 @@ interface ShareInfoOverlayProps {
 
 export default function ShareInfoOverlay({ shareInfo }: ShareInfoOverlayProps) {
   return (
-    <div className="paper-panel absolute top-16 right-4 space-y-1 px-3 py-2 text-xs text-[var(--ink-soft)]">
+    <div className="absolute top-14 right-2 space-y-1 border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-700 shadow-sm">
       <div className="flex items-center">
-        <EyeIcon className="mr-1 h-3 w-3 text-[var(--plum)]" />
+        <EyeIcon className="mr-1 h-3 w-3" />
         <span>{shareInfo.viewCount} views</span>
       </div>
       <div className="flex items-center">
-        <CalendarIcon className="mr-1 h-3 w-3 text-[var(--plum)]" />
+        <CalendarIcon className="mr-1 h-3 w-3" />
         <span>Shared {formatRelativeTime(new Date(shareInfo.createdAt))}</span>
       </div>
       <div className="flex items-center">
-        <ClockIcon className="mr-1 h-3 w-3 text-[var(--plum)]" />
+        <ClockIcon className="mr-1 h-3 w-3" />
         <span>
           {shareInfo.expiresAt
             ? `Expires ${formatRelativeTime(new Date(shareInfo.expiresAt))}`

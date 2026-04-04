@@ -55,6 +55,8 @@ Required fields for new entries:
 - **Action taken:** Logged the design-system direction so upcoming UI work can align with it before further visual implementation.
 - **Follow-up (2026-04-04):** Stakeholder clarified, "I am not too happy with the overly round aesthetic. additionally the pretty finnicy print layout is now incredibly space-inefficient"
 - **Action taken (follow-up):** Tightened the visual language away from pill-heavy rounding and treated print efficiency as a first-class constraint for the design-system pass.
+- **Follow-up (2026-04-04):** Stakeholder added, "I think the new ui is looking a bit too polished still... I could have drawn that very design with 2-3 pens and a ruler or square-grid sheet of paper... it had blocky colors and hadn't had as many gradients and pills/tags/badges... I also kind of liked that the app was somewhat narrow... it looked more deliberate."
+- **Action taken (follow-up):** Re-centered the visual rollback around the older narrow, hand-crafted, blocky qualities instead of continuing toward a glossy paper-card system.
 
 ### F-007 (2026-04-04) - Browser validation is the final gate
 

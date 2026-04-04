@@ -87,5 +87,5 @@ Stabilized browser-local recent-form tracking after the root-level repo migratio
 - Added automated tests for recent-form storage helpers.
 - Removed the unused server-side recent-forms listing endpoint to keep recent-form tracking browser-local only.
 - Fixed the home-page recent-form delete action so it does not trigger row navigation.
-- Shifted the primary UI toward a warmer, centered paper-like layout so templates/forms stay visually central while utility controls live near the top edges.
+- Shifted the primary UI toward a warmer, narrower, more hand-crafted layout so templates/forms stay visually central while utility controls live near the top edges.
 - Fixed the published/shared form toolbar to react to the live publication state instead of leaving stale publish actions visible after publication.

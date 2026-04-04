@@ -16,7 +16,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <div className="app-frame overflow-visible">
-          <div className="app-brand">Small Paws</div>
+          <h1 className="app-brand">Small Paws</h1>
           <div className="page-shell">{children}</div>
         </div>
       </body>
