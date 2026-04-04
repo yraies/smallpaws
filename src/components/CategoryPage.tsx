@@ -56,7 +56,7 @@ function CategoryBox({
         title="Add question"
       >
         <PlusIcon
-          className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-violet-400"
+          className="h-4 w-4 text-[var(--plum)] transition-transform group-hover:scale-90"
           aria-hidden="true"
         />
       </IconButton>
@@ -70,7 +70,7 @@ function CategoryBox({
         title="Move category up"
       >
         <ArrowUpIcon
-          className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-violet-400"
+          className="h-4 w-4 text-[var(--plum)] transition-transform group-hover:scale-90"
           aria-hidden="true"
         />
       </IconButton>
@@ -84,7 +84,7 @@ function CategoryBox({
         title="Move category down"
       >
         <ArrowDownIcon
-          className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-violet-400"
+          className="h-4 w-4 text-[var(--plum)] transition-transform group-hover:scale-90"
           aria-hidden="true"
         />
       </IconButton>
@@ -98,7 +98,7 @@ function CategoryBox({
         title={`Delete category`}
       >
         <TrashIcon
-          className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-red-400"
+          className="h-4 w-4 text-[var(--paper-accent)] transition-transform group-hover:scale-90"
           aria-hidden="true"
         />
       </IconButton>
@@ -118,7 +118,7 @@ function CategoryBox({
         );
       }}
       buttons={structureEditable ? buttons : null}
-      className="category"
+      className="category border border-[rgba(198,144,85,0.18)]"
       role="region"
       aria-label={`${category.name} category`}
     >

@@ -14,12 +14,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="bg-slate-100">
-        <div className="m-auto flex w-full max-w-lg flex-col items-center gap-2 overflow-visible p-4">
-          <h1 className="m-4 text-center text-4xl font-extrabold">
-            Small Paws
-          </h1>
-          {children}
+      <body>
+        <div className="app-frame overflow-visible">
+          <div className="app-brand">Small Paws</div>
+          <div className="page-shell">{children}</div>
         </div>
       </body>
     </html>

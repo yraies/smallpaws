@@ -4,6 +4,7 @@ import {
   type ReactNode,
   useCallback,
   useContext,
+  useEffect,
   useState,
 } from "react";
 import {
@@ -66,6 +67,14 @@ export function FormActionsProvider({
   const [isPublishing, _setIsPublishing] = useState(false);
   const [isCloning, setIsCloning] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    setIsPublished(initialIsPublished);
+  }, [initialIsPublished]);
+
+  useEffect(() => {
+    setIsEncrypted(initialIsEncrypted);
+  }, [initialIsEncrypted]);
 
   const handleClone = useCallback(() => {
     if (!form || !formId) return;

@@ -38,36 +38,36 @@ const SelectionButtonComponent: React.FC<SelectionButtonProps> = ({
   const selectionConfig: Record<Selection, SelectionConfig> = {
     [Selection.MUST_HAVE]: {
       Icon: ExclamationCircleIcon,
-      textColor: "text-green-500",
-      bgColor: "bg-green-500",
+      textColor: "text-[#8d4f3f]",
+      bgColor: "bg-[#8d4f3f]",
       text: "Must Have",
       shortText: "Must",
     },
     [Selection.WOULD_LIKE]: {
       Icon: CheckCircleIcon,
-      textColor: "text-blue-400",
-      bgColor: "bg-blue-400",
+      textColor: "text-[#7c4f73]",
+      bgColor: "bg-[#7c4f73]",
       text: "Would Like",
       shortText: "Like",
     },
     [Selection.MAYBE]: {
       Icon: QuestionMarkCircleIcon,
-      textColor: "text-amber-400",
-      bgColor: "bg-amber-500",
+      textColor: "text-[#c69055]",
+      bgColor: "bg-[#c69055]",
       text: "Maybe",
       shortText: "Maybe",
     },
     [Selection.OFF_LIMITS]: {
       Icon: MinusCircleIcon,
-      textColor: "text-red-400",
-      bgColor: "bg-red-400",
+      textColor: "text-[#aa6c67]",
+      bgColor: "bg-[#aa6c67]",
       text: "Off Limits",
       shortText: "Limit",
     },
     [Selection.UNSET]: {
       Icon: StopIcon,
-      textColor: "text-gray-400",
-      bgColor: "bg-gray-400",
+      textColor: "text-[#b39a84]",
+      bgColor: "bg-[#b39a84]",
       text: "Unset",
       shortText: "Unset",
     },
@@ -80,7 +80,7 @@ const SelectionButtonComponent: React.FC<SelectionButtonProps> = ({
     return (
       <button
         type="button"
-        className={`group -m-2 flex h-12 w-12 cursor-pointer items-center justify-center selection-button ${disabled ? "cursor-not-allowed" : ""}`}
+        className={`selection-button group -m-2 flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-[rgba(170,108,103,0.15)] bg-[rgba(255,253,248,0.9)] ${disabled ? "cursor-not-allowed" : ""}`}
         onClick={disabled ? undefined : onClick}
         title={config.text}
         disabled={disabled}
@@ -101,7 +101,7 @@ const SelectionButtonComponent: React.FC<SelectionButtonProps> = ({
   return (
     <button
       type="button"
-      className={`h-8 w-16 cursor-pointer font-extrabold text-white selection-button ${config.bgColor} ${className} ${disabled ? "cursor-not-allowed" : ""}`}
+      className={`selection-button h-9 w-16 cursor-pointer rounded-full font-extrabold text-white ${config.bgColor} ${className} ${disabled ? "cursor-not-allowed" : ""}`}
       onClick={disabled ? undefined : onClick}
       title={config.text}
       disabled={disabled}
@@ -120,7 +120,7 @@ const SelectionButton = dynamic(
   () => Promise.resolve(SelectionButtonComponent),
   {
     ssr: false,
-    loading: () => <div>Loading...</div>,
+    loading: () => <div className="h-10 w-10" />,
   },
 );
 

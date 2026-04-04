@@ -35,26 +35,29 @@ export default function HomePage() {
     <>
       <IconButton
         onClick={() => router.push("/")}
-        className="absolute top-2 left-2"
+        className="absolute top-4 left-4"
         title="Home"
       >
-        <HomeIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-violet-400" />
+        <HomeIcon className="h-5 w-5 text-[var(--plum)] transition-transform group-hover:scale-90" />
       </IconButton>
-      <div className="flex w-full flex-col items-center gap-4">
+      <div className="flex w-full max-w-4xl flex-col items-center gap-4">
         <Box title="New Template" onTitleChange={() => {}} buttons={null}>
-          <div className="grid w-full grid-cols-2">
+          <div className="grid w-full grid-cols-2 gap-y-1">
             <div className="col-span-2 flex flex-row gap-2 px-2">
-              <legend className="text-lg font-semibold">Template Title</legend>
+              <legend className="text-lg font-semibold text-[var(--ink)]">
+                Template Title
+              </legend>
               <input
                 type="text"
-                className="min-w-1 grow border-b-1"
+                className="paper-field min-w-1 grow px-3 py-2"
                 placeholder="My Template"
                 value={templateName}
                 onChange={(e) => setTemplateName(e.target.value)}
+                name="template-name"
               />
             </div>
             <Spacer />
-            <legend className="col-span-2 px-2 text-lg font-semibold">
+            <legend className="col-span-2 px-2 text-lg font-semibold text-[var(--ink)]">
               Templates
             </legend>
             {FormTemplates.map((template) =>
@@ -67,7 +70,7 @@ export default function HomePage() {
             <Spacer />
             <button
               type="button"
-              className="col-start-2 px-2 py-1 hover:backdrop-brightness-90"
+              className="tactile-button col-start-2 justify-self-end px-4 py-2 font-semibold text-[var(--plum)]"
               onClick={() =>
                 createAndNavigateTemplate(
                   selectedTemplate,
@@ -76,7 +79,7 @@ export default function HomePage() {
                 )
               }
             >
-              <legend className="text-lg font-semibold">Create Draft</legend>
+              Create Draft
             </button>
           </div>
         </Box>
@@ -88,25 +91,28 @@ export default function HomePage() {
               onClick={() => clearRecents(setRecentItems)}
               title="Clear Recent Work"
             >
-              <TrashIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-red-400" />
+              <TrashIcon className="h-4 w-4 text-[var(--paper-accent)] transition-transform group-hover:scale-90" />
             </IconButton>
           }
         >
           <div className="grid w-full grid-cols-1 gap-2">
             {recentItems.length > 0 ? (
               recentItems.map((item) => (
-                <div key={item.id} className="flex items-center gap-2">
+                <div
+                  key={item.id}
+                  className="paper-field flex items-center gap-2 px-2 py-2"
+                >
                   <button
                     type="button"
-                    className="flex grow cursor-pointer flex-row items-center px-2 py-1 text-center hover:backdrop-brightness-90"
+                    className="flex grow cursor-pointer flex-row items-center px-2 py-1 text-center"
                     onClick={() => navigateToRecent(item, router)}
                   >
                     <legend
-                      className="grow font-semibold"
+                      className="grow font-semibold text-[var(--ink)]"
                       title={item.date.toLocaleString()}
                     >
                       {item.name}{" "}
-                      <span className="text-xs text-neutral-600">
+                      <span className="text-xs ink-muted">
                         ({describeRecentItem(item)} -{" "}
                         {formatRelativeTime(item.date)})
                       </span>
@@ -119,14 +125,14 @@ export default function HomePage() {
                     onClick={() =>
                       removeRecent(item, setRecentItems, recentItems)
                     }
-                    title={"Delete Item from Recent Work"}
+                    title="Delete item from recent work"
                   >
-                    <TrashIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-red-400" />
+                    <TrashIcon className="h-4 w-4 text-[var(--paper-accent)] transition-transform group-hover:scale-90" />
                   </IconButton>
                 </div>
               ))
             ) : (
-              <legend className="place-self-center px-2 py-1 text-center italic">
+              <legend className="place-self-center px-2 py-1 text-center italic ink-muted">
                 No recent work
               </legend>
             )}
@@ -146,7 +152,7 @@ function renderTemplateOption(
     <label
       key={template.id.toString()}
       htmlFor={`template${template.id}`}
-      className="flex items-center gap-2 px-2 py-1 hover:backdrop-brightness-90"
+      className="paper-field flex items-center gap-3 px-3 py-3"
     >
       <input
         type="radio"
@@ -158,7 +164,9 @@ function renderTemplateOption(
           e.target.checked && setSelectedTemplate(e.target.value)
         }
       />
-      <legend className="text-lg font-semibold">{template.name}</legend>
+      <legend className="text-lg font-semibold text-[var(--ink)]">
+        {template.name}
+      </legend>
     </label>
   );
 }

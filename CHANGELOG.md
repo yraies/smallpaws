@@ -20,6 +20,7 @@ Detailed historical notes are preserved in `CHANGELOG_ARCHIVE.md`.
 
 - Root-level docs now reflect the current Biome-based toolchain and shipped JSON export support.
 - Recent forms now remain browser-local only; the server no longer exposes a recent-forms listing endpoint.
+- The main UI now uses a warmer, paper-like visual system with centered document surfaces and edge-aligned controls so templates and forms stay visually primary.
 
 ### Fixed
 
@@ -27,6 +28,7 @@ Detailed historical notes are preserved in `CHANGELOG_ARCHIVE.md`.
 - Fixed recent-form navigation to read draft payloads from the correct storage key.
 - Fixed "Clear Recent Forms" so it clears only recent-form browser entries instead of wiping unrelated local storage or deleting server data.
 - Fixed the recent-form delete button so removing an entry no longer also navigates into that form.
+- Fixed the published/shared form toolbar so it tracks live form state correctly instead of showing stale actions after publication.
 
 ## [v0.1.0] — 2025-11 (Post-Phase 3)
 

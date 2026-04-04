@@ -22,7 +22,7 @@ export default function FormCategoryList({
 }: FormCategoryListProps) {
   return (
     <main
-      className="form-categories not-print:flex not-print:flex-col not-print:gap-2"
+      className="document-sheet form-categories not-print:flex not-print:flex-col not-print:gap-4"
       aria-label="Form categories"
     >
       {categories.map((category) => (
@@ -38,12 +38,12 @@ export default function FormCategoryList({
       {showAddButton && onAddCategory && (
         <button
           type="button"
-          className="flex w-fit items-center justify-center gap-2 px-2 py-1 hover:backdrop-brightness-90 print:hidden"
+          className="tactile-button mx-auto mt-1 flex w-fit items-center justify-center gap-2 px-4 py-2 print:hidden"
           onClick={onAddCategory}
           aria-label="Add new category"
         >
           <PlusIcon className="h-4 w-4" aria-hidden="true" />
-          Add new Category
+          Add new category
         </button>
       )}
     </main>

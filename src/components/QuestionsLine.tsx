@@ -22,7 +22,7 @@ function QuestionLine({
   return (
     <li
       key={question.id.toString()}
-      className="flex flex-row items-center gap-1 px-2 py-1 hover:backdrop-brightness-90 question-line"
+      className="question-line flex flex-row items-center gap-2 rounded-2xl border border-transparent px-3 py-2 hover:border-[rgba(170,108,103,0.14)] hover:bg-[rgba(255,248,239,0.62)]"
     >
       {answerMode !== "hidden" && (
         <SelectionButton
@@ -41,7 +41,7 @@ function QuestionLine({
       {/* Input for screen, span for print (to enable text wrapping) */}
       <input
         type="text"
-        className="mx-2 min-w-10 grow border-b-1 question-text screen-only"
+        className="paper-field question-text screen-only mx-1 min-w-10 grow px-3 py-2"
         value={question.value}
         placeholder="Question"
         onChange={(e) => {
@@ -53,6 +53,7 @@ function QuestionLine({
         disabled={!structureEditable}
         readOnly={!structureEditable}
         aria-label="Question text"
+        name="question-text"
       />
 
       {/* Print-only text that can wrap */}
@@ -84,7 +85,7 @@ function QuestionLine({
           title="Move question up"
         >
           <ArrowUpIcon
-            className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-violet-400"
+            className="h-4 w-4 text-[var(--plum)] transition-transform group-hover:scale-90"
             aria-hidden="true"
           />
         </IconButton>
@@ -98,7 +99,7 @@ function QuestionLine({
           title="Move question down"
         >
           <ArrowDownIcon
-            className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-violet-400"
+            className="h-4 w-4 text-[var(--plum)] transition-transform group-hover:scale-90"
             aria-hidden="true"
           />
         </IconButton>
@@ -112,7 +113,7 @@ function QuestionLine({
           title="Delete question"
         >
           <TrashIcon
-            className="h-4 w-4 transition-transform group-hover:scale-75 group-hover:text-red-400"
+            className="h-4 w-4 text-[var(--paper-accent)] transition-transform group-hover:scale-75"
             aria-hidden="true"
           />
         </IconButton>
