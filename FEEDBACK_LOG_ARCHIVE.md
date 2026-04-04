@@ -53,6 +53,8 @@ Required fields for new entries:
 - **Normalized Intent:** Re-establish a stronger visual identity built around a warm, tactile, playful document-first UI with the form/template centered and peripheral controls pushed to the top edges.
 - **Feedback:** The current design has drifted toward generic gray/blue product UI. The app should feel cozy and paper-like, with the main document as the visual focus and supporting controls de-emphasized spatially.
 - **Action taken:** Logged the design-system direction so upcoming UI work can align with it before further visual implementation.
+- **Follow-up (2026-04-04):** Stakeholder clarified, "I am not too happy with the overly round aesthetic. additionally the pretty finnicy print layout is now incredibly space-inefficient"
+- **Action taken (follow-up):** Tightened the visual language away from pill-heavy rounding and treated print efficiency as a first-class constraint for the design-system pass.
 
 ### F-007 (2026-04-04) - Browser validation is the final gate
 

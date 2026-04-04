@@ -73,7 +73,7 @@ body {
   margin: 0 auto 1.5rem;
   width: fit-content;
   border: 1px solid rgba(124, 79, 115, 0.18);
-  border-radius: 9999px;
+  border-radius: 0.5rem;
   background: rgba(255, 248, 239, 0.72);
   box-shadow: var(--shadow-soft);
   color: var(--plum);
@@ -96,7 +96,7 @@ body {
   width: 100%;
   max-width: 52rem;
   border: 1px solid rgba(170, 108, 103, 0.2);
-  border-radius: 2rem;
+  border-radius: 0.9rem;
   background: linear-gradient(
     180deg,
     rgba(255, 253, 248, 0.98),
@@ -108,14 +108,14 @@ body {
 
 .paper-panel {
   border: 1px solid rgba(170, 108, 103, 0.2);
-  border-radius: 1.5rem;
+  border-radius: 0.7rem;
   background: linear-gradient(180deg, var(--paper-strong), var(--paper));
   box-shadow: var(--shadow-paper);
 }
 
 .paper-field {
   border: 1px solid rgba(170, 108, 103, 0.22);
-  border-radius: 0.9rem;
+  border-radius: 0.35rem;
   background: rgba(255, 253, 248, 0.88);
   color: var(--ink);
 }
@@ -132,7 +132,7 @@ body {
 
 .tactile-button {
   border: 1px solid rgba(124, 79, 115, 0.18);
-  border-radius: 9999px;
+  border-radius: 0.45rem;
   background: rgba(255, 250, 244, 0.92);
   box-shadow: 0 4px 12px rgba(117, 70, 44, 0.08);
   color: var(--ink);
@@ -203,6 +203,34 @@ body {
     max-width: 100%;
   }
 
+  .app-brand,
+  .document-sheet,
+  .paper-panel,
+  .paper-field,
+  .tactile-button {
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .app-brand {
+    border: none;
+    margin: 0 0 0.25rem 0;
+    padding: 0;
+    box-shadow: none;
+    color: #000;
+    font-size: 10pt;
+    letter-spacing: 0.08em;
+  }
+
+  .app-frame,
+  .page-shell,
+  .document-sheet {
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
   /* Hide interactive elements */
   button,
   .no-print,
@@ -254,8 +282,8 @@ body {
   /* Multi-column layout for categories - responsive to page size */
   [class*="FormCategoryList"],
   .form-categories {
-    column-width: 8cm; /* Minimum 8cm width, auto-fills based on page size */
-    column-gap: 1.5rem;
+    column-width: 7.2cm;
+    column-gap: 0.8rem;
     width: 100%;
     max-width: 100%;
   }
@@ -265,12 +293,12 @@ body {
   .category {
     break-inside: avoid;
     page-break-inside: avoid;
-    margin-bottom: 1rem;
-    padding: 0.5rem;
+    margin-bottom: 0.45rem;
+    padding: 0.2rem 0.25rem;
     width: 100%;
     max-width: 100%;
     display: block;
-    border-radius: 0.25rem;
+    border-radius: 0;
   }
 
   /* Category titles */
@@ -292,6 +320,10 @@ body {
   .category header {
     background: transparent;
     color: #000;
+    min-height: auto;
+    padding: 0 0 0.15rem 0;
+    margin-bottom: 0.15rem;
+    border-radius: 0;
   }
 
   /* Ensure all text in categories is visible regardless of background print setting */
@@ -301,21 +333,22 @@ body {
   }
 
   .category > div {
-    border-radius: 1mm;
+    padding: 0;
+    border-radius: 0;
   }
 
   /* Question lines - checkbox, question text, and answer field in one row */
   [class*="QuestionsLine"],
   .question-line {
-    margin: 0.3rem 0;
-    padding: 0.15rem 0;
+    margin: 0.1rem 0;
+    padding: 0.05rem 0;
     display: flex;
     flex-wrap: nowrap;
     align-items: flex-start; /* Align to top for multiline text */
     break-inside: avoid;
     page-break-inside: avoid;
     width: 100%;
-    gap: 0.25rem;
+    gap: 0.15rem;
   }
 
   /* Question text - fills available space, wraps if needed */
@@ -355,14 +388,14 @@ body {
 
   /* Response space for handwritten answers - light gray box */
   .print-response-space {
-    width: 2cm;
-    min-width: 2cm;
-    max-width: 2cm;
+    width: 1.35cm;
+    min-width: 1.35cm;
+    max-width: 1.35cm;
     margin: -0.5mm 0mm -0.5mm 0mm;
-    height: 0.6cm;
+    height: 0.45cm;
     min-height: 0.4cm;
     background-color: #f5f5f5; /* Very light gray */
-    border-radius: 0.1rem;
+    border-radius: 0;
     flex-shrink: 0;
     align-self: center;
   }
@@ -457,9 +490,9 @@ body {
   /* Input fields for print */
   input[type="text"],
   textarea {
-    border: 1pt solid #999;
+    border: 0;
     background: white;
-    padding: 0.125rem 0.25rem;
+    padding: 0;
   }
 
   /* Footer with page numbers */

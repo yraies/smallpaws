@@ -22,7 +22,7 @@ function QuestionLine({
   return (
     <li
       key={question.id.toString()}
-      className="question-line flex flex-row items-center gap-2 rounded-2xl border border-transparent px-3 py-2 hover:border-[rgba(170,108,103,0.14)] hover:bg-[rgba(255,248,239,0.62)]"
+      className="question-line flex flex-row items-center gap-2 rounded-md border border-transparent px-3 py-2 hover:border-[rgba(170,108,103,0.14)] hover:bg-[rgba(255,248,239,0.62)]"
     >
       {answerMode !== "hidden" && (
         <SelectionButton

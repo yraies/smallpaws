@@ -47,7 +47,7 @@ export default function FormPhaseBanner({ phase }: FormPhaseBannerProps) {
   return (
     <div className="paper-panel mb-4 flex w-full max-w-4xl flex-wrap items-center gap-3 px-4 py-3 print:hidden">
       <span
-        className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${current.badgeClassName}`}
+        className={`rounded-sm px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${current.badgeClassName}`}
       >
         {current.badge}
       </span>

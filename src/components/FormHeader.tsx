@@ -60,7 +60,7 @@ export default function FormHeader({
           />
           <span
             id="form-status-badge"
-            className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${config.className}`}
+            className={`rounded-sm px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${config.className}`}
           >
             {config.label}
           </span>

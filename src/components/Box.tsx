@@ -28,7 +28,7 @@ const Box: React.FC<BoxProps> = ({
       role={role}
       aria-label={ariaLabel}
     >
-      <header className="flex min-h-12 w-full items-center justify-between gap-4 rounded-[1.1rem] bg-[var(--paper-accent-soft)] px-4 py-2 text-[var(--ink)]">
+      <header className="flex min-h-12 w-full items-center justify-between gap-4 rounded-[0.45rem] bg-[var(--paper-accent-soft)] px-4 py-2 text-[var(--ink)]">
         {editableTitle ? (
           <input
             type="text"
@@ -49,7 +49,7 @@ const Box: React.FC<BoxProps> = ({
           </div>
         )}
       </header>
-      <div className="w-full rounded-[1.15rem] bg-[rgba(255,253,248,0.92)] p-2 text-[var(--ink)]">
+      <div className="w-full rounded-[0.45rem] bg-[rgba(255,253,248,0.92)] p-2 text-[var(--ink)]">
         {children}
       </div>
     </div>
