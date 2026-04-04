@@ -59,6 +59,8 @@ Required fields for new entries:
 - **Action taken (follow-up):** Re-centered the visual rollback around the older narrow, hand-crafted, blocky qualities instead of continuing toward a glossy paper-card system.
 - **Follow-up (2026-04-04):** Stakeholder suggested that the top controls may work better as left/right vertical stacks outside the center column, with labels next to the icons, rather than as a row near the document header.
 - **Action taken (follow-up):** Logged the preferred control placement so the next layout pass can move the utility chrome out toward the screen edges while keeping the document column visually clean.
+- **Follow-up (2026-04-04):** Stakeholder highlighted remaining inconsistencies where some pages still kept unlabeled or duplicated actions in the center column instead of using the rails.
+- **Action taken (follow-up):** Standardized the rule that center-column notices are informational only while page actions belong in the side rails (with mobile fallback), and removed duplicated primary actions from the document body.
 
 ### F-007 (2026-04-04) - Browser validation is the final gate
 

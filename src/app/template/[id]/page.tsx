@@ -1,12 +1,22 @@
 "use client";
 
+import {
+  CloudArrowUpIcon,
+  DocumentDuplicateIcon,
+  PlayIcon,
+  ShareIcon,
+} from "@heroicons/react/16/solid";
 import dynamic from "next/dynamic";
 import { useParams, useRouter } from "next/navigation";
 import React from "react";
 import { typeid } from "typeid-js";
+import DocumentPhaseNotice from "../../../components/DocumentPhaseNotice";
 import FormCategoryList from "../../../components/FormCategoryList";
 import FormHeader from "../../../components/FormHeader";
 import LoadingState from "../../../components/LoadingState";
+import PageActionRails, {
+  type RailAction,
+} from "../../../components/PageActionRails";
 import TemplateShareModal from "../../../components/TemplateShareModal";
 import {
   TemplateContextProvider,
@@ -118,47 +128,58 @@ function TemplatePageContent() {
         readOnly={isFinalized}
       />
 
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <p className="grow text-sm text-neutral-700">
-          {isFinalized
+      <PageActionRails
+        rightActions={
+          isFinalized
+            ? ([
+                {
+                  key: "start-form",
+                  label: "Start Form",
+                  onClick: startForm,
+                  title: "Start Form",
+                  variant: "success",
+                  icon: <PlayIcon className="h-5 w-5" />,
+                },
+                {
+                  key: "new-draft",
+                  label: "New Draft",
+                  onClick: createNewDraft,
+                  title: "Create New Draft",
+                  variant: "default",
+                  icon: <DocumentDuplicateIcon className="h-5 w-5" />,
+                },
+                {
+                  key: "share-template",
+                  label: "Share",
+                  onClick: () => setShowShareModal(true),
+                  title: "Share Template",
+                  variant: "info",
+                  icon: <ShareIcon className="h-5 w-5" />,
+                },
+              ] satisfies RailAction[])
+            : ([
+                {
+                  key: "finalize-template",
+                  label: isFinalizing ? "Finalizing..." : "Finalize",
+                  onClick: finalizeTemplate,
+                  title: "Finalize Template",
+                  disabled: isFinalizing,
+                  variant: "success",
+                  icon: <CloudArrowUpIcon className="h-5 w-5" />,
+                },
+              ] satisfies RailAction[])
+        }
+      />
+
+      <DocumentPhaseNotice
+        label={isFinalized ? "Finalized Template" : "Template Draft"}
+        tone={isFinalized ? "finalized" : "draft"}
+        description={
+          isFinalized
             ? "This template is finalized. Its structure is frozen and ready for creating forms."
-            : "Edit the structure here. Templates define categories and questions, but do not contain filled answers."}
-        </p>
-        {isFinalized ? (
-          <>
-            <button
-              type="button"
-              className="cursor-pointer rounded bg-violet-500 px-4 py-2 font-semibold text-white hover:bg-violet-600"
-              onClick={startForm}
-            >
-              Start Form
-            </button>
-            <button
-              type="button"
-              className="cursor-pointer rounded border border-violet-500 px-4 py-2 font-semibold text-violet-700 hover:bg-violet-50"
-              onClick={createNewDraft}
-            >
-              Create New Draft
-            </button>
-            <button
-              type="button"
-              className="cursor-pointer rounded border border-violet-500 px-4 py-2 font-semibold text-violet-700 hover:bg-violet-50"
-              onClick={() => setShowShareModal(true)}
-            >
-              Share Template
-            </button>
-          </>
-        ) : (
-          <button
-            type="button"
-            className="cursor-pointer rounded bg-violet-500 px-4 py-2 font-semibold text-white hover:bg-violet-600 disabled:cursor-not-allowed disabled:bg-violet-300"
-            onClick={finalizeTemplate}
-            disabled={isFinalizing}
-          >
-            {isFinalizing ? "Finalizing..." : "Finalize Template"}
-          </button>
-        )}
-      </div>
+            : "Edit the structure here. Templates define categories and questions, but do not contain filled answers."
+        }
+      />
 
       <FormCategoryList
         setDocument={setTemplate}

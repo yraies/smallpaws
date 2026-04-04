@@ -10,7 +10,7 @@ import {
 import type React from "react";
 import { useDisplayPreferences } from "../contexts/DisplayPreferencesContext";
 import { useFormActions } from "../contexts/FormActionsContext";
-import EdgeActionButton from "./EdgeActionButton";
+import PageActionRails from "./PageActionRails";
 
 type ActionConfig = {
   key: string;
@@ -119,63 +119,6 @@ export default function FormActionButtons() {
   });
 
   return (
-    <div className="print:hidden">
-      <div className="fixed top-20 left-6 z-10 hidden flex-col gap-2 lg:flex xl:left-10">
-        {leftActions.map((action) => (
-          <EdgeActionButton
-            key={action.key}
-            onClick={action.onClick}
-            label={action.label}
-            title={action.title}
-            disabled={action.disabled}
-            variant={action.variant}
-          >
-            {action.icon}
-          </EdgeActionButton>
-        ))}
-      </div>
-
-      <div className="fixed top-20 right-6 z-10 hidden flex-col gap-2 lg:flex xl:right-10">
-        {rightActions.map((action) => (
-          <EdgeActionButton
-            key={action.key}
-            onClick={action.onClick}
-            label={action.label}
-            title={action.title}
-            disabled={action.disabled}
-            variant={action.variant}
-          >
-            {action.icon}
-          </EdgeActionButton>
-        ))}
-      </div>
-
-      <div className="mb-3 flex flex-wrap items-center justify-center gap-2 lg:hidden">
-        {leftActions.map((action) => (
-          <EdgeActionButton
-            key={action.key}
-            onClick={action.onClick}
-            label={action.label}
-            title={action.title}
-            disabled={action.disabled}
-            variant={action.variant}
-          >
-            {action.icon}
-          </EdgeActionButton>
-        ))}
-        {rightActions.map((action) => (
-          <EdgeActionButton
-            key={action.key}
-            onClick={action.onClick}
-            label={action.label}
-            title={action.title}
-            disabled={action.disabled}
-            variant={action.variant}
-          >
-            {action.icon}
-          </EdgeActionButton>
-        ))}
-      </div>
-    </div>
+    <PageActionRails leftActions={leftActions} rightActions={rightActions} />
   );
 }

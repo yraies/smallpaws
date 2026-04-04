@@ -1,13 +1,18 @@
 "use client";
 
+import { PlayIcon } from "@heroicons/react/16/solid";
 import dynamic from "next/dynamic";
 import { useParams, useRouter } from "next/navigation";
 import React from "react";
 import { typeid } from "typeid-js";
+import DocumentPhaseNotice from "../../../../components/DocumentPhaseNotice";
 import ErrorMessage from "../../../../components/ErrorMessage";
 import FormCategoryList from "../../../../components/FormCategoryList";
 import FormHeader from "../../../../components/FormHeader";
 import LoadingState from "../../../../components/LoadingState";
+import PageActionRails, {
+  type RailAction,
+} from "../../../../components/PageActionRails";
 import { Form, type FormPOJO } from "../../../../types/Form";
 import {
   saveDraftFormData,
@@ -86,29 +91,32 @@ function SharedTemplatePageContent() {
       <FormHeader
         formName={template.name}
         isEncrypted={false}
-        status="finalized"
+        status="shared"
         onHomeClick={() => router.push("/")}
         readOnly={true}
       />
 
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <p className="grow text-sm text-neutral-700">
-          This shared template is read-only. Review the structure, then create
-          your own local form to fill in answers.
-        </p>
-        {viewCount !== null && (
-          <span className="text-sm text-neutral-500">
-            Viewed {viewCount} times
-          </span>
-        )}
-        <button
-          type="button"
-          className="cursor-pointer rounded bg-violet-500 px-4 py-2 font-semibold text-white hover:bg-violet-600"
-          onClick={startLocalForm}
-        >
-          Create My Form
-        </button>
-      </div>
+      <PageActionRails
+        rightActions={
+          [
+            {
+              key: "create-my-form",
+              label: "Create My Form",
+              onClick: startLocalForm,
+              title: "Create My Form",
+              variant: "success",
+              icon: <PlayIcon className="h-5 w-5" />,
+            },
+          ] satisfies RailAction[]
+        }
+      />
+
+      <DocumentPhaseNotice
+        label="Shared Template"
+        tone="shared"
+        description="This shared template is read-only. Review the structure, then create your own local form to fill in answers."
+        meta={viewCount !== null ? `Viewed ${viewCount} times` : undefined}
+      />
 
       <FormCategoryList
         categories={template.categories}

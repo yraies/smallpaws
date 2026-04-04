@@ -1,6 +1,6 @@
 "use client";
 
-import { HomeIcon, TrashIcon } from "@heroicons/react/16/solid";
+import { TrashIcon } from "@heroicons/react/16/solid";
 import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
 import { typeid } from "typeid-js";
@@ -32,109 +32,98 @@ export default function HomePage() {
   }, []);
 
   return (
-    <>
-      <IconButton
-        onClick={() => router.push("/")}
-        className="absolute top-2 left-2"
-        title="Home"
-      >
-        <HomeIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-violet-400" />
-      </IconButton>
-      <div className="flex w-full flex-col items-center gap-4">
-        <Box title="New Template" onTitleChange={() => {}} buttons={null}>
-          <div className="grid w-full grid-cols-2">
-            <div className="col-span-2 flex flex-row gap-2 px-2">
-              <legend className="text-lg font-semibold">Template Title</legend>
-              <input
-                type="text"
-                className="paper-field min-w-1 grow"
-                placeholder="My Template"
-                value={templateName}
-                onChange={(e) => setTemplateName(e.target.value)}
-                name="template-name"
-              />
-            </div>
-            <Spacer />
-            <legend className="col-span-2 px-2 text-lg font-semibold">
-              Templates
-            </legend>
-            {FormTemplates.map((template) =>
-              renderTemplateOption(
-                template,
-                selectedTemplate,
-                setSelectedTemplate,
-              ),
-            )}
-            <Spacer />
-            <button
-              type="button"
-              className="col-start-2 px-2 py-1 hover:backdrop-brightness-90"
-              onClick={() =>
-                createAndNavigateTemplate(
-                  selectedTemplate,
-                  templateName,
-                  router,
-                )
-              }
-            >
-              <legend className="text-lg font-semibold">Create Draft</legend>
-            </button>
+    <div className="flex w-full flex-col items-center gap-4">
+      <Box title="New Template" onTitleChange={() => {}} buttons={null}>
+        <div className="grid w-full grid-cols-2">
+          <div className="col-span-2 flex flex-row gap-2 px-2">
+            <legend className="text-lg font-semibold">Template Title</legend>
+            <input
+              type="text"
+              className="paper-field min-w-1 grow"
+              placeholder="My Template"
+              value={templateName}
+              onChange={(e) => setTemplateName(e.target.value)}
+              name="template-name"
+            />
           </div>
-        </Box>
-        <Box
-          title="Recent Work"
-          onTitleChange={() => {}}
-          buttons={
+          <Spacer />
+          <legend className="col-span-2 px-2 text-lg font-semibold">
+            Templates
+          </legend>
+          {FormTemplates.map((template) =>
+            renderTemplateOption(
+              template,
+              selectedTemplate,
+              setSelectedTemplate,
+            ),
+          )}
+          <Spacer />
+          <button
+            type="button"
+            className="col-start-2 px-2 py-1 hover:backdrop-brightness-90"
+            onClick={() =>
+              createAndNavigateTemplate(selectedTemplate, templateName, router)
+            }
+          >
+            <legend className="text-lg font-semibold">Create Draft</legend>
+          </button>
+        </div>
+      </Box>
+      <Box
+        title="Recent Work"
+        onTitleChange={() => {}}
+        buttons={
+          recentItems.length > 0 ? (
             <IconButton
               onClick={() => clearRecents(setRecentItems)}
               title="Clear Recent Work"
             >
               <TrashIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-red-400" />
             </IconButton>
-          }
-        >
-          <div className="grid w-full grid-cols-1 gap-2">
-            {recentItems.length > 0 ? (
-              recentItems.map((item) => (
-                <div key={item.id} className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    className="flex grow cursor-pointer flex-row items-center px-2 py-1 text-center hover:backdrop-brightness-90"
-                    onClick={() => navigateToRecent(item, router)}
+          ) : null
+        }
+      >
+        <div className="grid w-full grid-cols-1 gap-2">
+          {recentItems.length > 0 ? (
+            recentItems.map((item) => (
+              <div key={item.id} className="flex items-center gap-2">
+                <button
+                  type="button"
+                  className="flex grow cursor-pointer flex-row items-center px-2 py-1 text-center hover:backdrop-brightness-90"
+                  onClick={() => navigateToRecent(item, router)}
+                >
+                  <legend
+                    className="grow font-semibold"
+                    title={item.date.toLocaleString()}
                   >
-                    <legend
-                      className="grow font-semibold"
-                      title={item.date.toLocaleString()}
-                    >
-                      {item.name}{" "}
-                      <span className="text-xs text-neutral-600">
-                        ({describeRecentItem(item)} -{" "}
-                        {formatRelativeTime(item.date)})
-                      </span>
-                    </legend>
+                    {item.name}{" "}
+                    <span className="text-xs text-neutral-600">
+                      ({describeRecentItem(item)} -{" "}
+                      {formatRelativeTime(item.date)})
+                    </span>
+                  </legend>
 
-                    <EncryptionStatus isEncrypted={item.encrypted} />
-                  </button>
+                  <EncryptionStatus isEncrypted={item.encrypted} />
+                </button>
 
-                  <IconButton
-                    onClick={() =>
-                      removeRecent(item, setRecentItems, recentItems)
-                    }
-                    title="Delete item from recent work"
-                  >
-                    <TrashIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-red-400" />
-                  </IconButton>
-                </div>
-              ))
-            ) : (
-              <legend className="place-self-center px-2 py-1 text-center italic">
-                No recent work
-              </legend>
-            )}
-          </div>
-        </Box>
-      </div>
-    </>
+                <IconButton
+                  onClick={() =>
+                    removeRecent(item, setRecentItems, recentItems)
+                  }
+                  title="Delete item from recent work"
+                >
+                  <TrashIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-red-400" />
+                </IconButton>
+              </div>
+            ))
+          ) : (
+            <legend className="place-self-center px-2 py-1 text-center italic">
+              No recent work
+            </legend>
+          )}
+        </div>
+      </Box>
+    </div>
   );
 }
 

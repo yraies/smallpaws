@@ -89,4 +89,5 @@ Stabilized browser-local recent-form tracking after the root-level repo migratio
 - Fixed the home-page recent-form delete action so it does not trigger row navigation.
 - Shifted the primary UI toward a warmer, narrower, more hand-crafted layout so templates/forms stay visually central while utility controls live near the top edges.
 - Moved form utility controls into labeled left/right side stacks on larger screens so the narrow document column stays visually clean while the actions remain explicit and easy to scan.
+- Extended that side-rail rule across finalized templates and shared templates, and removed duplicated primary actions from center-column phase notices so page chrome stays consistent across workflow phases.
 - Fixed the published/shared form toolbar to react to the live publication state instead of leaving stale publish actions visible after publication.
