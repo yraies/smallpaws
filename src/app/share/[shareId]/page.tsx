@@ -5,10 +5,10 @@ import dynamic from "next/dynamic";
 import { useParams, useRouter } from "next/navigation";
 import React from "react";
 import DeletedFormMessage from "../../../components/DeletedFormMessage";
+import DocumentPageShell from "../../../components/DocumentPageShell";
 import ErrorMessage from "../../../components/ErrorMessage";
 import FormActionButtons from "../../../components/FormActionButtons";
 import FormCategoryList from "../../../components/FormCategoryList";
-import FormHeader from "../../../components/FormHeader";
 import FormPhaseBanner from "../../../components/FormPhaseBanner";
 import LoadingState from "../../../components/LoadingState";
 import ShareInfoOverlay from "../../../components/ShareInfoOverlay";
@@ -351,26 +351,21 @@ function SharedFormPageContent() {
       initialIsEncrypted={isFormEncrypted}
       allowDelete={false}
     >
-      <FormHeader
+      <DocumentPageShell
         formName={formName}
         isEncrypted={isFormEncrypted}
         onHomeClick={() => router.push("/")}
         readOnly={true}
-      />
-
-      <FormActionButtons />
-
-      <FormPhaseBanner phase="shared" />
-
-      {/* Share Info Overlay (top-right, below clone button) */}
-      {shareInfo && <ShareInfoOverlay shareInfo={shareInfo} />}
-
-      {/* Form Categories */}
-      <FormCategoryList
-        categories={form.categories}
-        answerMode="readonly"
-        structureEditable={false}
-      />
+        actions={<FormActionButtons />}
+        notice={<FormPhaseBanner phase="shared" />}
+        overlay={shareInfo ? <ShareInfoOverlay shareInfo={shareInfo} /> : null}
+      >
+        <FormCategoryList
+          categories={form.categories}
+          answerMode="readonly"
+          structureEditable={false}
+        />
+      </DocumentPageShell>
     </FormActionsProvider>
   );
 }

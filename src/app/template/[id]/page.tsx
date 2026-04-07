@@ -11,9 +11,9 @@ import dynamic from "next/dynamic";
 import { useParams, useRouter } from "next/navigation";
 import React from "react";
 import { typeid } from "typeid-js";
+import DocumentPageShell from "../../../components/DocumentPageShell";
 import DocumentPhaseNotice from "../../../components/DocumentPhaseNotice";
 import FormCategoryList from "../../../components/FormCategoryList";
-import FormHeader from "../../../components/FormHeader";
 import LoadingState from "../../../components/LoadingState";
 import PageActionRails, {
   type RailAction,
@@ -120,84 +120,84 @@ function TemplatePageContent() {
   };
 
   return (
-    <>
-      <FormHeader
-        formName={template.name}
-        isEncrypted={false}
-        onFormNameChange={(name) => setTemplate((prev) => prev.withName(name))}
-        onHomeClick={() => router.push("/")}
-        readOnly={isFinalized}
-      />
-
-      <PageActionRails
-        rightActions={
-          isFinalized
-            ? ([
-                {
-                  key: "print-template",
-                  label: "Print",
-                  onClick: printCurrentView,
-                  title: "Print this template",
-                  variant: "default",
-                  icon: <PrinterIcon className="h-5 w-5" />,
-                },
-                {
-                  key: "start-form",
-                  label: "Start Form",
-                  onClick: startForm,
-                  title: "Start Form",
-                  variant: "success",
-                  icon: <PlayIcon className="h-5 w-5" />,
-                },
-                {
-                  key: "new-draft",
-                  label: "New Draft",
-                  onClick: createNewDraft,
-                  title: "Create New Draft",
-                  variant: "default",
-                  icon: <DocumentDuplicateIcon className="h-5 w-5" />,
-                },
-                {
-                  key: "share-template",
-                  label: "Share",
-                  onClick: () => setShowShareModal(true),
-                  title: "Share Template",
-                  variant: "info",
-                  icon: <ShareIcon className="h-5 w-5" />,
-                },
-              ] satisfies RailAction[])
-            : ([
-                {
-                  key: "print-template",
-                  label: "Print",
-                  onClick: printCurrentView,
-                  title: "Print this template",
-                  variant: "default",
-                  icon: <PrinterIcon className="h-5 w-5" />,
-                },
-                {
-                  key: "finalize-template",
-                  label: isFinalizing ? "Finalizing..." : "Finalize",
-                  onClick: finalizeTemplate,
-                  title: "Finalize Template",
-                  disabled: isFinalizing,
-                  variant: "success",
-                  icon: <CloudArrowUpIcon className="h-5 w-5" />,
-                },
-              ] satisfies RailAction[])
-        }
-      />
-
-      <DocumentPhaseNotice
-        label={isFinalized ? "Finalized Template" : "Template Draft"}
-        tone={isFinalized ? "finalized" : "draft"}
-        description={
-          isFinalized
-            ? "This template is finalized. Its structure is frozen and ready for creating forms."
-            : "Edit the structure here. Templates define categories and questions, but do not contain filled answers."
-        }
-      />
-
+    <DocumentPageShell
+      formName={template.name}
+      isEncrypted={false}
+      onFormNameChange={(name) => setTemplate((prev) => prev.withName(name))}
+      onHomeClick={() => router.push("/")}
+      readOnly={isFinalized}
+      actions={
+        <PageActionRails
+          rightActions={
+            isFinalized
+              ? ([
+                  {
+                    key: "print-template",
+                    label: "Print",
+                    onClick: printCurrentView,
+                    title: "Print this template",
+                    variant: "default",
+                    icon: <PrinterIcon className="h-5 w-5" />,
+                  },
+                  {
+                    key: "start-form",
+                    label: "Start Form",
+                    onClick: startForm,
+                    title: "Start Form",
+                    variant: "success",
+                    icon: <PlayIcon className="h-5 w-5" />,
+                  },
+                  {
+                    key: "new-draft",
+                    label: "New Draft",
+                    onClick: createNewDraft,
+                    title: "Create New Draft",
+                    variant: "default",
+                    icon: <DocumentDuplicateIcon className="h-5 w-5" />,
+                  },
+                  {
+                    key: "share-template",
+                    label: "Share",
+                    onClick: () => setShowShareModal(true),
+                    title: "Share Template",
+                    variant: "info",
+                    icon: <ShareIcon className="h-5 w-5" />,
+                  },
+                ] satisfies RailAction[])
+              : ([
+                  {
+                    key: "print-template",
+                    label: "Print",
+                    onClick: printCurrentView,
+                    title: "Print this template",
+                    variant: "default",
+                    icon: <PrinterIcon className="h-5 w-5" />,
+                  },
+                  {
+                    key: "finalize-template",
+                    label: isFinalizing ? "Finalizing..." : "Finalize",
+                    onClick: finalizeTemplate,
+                    title: "Finalize Template",
+                    disabled: isFinalizing,
+                    variant: "success",
+                    icon: <CloudArrowUpIcon className="h-5 w-5" />,
+                  },
+                ] satisfies RailAction[])
+          }
+        />
+      }
+      notice={
+        <DocumentPhaseNotice
+          label={isFinalized ? "Finalized Template" : "Template Draft"}
+          tone={isFinalized ? "finalized" : "draft"}
+          description={
+            isFinalized
+              ? "This template is finalized. Its structure is frozen and ready for creating forms."
+              : "Edit the structure here. Templates define categories and questions, but do not contain filled answers."
+          }
+        />
+      }
+    >
       <FormCategoryList
         setDocument={setTemplate}
         categories={template.categories}
@@ -217,7 +217,7 @@ function TemplatePageContent() {
         templateId={templateId}
         templateName={template.name}
       />
-    </>
+    </DocumentPageShell>
   );
 }
 

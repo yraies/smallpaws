@@ -4,9 +4,9 @@ import dynamic from "next/dynamic";
 import { useParams, useRouter } from "next/navigation";
 import React from "react";
 import DeletedFormMessage from "../../../components/DeletedFormMessage";
+import DocumentPageShell from "../../../components/DocumentPageShell";
 import FormActionButtons from "../../../components/FormActionButtons";
 import FormCategoryList from "../../../components/FormCategoryList";
-import FormHeader from "../../../components/FormHeader";
 import FormPhaseBanner from "../../../components/FormPhaseBanner";
 import LoadingState from "../../../components/LoadingState";
 import PasswordModal from "../../../components/PasswordModal";
@@ -241,41 +241,38 @@ function FormPageContent() {
       onPublish={() => setShowPasswordModal(true)}
       onShare={() => setShowShareModal(true)}
     >
-      <FormHeader
+      <DocumentPageShell
         formName={form?.name || ""}
         isEncrypted={isEncrypted}
         onFormNameChange={(name) => setForm((prev) => prev.withName(name))}
         onHomeClick={() => router.push("/")}
         readOnly={isPublished}
-      />
+        actions={<FormActionButtons />}
+        notice={<FormPhaseBanner phase={isPublished ? "published" : "draft"} />}
+      >
+        <FormCategoryList
+          setDocument={setForm}
+          categories={form.categories}
+          answerMode={isPublished ? "readonly" : "editable"}
+          structureEditable={false}
+        />
 
-      <FormActionButtons />
+        <PasswordModal
+          isOpen={showPasswordModal}
+          onClose={() => setShowPasswordModal(false)}
+          onSubmit={handlePublishForm}
+          mode="set"
+          title="Publish Form"
+          description="Choose whether to protect your form with a password"
+        />
 
-      <FormPhaseBanner phase={isPublished ? "published" : "draft"} />
-
-      <FormCategoryList
-        setDocument={setForm}
-        categories={form.categories}
-        answerMode={isPublished ? "readonly" : "editable"}
-        structureEditable={false}
-      />
-
-      {/* Password Modal */}
-      <PasswordModal
-        isOpen={showPasswordModal}
-        onClose={() => setShowPasswordModal(false)}
-        onSubmit={handlePublishForm}
-        mode="set"
-        title="Publish Form"
-        description="Choose whether to protect your form with a password"
-      />
-
-      <ShareModal
-        isOpen={showShareModal}
-        onClose={() => setShowShareModal(false)}
-        formId={formId}
-        formName={form.name}
-      />
+        <ShareModal
+          isOpen={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          formId={formId}
+          formName={form.name}
+        />
+      </DocumentPageShell>
     </FormActionsProvider>
   );
 }

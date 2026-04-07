@@ -93,4 +93,5 @@ Stabilized browser-local recent-form tracking after the root-level repo migratio
 - Removed the small Published/Shared/Finalized header badges so phase context is conveyed only by the page notices instead of being repeated next to the document name.
 - Made print a first-class action in the side rails for finalized templates, shared templates, and form views, keeping export/print affordances visible in the phases where they matter.
 - Added first-run onboarding copy to the home page covering what Small Paws is for, how privacy works, and how the template -> form -> results workflow fits together.
+- Extracted a shared document page shell so finalized templates, shared templates, editable forms, and shared results all compose the same header, action-rail, notice, and overlay structure.
 - Fixed the published/shared form toolbar to react to the live publication state instead of leaving stale publish actions visible after publication.

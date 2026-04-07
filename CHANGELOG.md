@@ -26,6 +26,7 @@ Detailed historical notes are preserved in `CHANGELOG_ARCHIVE.md`.
 - The document header no longer shows Published/Shared/Finalized badges next to the title; phase context now lives only in the page notices.
 - Finalized templates, shared templates, and form views now expose printing directly in the action rails, and published/shared forms keep export actions visible alongside print.
 - The home page now explains the product purpose, privacy model, and three workflow phases directly in the landing view so new users can understand how to start.
+- Finalized templates, shared templates, editable forms, and shared results now share the same page-shell structure for headers, rails, notices, and overlays, reducing layout drift between phases.
 
 ### Fixed
 

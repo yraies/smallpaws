@@ -5,10 +5,10 @@ import dynamic from "next/dynamic";
 import { useParams, useRouter } from "next/navigation";
 import React from "react";
 import { typeid } from "typeid-js";
+import DocumentPageShell from "../../../../components/DocumentPageShell";
 import DocumentPhaseNotice from "../../../../components/DocumentPhaseNotice";
 import ErrorMessage from "../../../../components/ErrorMessage";
 import FormCategoryList from "../../../../components/FormCategoryList";
-import FormHeader from "../../../../components/FormHeader";
 import LoadingState from "../../../../components/LoadingState";
 import PageActionRails, {
   type RailAction,
@@ -88,50 +88,50 @@ function SharedTemplatePageContent() {
   };
 
   return (
-    <>
-      <FormHeader
-        formName={template.name}
-        isEncrypted={false}
-        onHomeClick={() => router.push("/")}
-        readOnly={true}
-      />
-
-      <PageActionRails
-        rightActions={
-          [
-            {
-              key: "print-template",
-              label: "Print",
-              onClick: printCurrentView,
-              title: "Print this template",
-              variant: "default",
-              icon: <PrinterIcon className="h-5 w-5" />,
-            },
-            {
-              key: "create-my-form",
-              label: "Create My Form",
-              onClick: startLocalForm,
-              title: "Create My Form",
-              variant: "success",
-              icon: <PlayIcon className="h-5 w-5" />,
-            },
-          ] satisfies RailAction[]
-        }
-      />
-
-      <DocumentPhaseNotice
-        label="Shared Template"
-        tone="shared"
-        description="This shared template is read-only. Review the structure, then create your own local form to fill in answers."
-        meta={viewCount !== null ? `Viewed ${viewCount} times` : undefined}
-      />
-
+    <DocumentPageShell
+      formName={template.name}
+      isEncrypted={false}
+      onHomeClick={() => router.push("/")}
+      readOnly={true}
+      actions={
+        <PageActionRails
+          rightActions={
+            [
+              {
+                key: "print-template",
+                label: "Print",
+                onClick: printCurrentView,
+                title: "Print this template",
+                variant: "default",
+                icon: <PrinterIcon className="h-5 w-5" />,
+              },
+              {
+                key: "create-my-form",
+                label: "Create My Form",
+                onClick: startLocalForm,
+                title: "Create My Form",
+                variant: "success",
+                icon: <PlayIcon className="h-5 w-5" />,
+              },
+            ] satisfies RailAction[]
+          }
+        />
+      }
+      notice={
+        <DocumentPhaseNotice
+          label="Shared Template"
+          tone="shared"
+          description="This shared template is read-only. Review the structure, then create your own local form to fill in answers."
+          meta={viewCount !== null ? `Viewed ${viewCount} times` : undefined}
+        />
+      }
+    >
       <FormCategoryList
         categories={template.categories}
         answerMode="hidden"
         structureEditable={false}
       />
-    </>
+    </DocumentPageShell>
   );
 }
 
