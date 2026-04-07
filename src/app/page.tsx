@@ -1,6 +1,7 @@
 "use client";
 
 import { TrashIcon } from "@heroicons/react/16/solid";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
 import { typeid } from "typeid-js";
@@ -21,7 +22,7 @@ function Spacer() {
   return <div className="col-span-2 mx-auto my-2 w-4/5" />;
 }
 
-export default function HomePage() {
+function HomePageContent() {
   const router = useRouter();
   const [selectedTemplate, setSelectedTemplate] = React.useState("empty");
   const [templateName, setTemplateName] = React.useState("");
@@ -33,10 +34,47 @@ export default function HomePage() {
 
   return (
     <div className="flex w-full flex-col items-center gap-4">
+      <Box title="Start Here" onTitleChange={() => {}} buttons={null}>
+        <div className="grid w-full grid-cols-1 gap-3 px-2 py-1 text-left">
+          <p className="text-sm leading-6 text-neutral-700">
+            Small Paws is a privacy-first conversation starter for sensitive
+            topics. It helps you build a question set, fill it out, and review
+            the results without needing user accounts or server-side access to
+            your plaintext answers.
+          </p>
+
+          <div className="grid gap-2">
+            <WorkflowStep
+              title="1. Create a template"
+              description="Start from scratch or from a built-in structure. Templates define categories and questions only."
+            />
+            <WorkflowStep
+              title="2. Fill out a form"
+              description="Finalize the template first, then create a form from it. Forms keep the structure fixed while you answer."
+            />
+            <WorkflowStep
+              title="3. Read results"
+              description="Shared and published views are read-only. To revise something later, create a new local draft copy."
+            />
+          </div>
+
+          <p className="border-l-4 border-violet-300 px-3 py-1 text-sm text-neutral-700">
+            Your recent work stays in this browser for convenience. If you use
+            encryption, decryption keys stay client-side.
+          </p>
+        </div>
+      </Box>
+
       <Box title="New Template" onTitleChange={() => {}} buttons={null}>
         <div className="grid w-full grid-cols-2">
+          <p className="col-span-2 px-2 text-sm text-neutral-700">
+            Choose a starting point, give it a title if you want, then create a
+            draft template. You can still edit the structure before finalizing
+            it.
+          </p>
+          <Spacer />
           <div className="col-span-2 flex flex-row gap-2 px-2">
-            <legend className="text-lg font-semibold">Template Title</legend>
+            <p className="text-lg font-semibold">Template Title</p>
             <input
               type="text"
               className="paper-field min-w-1 grow"
@@ -47,9 +85,7 @@ export default function HomePage() {
             />
           </div>
           <Spacer />
-          <legend className="col-span-2 px-2 text-lg font-semibold">
-            Templates
-          </legend>
+          <p className="col-span-2 px-2 text-lg font-semibold">Templates</p>
           {FormTemplates.map((template) =>
             renderTemplateOption(
               template,
@@ -65,7 +101,7 @@ export default function HomePage() {
               createAndNavigateTemplate(selectedTemplate, templateName, router)
             }
           >
-            <legend className="text-lg font-semibold">Create Draft</legend>
+            <span className="text-lg font-semibold">Create Draft</span>
           </button>
         </div>
       </Box>
@@ -84,6 +120,10 @@ export default function HomePage() {
         }
       >
         <div className="grid w-full grid-cols-1 gap-2">
+          <p className="px-2 text-sm text-neutral-700">
+            Reopen recent drafts, finalized templates, or published forms from
+            this browser.
+          </p>
           {recentItems.length > 0 ? (
             recentItems.map((item) => (
               <div key={item.id} className="flex items-center gap-2">
@@ -92,7 +132,7 @@ export default function HomePage() {
                   className="flex grow cursor-pointer flex-row items-center px-2 py-1 text-center hover:backdrop-brightness-90"
                   onClick={() => navigateToRecent(item, router)}
                 >
-                  <legend
+                  <span
                     className="grow font-semibold"
                     title={item.date.toLocaleString()}
                   >
@@ -101,7 +141,7 @@ export default function HomePage() {
                       ({describeRecentItem(item)} -{" "}
                       {formatRelativeTime(item.date)})
                     </span>
-                  </legend>
+                  </span>
 
                   <EncryptionStatus isEncrypted={item.encrypted} />
                 </button>
@@ -117,12 +157,36 @@ export default function HomePage() {
               </div>
             ))
           ) : (
-            <legend className="place-self-center px-2 py-1 text-center italic">
+            <p className="place-self-center px-2 py-1 text-center italic">
               No recent work
-            </legend>
+            </p>
           )}
         </div>
       </Box>
+    </div>
+  );
+}
+
+const HomePageClientOnly = dynamic(() => Promise.resolve(HomePageContent), {
+  ssr: false,
+  loading: () => <div>Loading home...</div>,
+});
+
+export default function HomePage() {
+  return <HomePageClientOnly />;
+}
+
+function WorkflowStep({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="border-l-4 border-violet-300 px-3 py-1">
+      <p className="font-semibold">{title}</p>
+      <p className="text-sm text-neutral-700">{description}</p>
     </div>
   );
 }
@@ -148,7 +212,7 @@ function renderTemplateOption(
           e.target.checked && setSelectedTemplate(e.target.value)
         }
       />
-      <legend className="text-lg font-semibold">{template.name}</legend>
+      <span className="text-lg font-semibold">{template.name}</span>
     </label>
   );
 }

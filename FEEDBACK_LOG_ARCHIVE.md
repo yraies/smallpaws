@@ -36,6 +36,15 @@ Required fields for new entries:
 
 ## Entries
 
+### F-010 (2026-04-04) - Prefer onboarding before deeper cleanup/accessibility
+
+- **Date:** 2026-04-04
+- **Source:** Chat-driven
+- **Exact Quote:** "I think B-017, then B-022 and B-014 then B-021 sounds like the most reasonable order"
+- **Normalized Intent:** Prioritize the next backlog slices in this order: onboarding/help copy first, then shared layout extraction, then password/access-control unification, then screen reader support.
+- **Feedback:** The stakeholder prefers user guidance first, then UI consistency cleanup, then access-control logic, then deeper accessibility work.
+- **Action taken:** Logged the preferred execution order so the next implementation pass follows this sequence.
+
 ### F-009 (2026-04-04) - Commit work regularly
 
 - **Date:** 2026-04-04
