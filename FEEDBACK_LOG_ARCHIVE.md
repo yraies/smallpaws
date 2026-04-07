@@ -72,6 +72,8 @@ Required fields for new entries:
 - **Action taken (follow-up):** Standardized the rule that center-column notices are informational only while page actions belong in the side rails (with mobile fallback), and removed duplicated primary actions from the document body.
 - **Follow-up (2026-04-04):** Stakeholder said, "I am not quite sure what the 'Published', 'Shared' and 'Finalized' Badges next to the name are for. So lets remove them"
 - **Action taken (follow-up):** Removed the title-adjacent lifecycle badges from the shared document header so phase context lives in the page notices instead of next to the document name.
+- **Follow-up (2026-04-04):** Stakeholder said, "I am not a big fan of the design of the 'start Here' box. Its pretty ... 'in your face'? and the three phase descriptions don't really make sense if you don't already know what the specific words mean."
+- **Action taken (follow-up):** Softened the landing-page onboarding treatment and rewrote the workflow copy in plainer language so it introduces the flow before relying on internal product terms.
 
 ### F-007 (2026-04-04) - Browser validation is the final gate
 

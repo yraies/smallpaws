@@ -34,36 +34,35 @@ function HomePageContent() {
 
   return (
     <div className="flex w-full flex-col items-center gap-4">
-      <Box title="Start Here" onTitleChange={() => {}} buttons={null}>
-        <div className="grid w-full grid-cols-1 gap-3 px-2 py-1 text-left">
-          <p className="text-sm leading-6 text-neutral-700">
-            Small Paws is a privacy-first conversation starter for sensitive
-            topics. It helps you build a question set, fill it out, and review
-            the results without needing user accounts or server-side access to
-            your plaintext answers.
-          </p>
+      <section className="w-full border border-neutral-300 bg-white px-4 py-3 text-left">
+        <h2 className="text-base font-semibold">What Small Paws helps with</h2>
+        <p className="mt-2 text-sm leading-6 text-neutral-700">
+          Small Paws helps people talk through sensitive topics by turning them
+          into a shared list of prompts. You can set up the questions first,
+          fill them in later, and then review the answers without needing user
+          accounts or server-side access to your plaintext answers.
+        </p>
 
-          <div className="grid gap-2">
-            <WorkflowStep
-              title="1. Create a template"
-              description="Start from scratch or from a built-in structure. Templates define categories and questions only."
-            />
-            <WorkflowStep
-              title="2. Fill out a form"
-              description="Finalize the template first, then create a form from it. Forms keep the structure fixed while you answer."
-            />
-            <WorkflowStep
-              title="3. Read results"
-              description="Shared and published views are read-only. To revise something later, create a new local draft copy."
-            />
-          </div>
-
-          <p className="border-l-4 border-violet-300 px-3 py-1 text-sm text-neutral-700">
-            Your recent work stays in this browser for convenience. If you use
-            encryption, decryption keys stay client-side.
-          </p>
+        <div className="mt-3 grid gap-2">
+          <WorkflowStep
+            title="1. Set up the questions"
+            description="Start from scratch or from a built-in starting point. This is where you decide what should be asked."
+          />
+          <WorkflowStep
+            title="2. Fill it out"
+            description="Once the question set looks right, make an answerable copy and mark your responses without changing the structure."
+          />
+          <WorkflowStep
+            title="3. Review or share"
+            description="Look back over the answers yourself or share a read-only version. If you want to revise something later, make a new local copy."
+          />
         </div>
-      </Box>
+
+        <p className="mt-3 border-l-4 border-violet-300 px-3 py-1 text-sm text-neutral-700">
+          Recent work stays in this browser for convenience. If you use
+          encryption, the decryption password stays client-side.
+        </p>
+      </section>
 
       <Box title="New Template" onTitleChange={() => {}} buttons={null}>
         <div className="grid w-full grid-cols-2">
@@ -184,7 +183,7 @@ function WorkflowStep({
   description: string;
 }) {
   return (
-    <div className="border-l-4 border-violet-300 px-3 py-1">
+    <div className="border-l-2 border-violet-300 px-3 py-1">
       <p className="font-semibold">{title}</p>
       <p className="text-sm text-neutral-700">{description}</p>
     </div>
