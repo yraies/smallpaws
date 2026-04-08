@@ -20,9 +20,6 @@ export async function POST(
 
     const requiresPassword = form.encrypted;
 
-    // Generate a unique share ID
-    const shareId = typeid("share").toString();
-
     // Calculate expiry date if provided
     let expiresAt: string | null = null;
     if (expiresInDays && expiresInDays > 0) {
@@ -31,9 +28,8 @@ export async function POST(
       expiresAt = expiry.toISOString();
     }
 
-    // Create shared form record
-    const sharedForm = FormStorage.createSharedForm({
-      shareId,
+    const sharedForm = FormStorage.upsertSharedForm({
+      shareId: typeid("share").toString(),
       formId: id,
       passwordHash: null,
       expiresAt,
@@ -42,14 +38,14 @@ export async function POST(
     // Build share URL
     const host = request.headers.get("host") || "localhost:3001";
     const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
-    const shareUrl = `${protocol}://${host}/share/${shareId}`;
+    const shareUrl = `${protocol}://${host}/share/${sharedForm.share_id}`;
 
     return NextResponse.json({
       success: true,
-      shareId,
+      shareId: sharedForm.share_id,
       shareUrl,
       requiresPassword,
-      expiresAt,
+      expiresAt: sharedForm.expires_at,
       viewCount: sharedForm.view_count,
       createdAt: sharedForm.created_at,
     });
@@ -69,23 +65,51 @@ export async function GET(
   try {
     const { id } = await context.params;
 
-    // Get all shares for this form
-    const shares = FormStorage.getSharedFormsForForm(id);
+    const share = FormStorage.getCanonicalSharedFormForForm(id);
     const form = FormStorage.getForm(id);
     const requiresPassword = !!form?.encrypted;
+    const host = _request.headers.get("host") || "localhost:3001";
+    const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
 
     return NextResponse.json({
       success: true,
-      shares: shares.map((share) => ({
-        shareId: share.share_id,
-        requiresPassword,
-        expiresAt: share.expires_at,
-        viewCount: share.view_count,
-        createdAt: share.created_at,
-      })),
+      share: share
+        ? {
+            shareId: share.share_id,
+            shareUrl: `${protocol}://${host}/share/${share.share_id}`,
+            requiresPassword,
+            expiresAt: share.expires_at,
+            viewCount: share.view_count,
+            createdAt: share.created_at,
+          }
+        : null,
     });
   } catch (error) {
     console.error("Error retrieving shared forms:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(
+  _request: NextRequest,
+  context: { params: Promise<{ id: string }> },
+) {
+  try {
+    const { id } = await context.params;
+    const form = FormStorage.getForm(id);
+
+    if (!form) {
+      return NextResponse.json({ error: "Form not found" }, { status: 404 });
+    }
+
+    FormStorage.deleteCanonicalSharedFormForForm(id);
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting shared form:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

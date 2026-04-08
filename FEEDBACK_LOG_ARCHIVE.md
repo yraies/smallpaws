@@ -36,6 +36,36 @@ Required fields for new entries:
 
 ## Entries
 
+### F-016 (2026-04-08) - Bring shared filled-form page back into the main UX system
+
+- **Date:** 2026-04-08
+- **Source:** Chat-driven
+- **Exact Quote:** "the \"filled form\"-share page is utterly iconsistent to the rest of the application in terms of design and UX! please fix that."
+- **Normalized Intent:** Refactor the shared filled-form page so it uses the same current design language, shell structure, and interaction patterns as the rest of the application.
+- **Feedback:** The shared-results page had drifted into an older special-case UI that no longer matched the centered document shell, side-rail action placement, and calmer password/access flow used elsewhere.
+- **Action taken:** Rebuilt the shared filled-form page around the common `DocumentPageShell`, `FormPhaseBanner`, `PageActionRails`, and `PasswordModal` patterns, while preserving shared-form loading, decryption, and clone-to-draft behavior.
+- **Validation:** Verified in real Chrome that the shared filled-form URL now shows the same shell/notice structure as other document views in both the password-gated and unlocked states.
+
+### F-015 (2026-04-08) - Use direct share wording and explicit removal
+
+- **Date:** 2026-04-08
+- **Source:** Chat-driven
+- **Exact Quote:** "the wording is super confusing! Why \"One link\"? what does that even mean? users should be able to create the share link and delete it again/have it expire if needed."
+- **Normalized Intent:** Rewrite the share UI around direct user actions and concepts: create a share link, let it expire or change expiry if relevant, and remove the share link explicitly when desired.
+- **Feedback:** The prior wording described the implementation constraint instead of the user-facing action model. The UX should speak in terms of creating, expiring, and removing a share link, not abstract internal simplifications.
+- **Action taken:** Reworded the template and form share modals to use direct action language, added explicit remove-share controls for both artifact types, and kept expiry editing visible on forms.
+- **Validation:** Verified in real Chrome that template and form share modals now show clearer create/remove wording, and that removing an active share returns the UI to the create-share state.
+
+### F-014 (2026-04-08) - Use one share link per document and fix copy buttons
+
+- **Date:** 2026-04-08
+- **Source:** Chat-driven
+- **Exact Quote:** "the share ui is still too complex... one share link per document is enough for now... there is nothing useful to do with multiple links except effectively the latest one... copy buttons next to share links appear broken and need fixing"
+- **Normalized Intent:** Simplify sharing further so each template or form has one canonical reusable share link for now, and make the share-link copy action reliable.
+- **Feedback:** The remaining multi-link model adds complexity without practical benefit at this stage. The share flow should present one stable link per artifact, and copy controls must actually work in the live UI.
+- **Action taken:** Logged the direction and implemented a single-share-link model in the share APIs and share modals, with a clipboard fallback for environments where the standard Clipboard API is unavailable.
+- **Validation:** Verified in real Chrome that template and form share modals now show one canonical link, copy correctly writes the URL, and form expiry updates keep the same URL while updating the expiry.
+
 ### F-013 (2026-04-08) - Simplify share UI and allow deletion from admin URLs
 
 - **Date:** 2026-04-08

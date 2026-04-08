@@ -27,8 +27,10 @@ Detailed historical notes are preserved in `CHANGELOG_ARCHIVE.md`.
 - Finalized templates, shared templates, and form views now expose printing directly in the action rails, and published/shared forms keep export actions visible alongside print.
 - The home page now explains the product purpose, privacy model, and three workflow phases directly in the landing view so new users can understand how to start.
 - Finalized templates, shared templates, editable forms, and shared results now share the same page-shell structure for headers, rails, notices, and overlays, reducing layout drift between phases.
+- Shared filled-form links now use the same document shell, password-entry flow, and side-rail action layout as the rest of the app instead of falling back to an older special-case page design.
 - Protected templates now use the same password model as protected forms: the artifact itself owns the password, and shared links reuse that same password instead of introducing a separate one.
 - Share dialogs now use a simpler, calmer layout that matches the rest of the UI instead of the older card-heavy share flow.
+- Template and form sharing now use one reusable share link per document instead of managing multiple parallel links.
 
 ### Fixed
 
@@ -38,6 +40,7 @@ Detailed historical notes are preserved in `CHANGELOG_ARCHIVE.md`.
 - Fixed the recent-form delete button so removing an entry no longer also navigates into that form.
 - Fixed the published/shared form toolbar so it tracks live form state correctly instead of showing stale actions after publication.
 - Direct admin URLs now expose deletion consistently for templates and draft forms, so users can remove the data they entered without going through shared views.
+- Fixed share-link copy buttons so they work reliably in the live UI, including environments where the standard Clipboard API is unavailable.
 
 ## [v0.1.0] — 2025-11 (Post-Phase 3)
 

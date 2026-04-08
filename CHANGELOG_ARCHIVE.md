@@ -98,3 +98,6 @@ Stabilized browser-local recent-form tracking after the root-level repo migratio
 - Unified access control so protected templates now mirror protected forms: finalized templates can be password-protected, direct template access uses a verifier-backed unlock flow, and shared template links reuse the same artifact password instead of inventing a second one.
 - Simplified the share dialogs into calmer, flatter single-flow layouts so sharing matches the established design system instead of feeling like a separate dashboard.
 - Added direct delete affordances for templates and draft forms on their admin URLs, ensuring user-entered artifacts can be removed from the authoritative non-shared pages.
+- Collapsed template and form sharing to one canonical reusable link per document, removing the need to manage parallel share links that were effectively redundant in practice.
+- Fixed share-link copy actions with a fallback path so copying works reliably in real Chrome/local environments where the async Clipboard API may be unavailable.
+- Refactored shared filled-form links back onto the same document-page shell and calmer password/access flow as the rest of the product, removing an older dashboard-like special-case experience from that path.

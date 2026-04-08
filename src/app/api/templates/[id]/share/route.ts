@@ -19,16 +19,18 @@ export async function POST(
 
     const requiresPassword = template.encrypted;
 
-    const shareId = typeid("share").toString();
-    const sharedTemplate = TemplateStorage.createSharedTemplate(id, shareId);
+    const sharedTemplate = TemplateStorage.upsertSharedTemplate(
+      id,
+      typeid("share").toString(),
+    );
 
     const host = request.headers.get("host") || "localhost:3000";
     const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
-    const shareUrl = `${protocol}://${host}/share/template/${shareId}`;
+    const shareUrl = `${protocol}://${host}/share/template/${sharedTemplate.share_id}`;
 
     return NextResponse.json({
       success: true,
-      shareId,
+      shareId: sharedTemplate.share_id,
       shareUrl,
       requiresPassword,
       viewCount: sharedTemplate.view_count,
@@ -49,21 +51,53 @@ export async function GET(
 ) {
   try {
     const { id } = await context.params;
-    const shares = TemplateStorage.getSharedTemplatesForTemplate(id);
+    const share = TemplateStorage.getCanonicalSharedTemplateForTemplate(id);
     const template = TemplateStorage.getTemplate(id);
     const requiresPassword = !!template?.encrypted;
+    const host = _request.headers.get("host") || "localhost:3000";
+    const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
 
     return NextResponse.json({
       success: true,
-      shares: shares.map((share) => ({
-        shareId: share.share_id,
-        requiresPassword,
-        viewCount: share.view_count,
-        createdAt: share.created_at,
-      })),
+      share: share
+        ? {
+            shareId: share.share_id,
+            shareUrl: `${protocol}://${host}/share/template/${share.share_id}`,
+            requiresPassword,
+            viewCount: share.view_count,
+            createdAt: share.created_at,
+          }
+        : null,
     });
   } catch (error) {
     console.error("Error retrieving shared templates:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(
+  _request: NextRequest,
+  context: { params: Promise<{ id: string }> },
+) {
+  try {
+    const { id } = await context.params;
+    const template = TemplateStorage.getTemplate(id);
+
+    if (!template) {
+      return NextResponse.json(
+        { error: "Template not found" },
+        { status: 404 },
+      );
+    }
+
+    TemplateStorage.deleteCanonicalSharedTemplateForTemplate(id);
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting shared template:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

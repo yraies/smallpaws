@@ -292,6 +292,35 @@ export class FormStorage {
     };
   }
 
+  static upsertSharedForm(shareData: {
+    shareId: string;
+    formId: string;
+    passwordHash: string | null;
+    expiresAt: string | null;
+  }): SharedForm {
+    const existingShare = FormStorage.getCanonicalSharedFormForForm(
+      shareData.formId,
+    );
+
+    if (!existingShare) {
+      return FormStorage.createSharedForm(shareData);
+    }
+
+    const stmt = db.prepare(`
+      UPDATE shared_forms
+      SET password_hash = ?, expires_at = ?
+      WHERE share_id = ?
+    `);
+
+    stmt.run(
+      shareData.passwordHash,
+      shareData.expiresAt,
+      existingShare.share_id,
+    );
+
+    return FormStorage.getSharedForm(existingShare.share_id) as SharedForm;
+  }
+
   static getSharedForm(shareId: string): SharedForm | null {
     const stmt = db.prepare("SELECT * FROM shared_forms WHERE share_id = ?");
     const result = stmt.get(shareId) as
@@ -351,6 +380,32 @@ export class FormStorage {
       view_count: row.view_count,
       created_at: row.created_at,
     }));
+  }
+
+  static getCanonicalSharedFormForForm(formId: string): SharedForm | null {
+    const shares = FormStorage.getSharedFormsForForm(formId);
+
+    if (shares.length === 0) {
+      return null;
+    }
+
+    const [latestShare, ...staleShares] = shares;
+
+    for (const staleShare of staleShares) {
+      FormStorage.deleteSharedForm(staleShare.share_id);
+    }
+
+    return latestShare;
+  }
+
+  static deleteCanonicalSharedFormForForm(formId: string): void {
+    const share = FormStorage.getCanonicalSharedFormForForm(formId);
+
+    if (!share) {
+      return;
+    }
+
+    FormStorage.deleteSharedForm(share.share_id);
   }
 }
 
@@ -426,6 +481,20 @@ export class TemplateStorage {
     return result;
   }
 
+  static upsertSharedTemplate(
+    templateId: string,
+    shareId: string,
+  ): SharedTemplate {
+    const existingShare =
+      TemplateStorage.getCanonicalSharedTemplateForTemplate(templateId);
+
+    if (existingShare) {
+      return existingShare;
+    }
+
+    return TemplateStorage.createSharedTemplate(templateId, shareId);
+  }
+
   static getSharedTemplate(shareId: string): SharedTemplate | null {
     const stmt = db.prepare(
       "SELECT * FROM shared_templates WHERE share_id = ?",
@@ -446,6 +515,39 @@ export class TemplateStorage {
       "SELECT * FROM shared_templates WHERE template_id = ? ORDER BY created_at DESC",
     );
     return stmt.all(templateId) as SharedTemplate[];
+  }
+
+  static getCanonicalSharedTemplateForTemplate(
+    templateId: string,
+  ): SharedTemplate | null {
+    const shares = TemplateStorage.getSharedTemplatesForTemplate(templateId);
+
+    if (shares.length === 0) {
+      return null;
+    }
+
+    const [latestShare, ...staleShares] = shares;
+
+    for (const staleShare of staleShares) {
+      const stmt = db.prepare(
+        "DELETE FROM shared_templates WHERE share_id = ?",
+      );
+      stmt.run(staleShare.share_id);
+    }
+
+    return latestShare;
+  }
+
+  static deleteCanonicalSharedTemplateForTemplate(templateId: string): void {
+    const share =
+      TemplateStorage.getCanonicalSharedTemplateForTemplate(templateId);
+
+    if (!share) {
+      return;
+    }
+
+    const stmt = db.prepare("DELETE FROM shared_templates WHERE share_id = ?");
+    stmt.run(share.share_id);
   }
 }
 

@@ -1,26 +1,28 @@
 "use client";
 
-import { CalendarIcon, ClockIcon, EyeIcon } from "@heroicons/react/24/outline";
+import { DocumentDuplicateIcon, PrinterIcon } from "@heroicons/react/16/solid";
 import dynamic from "next/dynamic";
 import { useParams, useRouter } from "next/navigation";
 import React from "react";
 import DeletedFormMessage from "../../../components/DeletedFormMessage";
 import DocumentPageShell from "../../../components/DocumentPageShell";
 import ErrorMessage from "../../../components/ErrorMessage";
-import FormActionButtons from "../../../components/FormActionButtons";
 import FormCategoryList from "../../../components/FormCategoryList";
 import FormPhaseBanner from "../../../components/FormPhaseBanner";
 import LoadingState from "../../../components/LoadingState";
+import PageActionRails, {
+  type RailAction,
+} from "../../../components/PageActionRails";
+import PasswordModal from "../../../components/PasswordModal";
 import ShareInfoOverlay from "../../../components/ShareInfoOverlay";
 import { DisplayPreferencesProvider } from "../../../contexts/DisplayPreferencesContext";
-import { FormActionsProvider } from "../../../contexts/FormActionsContext";
 import {
   FormContextProvider,
   useFormContext,
 } from "../../../contexts/FormContext";
 import { decryptFormData } from "../../../lib/crypto";
 import { Form, type FormPOJO } from "../../../types/Form";
-import { formatRelativeTime } from "../../../utils/RelativeDates";
+import { prepareFormClone, printCurrentView } from "../../../utils/formActions";
 
 interface ShareInfo {
   shareId: string;
@@ -61,7 +63,6 @@ function SharedFormPageContent() {
         setIsFormEncrypted(formData.encrypted);
         setFormName(formData.name);
 
-        // Check if form has been deleted (soft delete)
         if (formData.name === "[Deleted]" || formData.data === "{}") {
           setIsDeleted(true);
           setIsLoading(false);
@@ -69,19 +70,14 @@ function SharedFormPageContent() {
         }
 
         if (formData.encrypted) {
-          // Form itself is encrypted, need to prompt for form password
           setNeedsPasswordVerification(true);
           return;
         }
 
-        // Parse the stored form data
         const parsedData = JSON.parse(formData.data);
-
-        // Create Form object from the parsed data
-        const loadedForm = Form.fromPOJO(parsedData as FormPOJO);
-        setForm(loadedForm);
-      } catch (error) {
-        console.error("Error loading form data:", error);
+        setForm(Form.fromPOJO(parsedData as FormPOJO));
+      } catch (loadError) {
+        console.error("Error loading form data:", loadError);
         setError("Failed to parse form data");
       }
     },
@@ -122,70 +118,69 @@ function SharedFormPageContent() {
           createdAt: data.createdAt,
           expiresAt: data.expiresAt,
         });
-      } else {
-        // Load form directly
-        await loadFormData(data);
+        return;
       }
-    } catch (error) {
-      console.error("Error loading shared form:", error);
+
+      await loadFormData(data);
+    } catch (loadError) {
+      console.error("Error loading shared form:", loadError);
       setError("Failed to load shared form");
     } finally {
       setIsLoading(false);
     }
-  }, [shareId, loadFormData]);
+  }, [loadFormData, shareId]);
 
-  // Load shared form on component mount
   React.useEffect(() => {
     if (shareId) {
-      loadSharedForm();
+      void loadSharedForm();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shareId, loadSharedForm]);
 
   const handlePasswordVerification = async (password: string) => {
-    try {
-      const response = await fetch(`/api/share/${shareId}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ password }),
-      });
+    const response = await fetch(`/api/share/${shareId}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ password }),
+    });
 
-      if (!response.ok) {
-        if (response.status === 401) {
-          throw new Error("Invalid password");
-        }
-        throw new Error("Failed to verify password");
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error("Invalid password");
       }
 
-      const data = await response.json();
-
-      if (data.form.encrypted) {
-        // This is an encrypted form, decrypt it with the form password (not share password)
-        try {
-          const encryptedData = JSON.parse(data.form.data);
-          const decryptedData = decryptFormData(encryptedData, password);
-          const loadedForm = Form.fromPOJO(decryptedData as FormPOJO);
-          setForm(loadedForm);
-        } catch (decryptError) {
-          console.error("Failed to decrypt form:", decryptError);
-          throw new Error("Failed to decrypt form data");
-        }
-      } else {
-        // Form is not encrypted, parse directly
-        const parsedData = JSON.parse(data.form.data);
-        const loadedForm = Form.fromPOJO(parsedData as FormPOJO);
-        setForm(loadedForm);
-      }
-
-      setNeedsPasswordVerification(false);
-      setFormName(data.form.name);
-      setShareInfo(data.shareInfo);
-    } catch (error) {
-      console.error("Password verification error:", error);
-      throw error;
+      throw new Error("Failed to verify password");
     }
+
+    const data = await response.json();
+
+    if (data.form.encrypted) {
+      try {
+        const encryptedData = JSON.parse(data.form.data);
+        const decryptedData = decryptFormData(encryptedData, password);
+        setForm(Form.fromPOJO(decryptedData as FormPOJO));
+      } catch (decryptError) {
+        console.error("Failed to decrypt form:", decryptError);
+        throw new Error("Failed to decrypt form data");
+      }
+    } else {
+      const parsedData = JSON.parse(data.form.data);
+      setForm(Form.fromPOJO(parsedData as FormPOJO));
+    }
+
+    setNeedsPasswordVerification(false);
+    setFormName(data.form.name);
+    setShareInfo(data.shareInfo);
+  };
+
+  const startLocalDraft = () => {
+    if (!form) {
+      return;
+    }
+
+    const newFormId = prepareFormClone(form);
+    router.push(`/form/${newFormId}`);
   };
 
   if (isLoading) {
@@ -196,7 +191,6 @@ function SharedFormPageContent() {
     return <ErrorMessage message={error} onGoHome={() => router.push("/")} />;
   }
 
-  // Show deleted form message if the form has been deleted
   if (isDeleted) {
     return (
       <DeletedFormMessage
@@ -208,169 +202,82 @@ function SharedFormPageContent() {
 
   if (needsPasswordVerification) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="w-full max-w-md px-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="text-center mb-6">
-              <div className="bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
-                <EyeIcon className="w-6 h-6 text-blue-600" />
-              </div>
-              <h1 className="text-xl font-semibold text-gray-900 mb-2">
-                {formName || "Shared Form"}
-              </h1>
-              {isFormEncrypted && (
-                <div className="flex items-center justify-center text-sm text-blue-600 mb-4">
-                  <svg
-                    className="w-4 h-4 mr-1"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    aria-label="Encrypted"
-                    role="img"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  Encrypted Form
-                </div>
-              )}
-              <p className="text-gray-600">
-                This form is password protected. Please enter the password to
-                view it.
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Password
-                </label>
-                <input
-                  id="password"
-                  type="password"
-                  placeholder="Enter form password"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  onKeyDown={async (e) => {
-                    if (e.key === "Enter") {
-                      const target = e.target as HTMLInputElement;
-                      if (target.value) {
-                        try {
-                          await handlePasswordVerification(target.value);
-                        } catch (error) {
-                          alert(
-                            error instanceof Error
-                              ? error.message
-                              : "Invalid password",
-                          );
-                        }
-                      }
-                    }
-                  }}
-                />
-              </div>
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => router.push("/")}
-                  className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={async () => {
-                    const input = document.getElementById(
-                      "password",
-                    ) as HTMLInputElement;
-                    if (input?.value) {
-                      try {
-                        await handlePasswordVerification(input.value);
-                      } catch (error) {
-                        alert(
-                          error instanceof Error
-                            ? error.message
-                            : "Invalid password",
-                        );
-                      }
-                    }
-                  }}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Access Form
-                </button>
-              </div>
-            </div>
-
-            {shareInfo && (
-              <div className="mt-6 pt-6 border-t border-gray-200 space-y-3">
-                <div className="flex items-center text-sm text-gray-500">
-                  <EyeIcon className="w-4 h-4 mr-2" />
-                  <span>Viewed {shareInfo.viewCount} times</span>
-                </div>
-                <div className="flex items-center text-sm text-gray-500">
-                  <CalendarIcon className="w-4 h-4 mr-2" />
-                  <span>
-                    Shared {formatRelativeTime(new Date(shareInfo.createdAt))}
-                  </span>
-                </div>
-                <div className="flex items-center text-sm text-gray-500">
-                  <ClockIcon className="w-4 h-4 mr-2" />
-                  <span>
-                    {shareInfo.expiresAt
-                      ? `Expires ${formatRelativeTime(new Date(shareInfo.expiresAt))}`
-                      : "No expiry"}
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+      <DocumentPageShell
+        formName={formName || "Shared Form"}
+        isEncrypted={isFormEncrypted}
+        onHomeClick={() => router.push("/")}
+        readOnly={true}
+        notice={<FormPhaseBanner phase="shared" />}
+        overlay={shareInfo ? <ShareInfoOverlay shareInfo={shareInfo} /> : null}
+      >
+        <PasswordModal
+          isOpen={true}
+          onClose={() => router.push("/")}
+          onSubmit={(password: string) => handlePasswordVerification(password)}
+          mode="enter"
+          title="Enter Password"
+          description={`Enter the password for "${formName || "Shared Form"}".`}
+          submitLabelEnter="Open Shared Form"
+        />
+      </DocumentPageShell>
     );
   }
 
   if (!form) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600">Unable to load form data</p>
-        </div>
-      </div>
+      <ErrorMessage
+        message="Unable to load form data"
+        onGoHome={() => router.push("/")}
+      />
     );
   }
 
   return (
-    <FormActionsProvider
-      formId={shareId}
-      initialIsPublished={true}
-      initialIsEncrypted={isFormEncrypted}
-      allowDelete={false}
-    >
-      <DocumentPageShell
-        formName={formName}
-        isEncrypted={isFormEncrypted}
-        onHomeClick={() => router.push("/")}
-        readOnly={true}
-        actions={<FormActionButtons />}
-        notice={<FormPhaseBanner phase="shared" />}
-        overlay={shareInfo ? <ShareInfoOverlay shareInfo={shareInfo} /> : null}
-      >
-        <FormCategoryList
-          categories={form.categories}
-          answerMode="readonly"
-          structureEditable={false}
+    <DocumentPageShell
+      formName={formName}
+      isEncrypted={isFormEncrypted}
+      onHomeClick={() => router.push("/")}
+      readOnly={true}
+      actions={
+        <PageActionRails
+          leftActions={
+            [
+              {
+                key: "new-draft",
+                label: "New Draft",
+                onClick: startLocalDraft,
+                title: "Create New Draft",
+                variant: "default",
+                icon: <DocumentDuplicateIcon className="h-5 w-5" />,
+              },
+            ] satisfies RailAction[]
+          }
+          rightActions={
+            [
+              {
+                key: "print",
+                label: "Print",
+                onClick: printCurrentView,
+                title: "Print this view",
+                variant: "default",
+                icon: <PrinterIcon className="h-5 w-5" />,
+              },
+            ] satisfies RailAction[]
+          }
         />
-      </DocumentPageShell>
-    </FormActionsProvider>
+      }
+      notice={<FormPhaseBanner phase="shared" />}
+      overlay={shareInfo ? <ShareInfoOverlay shareInfo={shareInfo} /> : null}
+    >
+      <FormCategoryList
+        categories={form.categories}
+        answerMode="readonly"
+        structureEditable={false}
+      />
+    </DocumentPageShell>
   );
 }
 
-// Export with dynamic loading to prevent SSR issues
 export default dynamic(
   () =>
     Promise.resolve(() => (
