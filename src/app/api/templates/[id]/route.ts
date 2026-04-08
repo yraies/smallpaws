@@ -93,3 +93,21 @@ export async function POST(
     );
   }
 }
+
+export async function DELETE(
+  _request: NextRequest,
+  context: { params: Promise<{ id: string }> },
+) {
+  try {
+    const { id } = await context.params;
+    TemplateStorage.deleteTemplate(id);
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting template:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
+  }
+}

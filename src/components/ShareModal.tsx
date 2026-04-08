@@ -14,6 +14,7 @@ interface ShareModalProps {
   onClose: () => void;
   formId: string;
   formName: string;
+  requiresPassword: boolean;
 }
 
 interface ShareInfo {
@@ -30,6 +31,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
   onClose,
   formId,
   formName,
+  requiresPassword,
 }) => {
   const [expiresInDays, setExpiresInDays] = useState<number | "">("");
   const [shareInfo, setShareInfo] = useState<ShareInfo | null>(null);
@@ -146,10 +148,9 @@ const ShareModal: React.FC<ShareModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto border border-neutral-300 bg-white">
+        <div className="flex items-center justify-between border-b px-5 py-4">
           <div className="flex items-center gap-3">
             <ShareIcon className="h-6 w-6 text-blue-600" />
             <h2 className="text-xl font-semibold text-gray-900">
@@ -166,206 +167,174 @@ const ShareModal: React.FC<ShareModalProps> = ({
           </button>
         </div>
 
-        {/* Content */}
-        <div className="p-6">
-          {!shareInfo ? (
-            <>
-              {/* Create New Share */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">
-                  Create New Share Link
-                </h3>
+        <div className="space-y-5 px-5 py-4">
+          <p className="text-sm text-neutral-700">
+            Shared links are read-only. Anyone opening them will see the same
+            published form results.
+          </p>
 
-                <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800">
-                  Shared links use the form's own protection settings. If the
-                  form is encrypted, recipients will need that same password.
-                </div>
+          <div className="border-l-4 border-blue-300 bg-blue-50 px-3 py-2 text-sm text-blue-900">
+            Shared links use the form&apos;s own protection settings.
+            <br />
+            {requiresPassword ||
+            existingShares.some((share) => share.requiresPassword) ||
+            shareInfo?.requiresPassword
+              ? "Recipients will need the same form password."
+              : "This form does not currently require a password."}
+          </div>
 
-                {/* Expiry */}
-                <div>
-                  <label
-                    htmlFor="share-expiry"
-                    className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2"
-                  >
-                    <CalendarIcon className="h-4 w-4" />
-                    Expires In (Optional)
-                  </label>
-                  <select
-                    id="share-expiry"
-                    value={expiresInDays}
-                    onChange={(e) =>
-                      setExpiresInDays(
-                        e.target.value ? Number(e.target.value) : "",
-                      )
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">Never expires</option>
-                    <option value={1}>1 day</option>
-                    <option value={7}>7 days</option>
-                    <option value={30}>30 days</option>
-                    <option value={90}>90 days</option>
-                  </select>
-                </div>
-
-                {/* Error Message */}
-                {error && (
-                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-                    {error}
-                  </div>
-                )}
-
-                {/* Create Button */}
+          {shareInfo && (
+            <div className="border border-neutral-300 bg-neutral-50 px-3 py-3">
+              <p className="mb-2 text-sm font-semibold">Latest link</p>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={shareInfo.shareUrl}
+                  readOnly
+                  className="flex-1 border border-neutral-300 bg-white px-3 py-2 text-sm"
+                />
                 <button
                   type="button"
-                  onClick={createShare}
-                  disabled={isCreating}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  onClick={() => copyToClipboard(shareInfo.shareUrl)}
+                  className={`border px-3 py-2 ${
+                    copied
+                      ? "border-green-300 bg-green-100 text-green-800"
+                      : "border-blue-300 bg-white text-blue-800"
+                  }`}
                 >
-                  <ShareIcon className="h-4 w-4" />
-                  {isCreating ? "Creating..." : "Create Share Link"}
+                  {copied ? (
+                    <CheckIcon className="h-4 w-4" />
+                  ) : (
+                    <DocumentDuplicateIcon className="h-4 w-4" />
+                  )}
                 </button>
               </div>
+              <p className="mt-2 text-xs text-neutral-600">
+                Created {formatDate(shareInfo.createdAt)}
+                {shareInfo.expiresAt
+                  ? ` • Expires ${formatDate(shareInfo.expiresAt)}`
+                  : " • No expiry"}
+              </p>
+            </div>
+          )}
 
-              {/* Existing Shares */}
-              {existingShares.length > 0 && (
-                <div className="mt-8 pt-6 border-t">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">
-                    Existing Share Links
-                  </h3>
-                  <div className="space-y-3">
-                    {existingShares.map((share, index) => (
-                      <div
-                        key={share.shareId}
-                        className="p-4 bg-gray-50 rounded-lg"
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <LinkIcon className="h-4 w-4" />
-                            Share #{index + 1}
-                            {share.requiresPassword && (
-                              <span className="rounded bg-amber-100 px-2 py-0.5 text-xs text-amber-700">
-                                Uses form password
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-gray-500">
-                            <EyeIcon className="h-4 w-4" />
-                            {share.viewCount} views
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="text"
-                            value={share.shareUrl}
-                            readOnly
-                            className="flex-1 px-3 py-1 text-sm bg-white border border-gray-200 rounded"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => copyToClipboard(share.shareUrl)}
-                            className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
-                          >
-                            <DocumentDuplicateIcon className="h-4 w-4" />
-                          </button>
-                        </div>
-                        <div className="mt-2 text-xs text-gray-500">
-                          Created: {formatDate(share.createdAt)}
-                          {share.expiresAt &&
-                            ` • Expires: ${formatDate(share.expiresAt)}`}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </>
-          ) : (
-            /* Share Created Successfully */
-            <div className="space-y-4">
-              <div className="text-center">
-                <CheckIcon className="h-12 w-12 text-green-600 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  Share Link Created!
-                </h3>
-                <p className="text-gray-600">
-                  Your form can now be accessed using the link below:
-                </p>
+          <div className="space-y-3 border border-neutral-300 bg-white px-3 py-3">
+            <h3 className="text-base font-semibold">Create a share link</h3>
+
+            <div>
+              <label
+                htmlFor="share-expiry"
+                className="mb-2 flex items-center gap-2 text-sm font-medium text-neutral-700"
+              >
+                <CalendarIcon className="h-4 w-4" />
+                Expiry (optional)
+              </label>
+              <select
+                id="share-expiry"
+                value={expiresInDays}
+                onChange={(e) =>
+                  setExpiresInDays(e.target.value ? Number(e.target.value) : "")
+                }
+                className="w-full border border-neutral-300 bg-white px-3 py-2 text-sm"
+              >
+                <option value="">Never expires</option>
+                <option value={1}>1 day</option>
+                <option value={7}>7 days</option>
+                <option value={30}>30 days</option>
+                <option value={90}>90 days</option>
+              </select>
+            </div>
+
+            {error && (
+              <div className="border-l-4 border-red-400 bg-red-50 px-3 py-2 text-sm text-red-800">
+                {error}
               </div>
+            )}
 
-              {/* Share URL */}
-              <div className="p-4 bg-gray-50 rounded-lg">
-                <div className="flex items-center gap-2 mb-2">
-                  <input
-                    type="text"
-                    value={shareInfo.shareUrl}
-                    readOnly
-                    className="flex-1 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => copyToClipboard(shareInfo.shareUrl)}
-                    className={`px-4 py-2 rounded-lg transition-colors ${
-                      copied
-                        ? "bg-green-100 text-green-700"
-                        : "bg-blue-100 text-blue-700 hover:bg-blue-200"
-                    }`}
-                  >
-                    {copied ? (
-                      <CheckIcon className="h-4 w-4" />
-                    ) : (
-                      <DocumentDuplicateIcon className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {/* Share Info */}
-              <div className="grid grid-cols-2 gap-4 p-4 bg-blue-50 rounded-lg">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">
-                    {shareInfo.viewCount}
-                  </div>
-                  <div className="text-sm text-blue-800">Views</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-lg font-semibold text-blue-600">
-                    {shareInfo.requiresPassword
-                      ? "Uses form password"
-                      : "Public"}
-                  </div>
-                  <div className="text-sm text-blue-800">Access</div>
-                </div>
-              </div>
-
-              {shareInfo.expiresAt && (
-                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                  <p className="text-amber-800 text-sm">
-                    <CalendarIcon className="h-4 w-4 inline mr-1" />
-                    This link will expire on {formatDate(shareInfo.expiresAt)}
-                  </p>
-                </div>
-              )}
-
-              {/* Actions */}
-              <div className="flex gap-3">
+            <div className="flex justify-between gap-3">
+              {shareInfo ? (
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                  className="border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700"
                 >
-                  Create Another
+                  Clear latest link
                 </button>
-                <button
-                  type="button"
-                  onClick={handleClose}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Done
-                </button>
+              ) : (
+                <span />
+              )}
+              <button
+                type="button"
+                onClick={createShare}
+                disabled={isCreating}
+                className="flex items-center justify-center gap-2 bg-blue-600 px-4 py-2 text-white disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <ShareIcon className="h-4 w-4" />
+                {isCreating ? "Creating..." : "Create share link"}
+              </button>
+            </div>
+          </div>
+
+          {existingShares.length > 0 && (
+            <div className="space-y-3 border-t pt-4">
+              <h3 className="text-base font-semibold">Existing links</h3>
+              <div className="space-y-2">
+                {existingShares.map((share, index) => (
+                  <div
+                    key={share.shareId}
+                    className="border border-neutral-300 bg-neutral-50 px-3 py-3"
+                  >
+                    <div className="mb-2 flex items-center justify-between gap-3 text-sm">
+                      <div className="flex items-center gap-2 text-neutral-700">
+                        <LinkIcon className="h-4 w-4" />
+                        Link #{index + 1}
+                        {share.requiresPassword && (
+                          <span className="border border-amber-300 bg-amber-100 px-2 py-0.5 text-xs text-amber-800">
+                            Uses form password
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 text-neutral-500">
+                        <EyeIcon className="h-4 w-4" />
+                        {share.viewCount} views
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={share.shareUrl}
+                        readOnly
+                        className="flex-1 border border-neutral-300 bg-white px-3 py-2 text-sm"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(share.shareUrl)}
+                        className="border border-blue-300 bg-white px-3 py-2 text-blue-800"
+                      >
+                        <DocumentDuplicateIcon className="h-4 w-4" />
+                      </button>
+                    </div>
+                    <p className="mt-2 text-xs text-neutral-500">
+                      Created {formatDate(share.createdAt)}
+                      {share.expiresAt
+                        ? ` • Expires ${formatDate(share.expiresAt)}`
+                        : " • No expiry"}
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
           )}
+
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={handleClose}
+              className="border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700"
+            >
+              Done
+            </button>
+          </div>
         </div>
       </div>
     </div>

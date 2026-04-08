@@ -6,6 +6,7 @@ import {
   PlayIcon,
   PrinterIcon,
   ShareIcon,
+  TrashIcon,
 } from "@heroicons/react/16/solid";
 import dynamic from "next/dynamic";
 import { useParams, useRouter } from "next/navigation";
@@ -30,6 +31,7 @@ import { hasValidStructure } from "../../../utils/documentStructure";
 import { printCurrentView } from "../../../utils/formActions";
 import {
   removeDraftFormData,
+  removeRecentFormFromStorage,
   saveDraftFormData,
   saveRecentFormMeta,
 } from "../../../utils/recentForms";
@@ -159,6 +161,35 @@ function TemplatePageContent() {
     router.push(`/template/${newTemplateId}`);
   };
 
+  const deleteTemplate = async () => {
+    const confirmed = confirm(
+      `Are you sure you want to delete "${template.name}"? This action cannot be undone.`,
+    );
+
+    if (!confirmed) return;
+
+    try {
+      if (isFinalized) {
+        const response = await fetch(`/api/templates/${templateId}`, {
+          method: "DELETE",
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          alert(error.error || "Failed to delete template.");
+          return;
+        }
+      }
+
+      removeRecentFormFromStorage(localStorage, templateId);
+      alert("Template deleted successfully!");
+      router.push("/");
+    } catch (error) {
+      console.error("Error deleting template:", error);
+      alert("Failed to delete template.");
+    }
+  };
+
   return (
     <DocumentPageShell
       formName={template.name}
@@ -168,6 +199,18 @@ function TemplatePageContent() {
       readOnly={isFinalized}
       actions={
         <PageActionRails
+          leftActions={
+            [
+              {
+                key: "delete-template",
+                label: "Delete",
+                onClick: deleteTemplate,
+                title: "Delete Template",
+                variant: "danger",
+                icon: <TrashIcon className="h-5 w-5" />,
+              },
+            ] satisfies RailAction[]
+          }
           rightActions={
             isFinalized
               ? ([

@@ -96,3 +96,5 @@ Stabilized browser-local recent-form tracking after the root-level repo migratio
 - Extracted a shared document page shell so finalized templates, shared templates, editable forms, and shared results all compose the same header, action-rail, notice, and overlay structure.
 - Fixed the published/shared form toolbar to react to the live publication state instead of leaving stale publish actions visible after publication.
 - Unified access control so protected templates now mirror protected forms: finalized templates can be password-protected, direct template access uses a verifier-backed unlock flow, and shared template links reuse the same artifact password instead of inventing a second one.
+- Simplified the share dialogs into calmer, flatter single-flow layouts so sharing matches the established design system instead of feeling like a separate dashboard.
+- Added direct delete affordances for templates and draft forms on their admin URLs, ensuring user-entered artifacts can be removed from the authoritative non-shared pages.

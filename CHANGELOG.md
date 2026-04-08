@@ -28,6 +28,7 @@ Detailed historical notes are preserved in `CHANGELOG_ARCHIVE.md`.
 - The home page now explains the product purpose, privacy model, and three workflow phases directly in the landing view so new users can understand how to start.
 - Finalized templates, shared templates, editable forms, and shared results now share the same page-shell structure for headers, rails, notices, and overlays, reducing layout drift between phases.
 - Protected templates now use the same password model as protected forms: the artifact itself owns the password, and shared links reuse that same password instead of introducing a separate one.
+- Share dialogs now use a simpler, calmer layout that matches the rest of the UI instead of the older card-heavy share flow.
 
 ### Fixed
 
@@ -36,6 +37,7 @@ Detailed historical notes are preserved in `CHANGELOG_ARCHIVE.md`.
 - Fixed "Clear Recent Forms" so it clears only recent-form browser entries instead of wiping unrelated local storage or deleting server data.
 - Fixed the recent-form delete button so removing an entry no longer also navigates into that form.
 - Fixed the published/shared form toolbar so it tracks live form state correctly instead of showing stale actions after publication.
+- Direct admin URLs now expose deletion consistently for templates and draft forms, so users can remove the data they entered without going through shared views.
 
 ## [v0.1.0] — 2025-11 (Post-Phase 3)
 

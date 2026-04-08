@@ -36,6 +36,15 @@ Required fields for new entries:
 
 ## Entries
 
+### F-013 (2026-04-08) - Simplify share UI and allow deletion from admin URLs
+
+- **Date:** 2026-04-08
+- **Source:** Chat-driven
+- **Exact Quote:** "I feel like the share system is too complex and does not fit into the established design system! additionally it seems like there is no exposed functionality to delete templates through the admin (ie non share) url! users have to be able to delete any data they input through their \"admin\" urls."
+- **Normalized Intent:** Simplify the sharing UX so it fits the app's current visual/system language, and ensure any user-entered artifact can be deleted from its non-shared admin/edit URL.
+- **Feedback:** Sharing currently feels too heavy and stylistically inconsistent. Deletion must be available from the authoritative direct URL for user-created data, not only through indirect flows.
+- **Action taken:** Logged the direction and started implementation for a simpler sharing surface plus template deletion through the direct template URL.
+
 ### F-012 (2026-04-04) - One password model, not multiple user-facing passwords
 
 - **Date:** 2026-04-04

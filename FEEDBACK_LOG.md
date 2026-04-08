@@ -23,6 +23,7 @@ Detailed chronological history is preserved in `FEEDBACK_LOG_ARCHIVE.md`.
 - **Backlog priority**: Preferred near-term order is `B-017` onboarding/help copy, then `B-022` shared page-layout extraction, then `B-014` password/access-control unification, then `B-021` screen reader support. (F-010)
 - **Access-control direction**: Templates, forms, and their shared links should all use one consistent password/access model rather than separate systems. (F-011)
 - **Access-control direction**: Keep a single server-verified password model across templates, forms, and shared links, but do not expose users to multiple passwords for the same artifact/share flow. (F-012)
+- **Data ownership and sharing UI**: The share system should be simpler and aligned with the established design system, and users must be able to delete any data they entered through the corresponding non-shared/admin URLs. (F-013)
 
 ## Severity Scale
 

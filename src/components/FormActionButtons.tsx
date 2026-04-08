@@ -69,18 +69,18 @@ export default function FormActionButtons() {
         icon: <ArrowDownTrayIcon className="h-5 w-5" />,
       },
     );
+  }
 
-    if (handleDelete) {
-      leftActions.push({
-        key: "delete",
-        label: "Delete",
-        onClick: handleDelete,
-        title: "Delete Form",
-        disabled: isDeleting,
-        variant: "danger",
-        icon: <TrashIcon className="h-5 w-5" />,
-      });
-    }
+  if (handleDelete) {
+    leftActions.push({
+      key: "delete",
+      label: "Delete",
+      onClick: handleDelete,
+      title: "Delete Form",
+      disabled: isDeleting,
+      variant: "danger",
+      icon: <TrashIcon className="h-5 w-5" />,
+    });
   }
 
   const rightActions: ActionConfig[] = [];

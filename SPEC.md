@@ -65,6 +65,7 @@ Pre-release (~75% complete). No compatibility obligations.
 - **REQ-9: Unified Access Control** — When password protection is used, template/form sharing access control should use one coherent password model rather than separate share-password and form-password systems. Status: ✅ implemented.
 - **REQ-15: Local Storage for Recent Forms** — Recently accessed forms stored only in browser local storage for quick access and draft recovery. Recent-form metadata must not be uploaded or exposed as a server-side list. Local storage respects privacy settings. Status: ✅ implemented.
 - **REQ-24: Draft Recovery** — Local browser storage may keep draft templates/forms for quick recovery, but finalized/shared artifacts must not rely on mutable local state. Status: ✅ partially implemented.
+- **REQ-25: Direct Artifact Deletion** — Users can delete templates and forms from their direct non-shared admin URLs. Status: ✅ implemented.
 
 #### Data Portability
 
@@ -97,6 +98,7 @@ Pre-release (~75% complete). No compatibility obligations.
 - Encrypting a form or template with a password makes it inaccessible without the correct password.
 - Sharing a filled form produces a unique URL; accessing it shows a read-only results view.
 - To revise a finalized/shared artifact, the user creates a new local draft/copy instead of editing it in place.
+- Users can delete templates and forms from their direct non-shared URLs.
 - Deleting a form soft-deletes; shared links show a "form deleted" message.
 - JSON and CSV export produce downloadable files with the relevant structure/response data.
 - Browser print produces a readable print-friendly layout.

@@ -271,6 +271,7 @@ function FormPageContent() {
           onClose={() => setShowShareModal(false)}
           formId={formId}
           formName={form.name}
+          requiresPassword={isEncrypted}
         />
       </DocumentPageShell>
     </FormActionsProvider>

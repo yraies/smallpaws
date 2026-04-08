@@ -398,6 +398,16 @@ export class TemplateStorage {
     );
   }
 
+  static deleteTemplate(id: string): void {
+    const deleteSharesStmt = db.prepare(
+      "DELETE FROM shared_templates WHERE template_id = ?",
+    );
+    deleteSharesStmt.run(id);
+
+    const deleteTemplateStmt = db.prepare("DELETE FROM templates WHERE id = ?");
+    deleteTemplateStmt.run(id);
+  }
+
   static createSharedTemplate(
     templateId: string,
     shareId: string,
