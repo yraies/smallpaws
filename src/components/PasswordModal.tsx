@@ -14,6 +14,10 @@ interface PasswordModalProps {
   mode: "set" | "enter";
   title?: string;
   description?: string;
+  toggleLabel?: string;
+  submitLabelWithPassword?: string;
+  submitLabelWithoutPassword?: string;
+  submitLabelEnter?: string;
 }
 
 const PasswordModal: React.FC<PasswordModalProps> = ({
@@ -23,6 +27,10 @@ const PasswordModal: React.FC<PasswordModalProps> = ({
   mode,
   title,
   description,
+  toggleLabel,
+  submitLabelWithPassword,
+  submitLabelWithoutPassword,
+  submitLabelEnter,
 }) => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -90,7 +98,7 @@ const PasswordModal: React.FC<PasswordModalProps> = ({
                   className="h-4 w-4 text-violet-600"
                 />
                 <span className="text-sm font-medium">
-                  Enable password protection
+                  {toggleLabel || "Enable password protection"}
                 </span>
               </label>
             </div>
@@ -193,9 +201,9 @@ const PasswordModal: React.FC<PasswordModalProps> = ({
             >
               {mode === "set"
                 ? shouldEncrypt
-                  ? "Publish with Password"
-                  : "Publish without Password"
-                : "Unlock"}
+                  ? submitLabelWithPassword || "Publish with Password"
+                  : submitLabelWithoutPassword || "Publish without Password"
+                : submitLabelEnter || "Unlock"}
             </button>
           </div>
         </form>

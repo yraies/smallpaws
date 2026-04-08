@@ -27,6 +27,7 @@ Detailed historical notes are preserved in `CHANGELOG_ARCHIVE.md`.
 - Finalized templates, shared templates, and form views now expose printing directly in the action rails, and published/shared forms keep export actions visible alongside print.
 - The home page now explains the product purpose, privacy model, and three workflow phases directly in the landing view so new users can understand how to start.
 - Finalized templates, shared templates, editable forms, and shared results now share the same page-shell structure for headers, rails, notices, and overlays, reducing layout drift between phases.
+- Protected templates now use the same password model as protected forms: the artifact itself owns the password, and shared links reuse that same password instead of introducing a separate one.
 
 ### Fixed
 

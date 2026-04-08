@@ -4,6 +4,10 @@ This file stores completed, cancelled, and superseded backlog items.
 
 ## done
 
+### Phase 4.5: Template/Form Lifecycle Refactor (Apr 2026)
+
+- **B-014** — Unify password/access-control handling for protected templates/forms and their shared links. (REQ-9)
+
 ### Phase 0: Next.js Migration (Nov 2025)
 
 - **B-001** — Migrate React frontend to Next.js App Router with TypeScript. (REQ-1 through REQ-4, REQ-20)

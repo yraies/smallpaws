@@ -13,6 +13,8 @@ import LoadingState from "../../../../components/LoadingState";
 import PageActionRails, {
   type RailAction,
 } from "../../../../components/PageActionRails";
+import PasswordModal from "../../../../components/PasswordModal";
+import { decryptFormData } from "../../../../lib/crypto";
 import { Form, type FormPOJO } from "../../../../types/Form";
 import { printCurrentView } from "../../../../utils/formActions";
 import {
@@ -22,9 +24,13 @@ import {
 
 function SharedTemplatePageContent() {
   const [template, setTemplate] = React.useState<Form | null>(null);
+  const [templateName, setTemplateName] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [viewCount, setViewCount] = React.useState<number | null>(null);
+  const [isEncrypted, setIsEncrypted] = React.useState(false);
+  const [needsPasswordVerification, setNeedsPasswordVerification] =
+    React.useState(false);
   const router = useRouter();
   const params = useParams();
   const shareId = params?.shareId as string;
@@ -41,7 +47,16 @@ function SharedTemplatePageContent() {
         }
 
         const data = await response.json();
+        if (data.requiresPassword) {
+          setTemplateName(data.templateName);
+          setViewCount(data.viewCount ?? null);
+          setIsEncrypted(true);
+          setNeedsPasswordVerification(true);
+          return;
+        }
+
         setTemplate(Form.fromPOJO(JSON.parse(data.template.data) as FormPOJO));
+        setTemplateName(data.template.name);
         setViewCount(data.shareInfo.viewCount);
       } catch (loadError) {
         console.error("Error loading shared template:", loadError);
@@ -56,8 +71,59 @@ function SharedTemplatePageContent() {
     })();
   }, [shareId]);
 
+  const handlePasswordVerification = async (password: string) => {
+    try {
+      const response = await fetch(`/api/template-share/${shareId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ password }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        alert(data.error || "Invalid password");
+        return;
+      }
+
+      const result = await response.json();
+      const encryptedData = JSON.parse(result.template.data);
+      const decryptedTemplate = decryptFormData(
+        encryptedData,
+        password,
+      ) as FormPOJO;
+
+      setTemplate(Form.fromPOJO(decryptedTemplate));
+      setTemplateName(result.template.name);
+      setViewCount(result.shareInfo.viewCount);
+      setIsEncrypted(true);
+      setNeedsPasswordVerification(false);
+    } catch (verifyError) {
+      console.error("Error verifying shared template password:", verifyError);
+      alert("Failed to unlock template.");
+    }
+  };
+
   if (isLoading) {
     return <LoadingState message="Loading shared template..." />;
+  }
+
+  if (needsPasswordVerification) {
+    return (
+      <div className="flex min-h-screen w-full flex-col items-center justify-center gap-4">
+        <h1 className="text-2xl font-bold">Password Protected Template</h1>
+        <p>This shared template requires the template password to open.</p>
+        <PasswordModal
+          isOpen={true}
+          onClose={() => router.push("/")}
+          onSubmit={(password: string) => handlePasswordVerification(password)}
+          mode="enter"
+          title="Enter Password"
+          description={`Enter the password for "${templateName}".`}
+        />
+      </div>
+    );
   }
 
   if (error || !template) {
@@ -90,7 +156,7 @@ function SharedTemplatePageContent() {
   return (
     <DocumentPageShell
       formName={template.name}
-      isEncrypted={false}
+      isEncrypted={isEncrypted}
       onHomeClick={() => router.push("/")}
       readOnly={true}
       actions={

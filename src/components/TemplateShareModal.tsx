@@ -12,11 +12,13 @@ interface TemplateShareModalProps {
   onClose: () => void;
   templateId: string;
   templateName: string;
+  requiresPassword: boolean;
 }
 
 interface ShareInfo {
   shareId: string;
   shareUrl: string;
+  requiresPassword: boolean;
   viewCount: number;
   createdAt: string;
 }
@@ -26,6 +28,7 @@ export default function TemplateShareModal({
   onClose,
   templateId,
   templateName,
+  requiresPassword,
 }: TemplateShareModalProps) {
   const [shareInfo, setShareInfo] = React.useState<ShareInfo | null>(null);
   const [existingShares, setExistingShares] = React.useState<ShareInfo[]>([]);
@@ -45,11 +48,13 @@ export default function TemplateShareModal({
         data.shares.map(
           (share: {
             shareId: string;
+            requiresPassword: boolean;
             viewCount: number;
             createdAt: string;
           }) => ({
             shareId: share.shareId,
             shareUrl: `${window.location.origin}/share/template/${share.shareId}`,
+            requiresPassword: share.requiresPassword,
             viewCount: share.viewCount,
             createdAt: share.createdAt,
           }),
@@ -87,6 +92,7 @@ export default function TemplateShareModal({
       setShareInfo({
         shareId: data.shareId,
         shareUrl: data.shareUrl,
+        requiresPassword: data.requiresPassword,
         viewCount: data.viewCount,
         createdAt: data.createdAt,
       });
@@ -148,6 +154,13 @@ export default function TemplateShareModal({
                   the structure and create their own local form from it.
                 </p>
 
+                <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800">
+                  Shared links use the template&apos;s own protection settings.
+                  {requiresPassword
+                    ? " Recipients will need that same password."
+                    : " This template does not currently require a password."}
+                </div>
+
                 {error && (
                   <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
                     {error}
@@ -180,6 +193,11 @@ export default function TemplateShareModal({
                           <div className="flex items-center gap-2 text-sm text-gray-600">
                             <LinkIcon className="h-4 w-4" />
                             Template Share #{index + 1}
+                            {share.requiresPassword && (
+                              <span className="rounded bg-amber-100 px-2 py-0.5 text-xs text-amber-700">
+                                Uses template password
+                              </span>
+                            )}
                           </div>
                           <div className="text-sm text-gray-500">
                             {share.viewCount} views
@@ -216,6 +234,9 @@ export default function TemplateShareModal({
                 <p className="text-gray-600">
                   Recipients can review the template and create their own local
                   form from it.
+                  {shareInfo.requiresPassword
+                    ? " They will need the same template password to open it."
+                    : ""}
                 </p>
               </div>
 

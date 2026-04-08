@@ -62,7 +62,7 @@ Pre-release (~75% complete). No compatibility obligations.
 
 - **REQ-13: Client-Side Encryption** — All sensitive form data encrypted client-side before transmission or storage. Encryption keys never leave the client; server only stores encrypted data. Status: ✅ implemented.
 - **REQ-14: No User Accounts Required** — System operates without user account creation or login. All data access relies on form links and optional encryption keys. Status: ✅ implemented.
-- **REQ-9: Unified Access Control** — When password protection is used, template/form sharing access control should use one coherent password model rather than separate share-password and form-password systems. Status: ❌ not implemented.
+- **REQ-9: Unified Access Control** — When password protection is used, template/form sharing access control should use one coherent password model rather than separate share-password and form-password systems. Status: ✅ implemented.
 - **REQ-15: Local Storage for Recent Forms** — Recently accessed forms stored only in browser local storage for quick access and draft recovery. Recent-form metadata must not be uploaded or exposed as a server-side list. Local storage respects privacy settings. Status: ✅ implemented.
 - **REQ-24: Draft Recovery** — Local browser storage may keep draft templates/forms for quick recovery, but finalized/shared artifacts must not rely on mutable local state. Status: ✅ partially implemented.
 

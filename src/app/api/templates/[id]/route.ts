@@ -18,6 +18,14 @@ export async function GET(
       );
     }
 
+    if (template.encrypted) {
+      return NextResponse.json({
+        requiresPassword: true,
+        templateName: template.name,
+        isEncrypted: true,
+      });
+    }
+
     return NextResponse.json(template);
   } catch (error) {
     console.error("Error retrieving template:", error);
@@ -36,7 +44,7 @@ export async function POST(
     const { id } = await context.params;
     const body = await request.json();
 
-    const { name, data } = body;
+    const { name, data, encrypted = false, password_hash = null } = body;
 
     if (!name || !data) {
       return NextResponse.json(
@@ -45,22 +53,26 @@ export async function POST(
       );
     }
 
-    const template = Form.fromPOJO(data as FormPOJO).withoutAnswers();
-    if (!hasValidStructure(template)) {
-      return NextResponse.json(
-        {
-          error:
-            "Templates need at least one category and one question before they can be finalized.",
-        },
-        { status: 400 },
-      );
+    if (!encrypted) {
+      const template = Form.fromPOJO(data as FormPOJO).withoutAnswers();
+      if (!hasValidStructure(template)) {
+        return NextResponse.json(
+          {
+            error:
+              "Templates need at least one category and one question before they can be finalized.",
+          },
+          { status: 400 },
+        );
+      }
     }
 
     try {
       TemplateStorage.saveTemplate({
         id,
+        encrypted,
+        password_hash,
         name,
-        data: JSON.stringify(template),
+        data: JSON.stringify(data),
       });
     } catch (error) {
       if (

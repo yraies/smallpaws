@@ -18,11 +18,13 @@ import LoadingState from "../../../components/LoadingState";
 import PageActionRails, {
   type RailAction,
 } from "../../../components/PageActionRails";
+import PasswordModal from "../../../components/PasswordModal";
 import TemplateShareModal from "../../../components/TemplateShareModal";
 import {
   TemplateContextProvider,
   useTemplateContext,
 } from "../../../contexts/TemplateContext";
+import { encryptFormData, hashPassword } from "../../../lib/crypto";
 import { Category, Question } from "../../../types/Form";
 import { hasValidStructure } from "../../../utils/documentStructure";
 import { printCurrentView } from "../../../utils/formActions";
@@ -33,9 +35,20 @@ import {
 } from "../../../utils/recentForms";
 
 function TemplatePageContent() {
-  const { template, setTemplate, isFinalized, setIsFinalized, isLoading } =
-    useTemplateContext();
+  const {
+    template,
+    templateName,
+    setTemplate,
+    isFinalized,
+    setIsFinalized,
+    isEncrypted,
+    setIsEncrypted,
+    needsPasswordVerification,
+    unlockTemplate,
+    isLoading,
+  } = useTemplateContext();
   const [isFinalizing, setIsFinalizing] = React.useState(false);
+  const [showPasswordModal, setShowPasswordModal] = React.useState(false);
   const [showShareModal, setShowShareModal] = React.useState(false);
   const router = useRouter();
   const params = useParams();
@@ -45,11 +58,31 @@ function TemplatePageContent() {
     return <LoadingState message="Loading template..." showSpinner={false} />;
   }
 
+  if (needsPasswordVerification) {
+    return (
+      <div className="flex min-h-screen w-full flex-col items-center justify-center gap-4">
+        <h1 className="text-2xl font-bold">Password Protected Template</h1>
+        <p>
+          This template is protected and requires a password before you can view
+          or share it.
+        </p>
+        <PasswordModal
+          isOpen={true}
+          onClose={() => router.push("/")}
+          onSubmit={(password: string) => unlockTemplate(password)}
+          mode="enter"
+          title="Enter Password"
+          description={`Enter the password for "${templateName}".`}
+        />
+      </div>
+    );
+  }
+
   if (!template) {
     return <h1>Template not found</h1>;
   }
 
-  const finalizeTemplate = async () => {
+  const finalizeTemplate = async (password: string, shouldEncrypt: boolean) => {
     if (!templateId || !hasValidStructure(template)) {
       alert("Templates need at least one category and one question.");
       return;
@@ -57,6 +90,7 @@ function TemplatePageContent() {
 
     setIsFinalizing(true);
     try {
+      const templateData = template.withoutAnswers();
       const response = await fetch(`/api/templates/${templateId}`, {
         method: "POST",
         headers: {
@@ -64,7 +98,11 @@ function TemplatePageContent() {
         },
         body: JSON.stringify({
           name: template.name,
-          data: template.withoutAnswers(),
+          data: shouldEncrypt
+            ? encryptFormData(templateData, password)
+            : templateData,
+          encrypted: shouldEncrypt,
+          password_hash: shouldEncrypt ? hashPassword(password) : null,
         }),
       });
 
@@ -77,12 +115,14 @@ function TemplatePageContent() {
       saveRecentFormMeta(localStorage, {
         id: templateId,
         name: template.name,
-        encrypted: false,
+        encrypted: shouldEncrypt,
         isPublished: true,
         kind: "template",
       });
       removeDraftFormData(localStorage, templateId);
+      setIsEncrypted(shouldEncrypt);
       setIsFinalized(true);
+      setShowPasswordModal(false);
     } catch (error) {
       console.error("Error finalizing template:", error);
       alert("Failed to finalize template.");
@@ -122,7 +162,7 @@ function TemplatePageContent() {
   return (
     <DocumentPageShell
       formName={template.name}
-      isEncrypted={false}
+      isEncrypted={isEncrypted}
       onFormNameChange={(name) => setTemplate((prev) => prev.withName(name))}
       onHomeClick={() => router.push("/")}
       readOnly={isFinalized}
@@ -176,7 +216,7 @@ function TemplatePageContent() {
                   {
                     key: "finalize-template",
                     label: isFinalizing ? "Finalizing..." : "Finalize",
-                    onClick: finalizeTemplate,
+                    onClick: () => setShowPasswordModal(true),
                     title: "Finalize Template",
                     disabled: isFinalizing,
                     variant: "success",
@@ -216,6 +256,19 @@ function TemplatePageContent() {
         onClose={() => setShowShareModal(false)}
         templateId={templateId}
         templateName={template.name}
+        requiresPassword={isEncrypted}
+      />
+
+      <PasswordModal
+        isOpen={showPasswordModal}
+        onClose={() => setShowPasswordModal(false)}
+        onSubmit={finalizeTemplate}
+        mode="set"
+        title="Finalize Template"
+        description="Choose whether to protect your template with a password. Shared links will use the same password."
+        toggleLabel="Protect this template with a password"
+        submitLabelWithPassword="Finalize with Password"
+        submitLabelWithoutPassword="Finalize without Password"
       />
     </DocumentPageShell>
   );

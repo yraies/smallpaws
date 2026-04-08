@@ -17,6 +17,8 @@ export async function POST(
       );
     }
 
+    const requiresPassword = template.encrypted;
+
     const shareId = typeid("share").toString();
     const sharedTemplate = TemplateStorage.createSharedTemplate(id, shareId);
 
@@ -28,6 +30,7 @@ export async function POST(
       success: true,
       shareId,
       shareUrl,
+      requiresPassword,
       viewCount: sharedTemplate.view_count,
       createdAt: sharedTemplate.created_at,
     });
@@ -47,11 +50,14 @@ export async function GET(
   try {
     const { id } = await context.params;
     const shares = TemplateStorage.getSharedTemplatesForTemplate(id);
+    const template = TemplateStorage.getTemplate(id);
+    const requiresPassword = !!template?.encrypted;
 
     return NextResponse.json({
       success: true,
       shares: shares.map((share) => ({
         shareId: share.share_id,
+        requiresPassword,
         viewCount: share.view_count,
         createdAt: share.created_at,
       })),

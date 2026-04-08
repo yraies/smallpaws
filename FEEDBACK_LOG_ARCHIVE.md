@@ -36,6 +36,24 @@ Required fields for new entries:
 
 ## Entries
 
+### F-012 (2026-04-04) - One password model, not multiple user-facing passwords
+
+- **Date:** 2026-04-04
+- **Source:** Chat-driven
+- **Exact Quote:** "I think 2 is fine, as long as the user is not confronted with multiple passwords or alike"
+- **Normalized Intent:** Use the stricter server-verified access-control model, but keep it as one user-facing password per protected artifact/share flow rather than introducing separate passwords for different steps.
+- **Feedback:** The stakeholder accepts a verifier-based protection model as long as it stays simple and does not burden users with multiple passwords.
+- **Action taken:** Logged the chosen `B-014` direction and will implement unified artifact-level password handling without separate share passwords.
+
+### F-011 (2026-04-04) - Use one consistent access-control model everywhere
+
+- **Date:** 2026-04-04
+- **Source:** Chat-driven
+- **Exact Quote:** "I think everything should use one consistent model."
+- **Normalized Intent:** Apply one coherent artifact-level password/access-control model across templates, forms, and shared links instead of mixing different rules by artifact or share type.
+- **Feedback:** The stakeholder wants consistency over special cases in access-control behavior.
+- **Action taken:** Logged the decision and proceeded with `B-014` implementation around a single unified model.
+
 ### F-010 (2026-04-04) - Prefer onboarding before deeper cleanup/accessibility
 
 - **Date:** 2026-04-04

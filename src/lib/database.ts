@@ -30,12 +30,26 @@ db.exec(`
 db.exec(`
   CREATE TABLE IF NOT EXISTS templates (
     id TEXT PRIMARY KEY,
+    encrypted BOOLEAN DEFAULT false,
+    password_hash TEXT,
     name TEXT NOT NULL,
     data TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )
 `);
+
+try {
+  db.exec(`ALTER TABLE templates ADD COLUMN encrypted BOOLEAN DEFAULT false`);
+} catch {
+  // Column already exists, ignore error
+}
+
+try {
+  db.exec(`ALTER TABLE templates ADD COLUMN password_hash TEXT`);
+} catch {
+  // Column already exists, ignore error
+}
 
 // Add migration for existing databases to add new columns
 try {
@@ -109,6 +123,8 @@ export interface StoredForm {
 
 export interface StoredTemplate {
   id: string;
+  encrypted: boolean;
+  password_hash?: string | null;
   name: string;
   data: string;
   created_at: string;
@@ -342,8 +358,20 @@ export class FormStorage {
 export class TemplateStorage {
   static getTemplate(id: string): StoredTemplate | null {
     const stmt = db.prepare("SELECT * FROM templates WHERE id = ?");
-    const result = stmt.get(id) as StoredTemplate | undefined;
-    return result ?? null;
+    const result = stmt.get(id) as
+      | (Omit<StoredTemplate, "encrypted"> & { encrypted: number })
+      | undefined;
+    if (!result) return null;
+
+    return {
+      id: result.id,
+      encrypted: Boolean(result.encrypted),
+      password_hash: result.password_hash,
+      name: result.name,
+      data: result.data,
+      created_at: result.created_at,
+      updated_at: result.updated_at,
+    };
   }
 
   static saveTemplate(
@@ -357,11 +385,17 @@ export class TemplateStorage {
     }
 
     const stmt = db.prepare(`
-      INSERT INTO templates (id, name, data, updated_at)
-      VALUES (?, ?, ?, datetime('now'))
+      INSERT INTO templates (id, encrypted, password_hash, name, data, updated_at)
+      VALUES (?, ?, ?, ?, ?, datetime('now'))
     `);
 
-    stmt.run(template.id, template.name, template.data);
+    stmt.run(
+      template.id,
+      template.encrypted ? 1 : 0,
+      template.password_hash || null,
+      template.name,
+      template.data,
+    );
   }
 
   static createSharedTemplate(

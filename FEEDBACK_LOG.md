@@ -21,6 +21,8 @@ Detailed chronological history is preserved in `FEEDBACK_LOG_ARCHIVE.md`.
 - **Design direction**: The app should return to a cozy, playful visual identity with warm colors, paper-like tactility, and a clearly centered document surface. It should feel hand-crafted and drawable with a few pens and a ruler: narrow, blocky, deliberate, and not overly polished. Avoid an overly rounded aesthetic, and keep the print layout space-efficient rather than decorative. Secondary controls should stay out of the way near the top edges rather than competing with the main form/template content; top controls should live in left/right vertical stacks outside the center column with text labels, while the center column should carry document/status information rather than duplicated primary actions. The small Published/Shared/Finalized title badges should be removed. Onboarding should be calm rather than in-your-face, and it should explain the workflow in plain language before introducing internal terms. (F-008)
 - **Workflow preference**: Work should be committed regularly at sensible checkpoints instead of left uncommitted for long stretches. (F-009)
 - **Backlog priority**: Preferred near-term order is `B-017` onboarding/help copy, then `B-022` shared page-layout extraction, then `B-014` password/access-control unification, then `B-021` screen reader support. (F-010)
+- **Access-control direction**: Templates, forms, and their shared links should all use one consistent password/access model rather than separate systems. (F-011)
+- **Access-control direction**: Keep a single server-verified password model across templates, forms, and shared links, but do not expose users to multiple passwords for the same artifact/share flow. (F-012)
 
 ## Severity Scale
 

@@ -22,7 +22,6 @@ Status buckets: `todo`, `in_progress`, `blocked`, `postponed`
 - **B-011** — Introduce explicit template drafts, finalized templates, and fixed-structure forms. Align types, persistence, and routing with REQ-1/REQ-2/REQ-4/REQ-22/REQ-23.
 - **B-012** — Enforce template finalization and structure validation before form creation or template sharing. Require at least one category and one question. (REQ-2, REQ-6)
 - **B-013** — Add shareable finalized-template views and let recipients create their own local forms from them. (REQ-7)
-- **B-014** — Unify password/access-control handling for protected templates/forms and their shared links. (REQ-9)
 - **B-015** — Make phase transitions clear in the UI: template creation, form filling, and reading results, including safe backtracking via new local copies. (REQ-18)
 - **B-016** — Make JSON/CSV export and printing clearly discoverable and user-friendly in the relevant phases. (REQ-16, REQ-19)
 
