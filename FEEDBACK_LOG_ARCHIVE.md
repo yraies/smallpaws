@@ -36,6 +36,16 @@ Required fields for new entries:
 
 ## Entries
 
+### F-017 (2026-04-23) - Give built-in starter templates both draft and fill entry paths
+
+- **Date:** 2026-04-23
+- **Source:** Chat-driven
+- **Exact Quote:** "sounds good. While doing that we should also adress that the front page should probably provide both \"create template draft\" as well as \"fill form\" buttons for all but the empty default templates. the empty one should only allow for creation of a template draft."
+- **Normalized Intent:** On the home page, built-in starter templates with valid structure should offer both a template-draft path and a fillable-form path, while the empty starter remains draft-only.
+- **Feedback:** The home page should expose the workflow choice directly for ready-made starter templates instead of forcing every built-in starter through template drafting first. The empty starter remains the path for building structure from scratch.
+- **Action taken:** Added explicit home-page actions for creating a template draft versus starting a fillable form from non-empty built-in starter templates, centralized lifecycle helpers for deriving template/form drafts from structure, and aligned SPEC/PRD/TESTING/BACKLOG wording with the built-in-starter rule.
+- **Validation:** Added targeted lifecycle unit tests and verified the updated home page plus template/shared pages in real Chrome, including a mobile layout check.
+
 ### F-016 (2026-04-08) - Bring shared filled-form page back into the main UX system
 
 - **Date:** 2026-04-08

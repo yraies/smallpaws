@@ -17,6 +17,11 @@ import {
   type RecentItemMeta,
   removeRecentFormFromStorage,
 } from "../utils/recentForms";
+import {
+  canStartFormFromTemplate,
+  createFormDraftFromTemplate,
+  createTemplateDraftFromStructure,
+} from "../utils/templateLifecycle";
 
 function Spacer() {
   return <div className="col-span-full mx-auto my-2 w-4/5" />;
@@ -27,6 +32,12 @@ function HomePageContent() {
   const [selectedTemplate, setSelectedTemplate] = React.useState("empty");
   const [templateName, setTemplateName] = React.useState("");
   const [recentItems, setRecentItems] = React.useState<RecentItemMeta[]>([]);
+  const selectedStarterTemplate =
+    FormTemplates.find((template) => template.id === selectedTemplate) ??
+    FormTemplates[0];
+  const canFillFormFromStarter = canStartFormFromTemplate(
+    selectedStarterTemplate.template,
+  );
 
   useEffect(() => {
     loadRecentFormsFromLocalStorage(setRecentItems);
@@ -67,13 +78,13 @@ function HomePageContent() {
       <Box title="New Template" onTitleChange={() => {}} buttons={null}>
         <div className="grid w-full grid-cols-1 md:grid-cols-2">
           <p className="col-span-full px-2 text-sm text-lavender-700">
-            Choose a starting point, give it a title if you want, then create a
-            draft template. You can still edit the structure before finalizing
-            it.
+            Choose a starting point and an optional title. You can create a
+            template draft to edit the structure, and non-empty starter
+            templates can also open directly as fillable forms.
           </p>
           <Spacer />
           <div className="col-span-full flex flex-row gap-2 px-2">
-            <p className="text-lg font-semibold">Template Title</p>
+            <p className="text-lg font-semibold">Starting Title</p>
             <input
               type="text"
               className="paper-field min-w-1 grow"
@@ -93,15 +104,36 @@ function HomePageContent() {
             ),
           )}
           <Spacer />
-          <button
-            type="button"
-            className="justify-self-end px-2 py-1 hover:backdrop-brightness-90 md:col-start-2"
-            onClick={() =>
-              createAndNavigateTemplate(selectedTemplate, templateName, router)
-            }
-          >
-            <span className="text-lg font-semibold">Create Draft</span>
-          </button>
+          <div className="col-span-full flex flex-wrap justify-end gap-2 px-2">
+            <button
+              type="button"
+              className="border border-sand-200 bg-sand-50 px-3 py-2 text-sm font-semibold text-lavender-700 hover:backdrop-brightness-95"
+              onClick={() =>
+                createAndNavigateTemplateDraft(
+                  selectedStarterTemplate.template,
+                  templateName,
+                  router,
+                )
+              }
+            >
+              Create Template Draft
+            </button>
+            {canFillFormFromStarter && (
+              <button
+                type="button"
+                className="bg-lavender-700 px-3 py-2 text-sm font-semibold text-white hover:backdrop-brightness-95"
+                onClick={() =>
+                  createAndNavigateFormDraft(
+                    selectedStarterTemplate.template,
+                    templateName,
+                    router,
+                  )
+                }
+              >
+                Fill Form
+              </button>
+            )}
+          </div>
         </div>
       </Box>
       <Box
@@ -222,23 +254,35 @@ function loadRecentFormsFromLocalStorage(
   setRecentForms(loadRecentForms(localStorage));
 }
 
-function createAndNavigateTemplate(
-  selectedTemplate: string,
+function createAndNavigateTemplateDraft(
+  template: Form,
   templateName: string,
   router: ReturnType<typeof useRouter>,
 ) {
-  const template =
-    FormTemplates.find((t) => t.id === selectedTemplate)?.template ||
-    FormTemplates[0].template;
   const id = typeid("template");
   sessionStorage.setItem("create_new_template", "true");
   sessionStorage.setItem(
     "template",
-    JSON.stringify(
-      templateName !== "" ? template.withName(templateName) : template,
-    ),
+    JSON.stringify(createTemplateDraftFromStructure(template, templateName)),
   );
   router.push(`/template/${id}`);
+}
+
+function createAndNavigateFormDraft(
+  template: Form,
+  templateName: string,
+  router: ReturnType<typeof useRouter>,
+) {
+  if (!canStartFormFromTemplate(template)) {
+    return;
+  }
+
+  const id = typeid("form");
+  const draftForm = createFormDraftFromTemplate(template, templateName);
+
+  sessionStorage.setItem("create_new", "true");
+  sessionStorage.setItem("form", JSON.stringify(draftForm));
+  router.push(`/form/${id}`);
 }
 
 function navigateToRecent(

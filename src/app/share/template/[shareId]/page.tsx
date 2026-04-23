@@ -21,6 +21,7 @@ import {
   saveDraftFormData,
   saveRecentFormMeta,
 } from "../../../../utils/recentForms";
+import { createFormDraftFromTemplate } from "../../../../utils/templateLifecycle";
 
 function SharedTemplatePageContent() {
   const [template, setTemplate] = React.useState<Form | null>(null);
@@ -137,7 +138,7 @@ function SharedTemplatePageContent() {
 
   const startLocalForm = () => {
     const formId = typeid("form").toString();
-    const draftForm = template.withoutAnswers();
+    const draftForm = createFormDraftFromTemplate(template);
 
     saveRecentFormMeta(localStorage, {
       id: formId,

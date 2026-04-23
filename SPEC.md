@@ -42,21 +42,22 @@ Pre-release (~75% complete). No compatibility obligations.
 
 #### Template Creation and Structure
 
-- **REQ-1: Create Template Draft** — Users create editable template drafts from scratch or by starting from an existing template structure. Templates are the structural source of truth for later forms. Status: ❌ not implemented.
-- **REQ-2: Finalize Template Before Filling** — Users finalize template drafts into frozen template versions before creating forms. Only finalized templates can be used to start fillable forms. Status: ❌ not implemented.
+- **REQ-1: Create Template Draft** — Users create editable template drafts from scratch or by starting from an existing template structure. Templates are the structural source of truth for later forms. Status: ✅ implemented.
+- **REQ-2: Finalize Template Before Filling** — Users finalize template drafts into frozen template versions before creating forms. Only finalized templates, or built-in starter templates with valid structure, can be used to start fillable forms. Status: ✅ implemented.
 - **REQ-3: Edit Template Structure** — Template drafts allow editing titles, categories, questions, ordering, and the template-wide answer schema. Finalized templates are read-only. Status: ❌ not implemented.
-- **REQ-4: Template vs Fillable Form Distinction** — System distinguishes clearly between templates and forms. Templates contain structure and answer schema only; forms contain the same fixed structure plus filled answers. Status: ❌ not implemented.
+- **REQ-4: Template vs Fillable Form Distinction** — System distinguishes clearly between templates and forms. Templates contain structure and answer schema only; forms contain the same fixed structure plus filled answers. Status: ✅ partially implemented.
 - **REQ-20: Category-Based Organization** — Templates and forms are organized into categories, each containing related questions. Categories clearly separate different topic areas. Status: ✅ implemented.
-- **REQ-6: Template Structure Validation** — Templates must have at least one category and one question before they can be finalized or shared. Status: ❌ not implemented.
+- **REQ-6: Template Structure Validation** — Templates must have at least one category and one question before they can be finalized or shared. Status: ✅ implemented.
+- **REQ-26: Built-In Starter Entry Paths** — On the home page, built-in starter templates with valid structure can start either a local template draft or a local fillable form. The empty starter only allows local template-draft creation. Status: ✅ implemented.
 
 #### Form Response and Interaction
 
-- **REQ-22: Create Form from Finalized Template** — Starting a form from a finalized template creates an independent fillable copy with fixed categories, questions, and answer schema. Status: ❌ not implemented.
+- **REQ-22: Create Form from Finalized Template** — Starting a form from a finalized template creates an independent fillable copy with fixed categories, questions, and answer schema. Built-in starter templates with valid structure may act as ready-made finalized starters on the home page. Status: ✅ implemented.
 - **REQ-10: Predefined Answer Options** — Questions support: "must", "would like", "maybe", "off limits", and "unset" by default. Unset is the default state. Status: ✅ implemented.
 - **REQ-11: Template-Wide Custom Answer Enumerations** — Template creators can define custom answer options for all questions in a template. These answer options carry into forms created from that template. Status: ❌ not implemented.
 - **REQ-12: Visual Answer Indication** — Visual indicators for different answer states show agreement/disagreement areas. Indicators must be clear and distinguishable. Status: ✅ implemented.
 - **REQ-17: Immutable Shared Forms** — Once a form is shared/published, its answers cannot be modified; changes require creating a new local form/copy. This protects recipients from silent changes. Status: ✅ partially implemented.
-- **REQ-23: Forms Only Edit Answers** — In the form-filling phase, users can edit answers/content but not the form structure. Status: ❌ not implemented.
+- **REQ-23: Forms Only Edit Answers** — In the form-filling phase, users can edit answers/content but not the form structure. Status: ✅ implemented.
 
 #### Privacy and Data Security
 
@@ -84,7 +85,7 @@ Pre-release (~75% complete). No compatibility obligations.
 
 - Privacy first: all sensitive data encrypted client-side; server is zero-knowledge.
 - No user accounts: access through shareable links and optional passwords only.
-- Finalization before filling: forms are created from finalized templates, not editable template drafts.
+- Finalization before filling: forms are created from finalized templates, not editable template drafts. Built-in starter templates with valid structure count as ready-made starter templates for beginning a fillable form from the home page.
 - Form immutability: shared/published forms cannot be modified, only replaced with new local versions.
 - Client-side processing: server only stores/serves encrypted data blobs.
 - Conversation focus: tool designed to start conversations, not replace them.
@@ -92,6 +93,7 @@ Pre-release (~75% complete). No compatibility obligations.
 ### 3) Acceptance Behaviors
 
 - Starting from scratch opens template creation, not form filling.
+- On the home page, non-empty built-in starter templates offer both "Create Template Draft" and "Fill Form" actions; the empty starter remains template-draft-only.
 - Finalizing a template freezes its structure and answer schema for future forms.
 - Starting a form from a finalized template produces an independent fillable copy with fixed structure.
 - Sharing a finalized template produces a unique URL; accessing it shows a read-only structure view.

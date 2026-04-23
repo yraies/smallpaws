@@ -63,6 +63,7 @@ For backlog-control and small-command turns with no code changes:
 - API route request/response contracts (to be added).
 - Recent-forms storage semantics (to be added): browser-local metadata/drafts only; no server-side recent-forms listing.
 - Template finalization invariants (to be added): forms can only be created from finalized templates; finalized/shared artifacts are immutable.
+- Starter-template entry behavior (to be added): non-empty built-in starters can open either a template draft or a fillable form; the empty starter remains template-draft-only.
 - Unified access-control coverage (to be added): protected shared links use the same password model as the protected artifact.
 
 ## Failure Handling

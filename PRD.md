@@ -13,6 +13,7 @@ Small Paws is a privacy-first conversation starter tool for complex personal top
 - **Template creation**: users design structure-only templates containing categories, questions, and answer schema.
 - **Form filling**: users create fillable forms from finalized templates and answer them without changing structure.
 - **Reading results**: users review finalized templates or shared/published forms in read-only form and branch backward by creating new local drafts/copies.
+- **Starter templates**: built-in starter templates with valid structure can begin either a local template draft or a local fillable form from the home page; the empty starter remains draft-only.
 
 ## Users
 
@@ -69,6 +70,7 @@ Small Paws is a privacy-first conversation starter tool for complex personal top
 See `SPEC.md` section 3 for detailed acceptance behaviors. Key outcomes:
 
 - Templates are editable structure-only artifacts; forms are fixed-structure answerable artifacts created from finalized templates.
+- Built-in starter templates with valid structure can begin either a local template draft or a local fillable form from the home page; the empty starter stays template-draft-only.
 - All encryption is client-side; server never sees plaintext.
 - JSON and CSV export are available through user-friendly UI.
 - UI is responsive on desktop and mobile.

@@ -35,6 +35,10 @@ import {
   saveDraftFormData,
   saveRecentFormMeta,
 } from "../../../utils/recentForms";
+import {
+  createFormDraftFromTemplate,
+  createTemplateDraftFromStructure,
+} from "../../../utils/templateLifecycle";
 
 function TemplatePageContent() {
   const {
@@ -135,7 +139,7 @@ function TemplatePageContent() {
 
   const startForm = () => {
     const formId = typeid("form").toString();
-    const draftForm = template.withoutAnswers();
+    const draftForm = createFormDraftFromTemplate(template);
 
     saveRecentFormMeta(localStorage, {
       id: formId,
@@ -156,7 +160,7 @@ function TemplatePageContent() {
     sessionStorage.setItem("create_new_template", "true");
     sessionStorage.setItem(
       "template",
-      JSON.stringify(template.withoutAnswers()),
+      JSON.stringify(createTemplateDraftFromStructure(template)),
     );
     router.push(`/template/${newTemplateId}`);
   };
