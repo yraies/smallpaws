@@ -57,8 +57,8 @@ function FormContextProvider({ children }: { children: React.ReactNode }) {
         id,
         name: form.name,
         encrypted: false,
-        isPublished: false,
         kind: "form",
+        phase: "draft",
       });
       saveDraftFormData(localStorage, id, JSON.stringify(form));
       console.log("Saved draft form to localStorage");
@@ -123,8 +123,8 @@ async function checkIfEncrypted(
         id,
         name: storedForm.name,
         encrypted: Boolean(storedForm.encrypted),
-        isPublished: true,
         kind: "form",
+        phase: "published",
       });
       removeDraftFormData(localStorage, id);
 

@@ -310,8 +310,8 @@ function clearRecents(
 
 function describeRecentItem(item: RecentItemMeta): string {
   if (item.kind === "template") {
-    return item.isPublished ? "finalized template" : "template draft";
+    return item.phase === "finalized" ? "finalized template" : "template draft";
   }
 
-  return item.isPublished ? "published form" : "form draft";
+  return item.phase === "published" ? "published form" : "form draft";
 }

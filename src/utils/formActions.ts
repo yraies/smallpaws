@@ -16,8 +16,8 @@ export function prepareFormClone(form: Form): string {
     id: newFormId,
     name: clonedForm.name,
     encrypted: false,
-    isPublished: false,
     kind: "form",
+    phase: "draft",
   });
   saveDraftFormData(localStorage, newFormId, JSON.stringify(clonedForm));
 

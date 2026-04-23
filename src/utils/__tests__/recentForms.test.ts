@@ -43,8 +43,8 @@ describe("recent forms storage", () => {
       id,
       name: "Draft Form",
       encrypted: false,
-      isPublished: false,
       kind: "form",
+      phase: "draft",
       date: new Date("2026-04-03T10:00:00.000Z"),
     });
 
@@ -55,8 +55,8 @@ describe("recent forms storage", () => {
       id,
       name: "Draft Form",
       encrypted: false,
-      isPublished: false,
       kind: "form",
+      phase: "draft",
     });
   });
 
@@ -90,8 +90,8 @@ describe("recent forms storage", () => {
       id,
       name: "Draft Form",
       encrypted: false,
-      isPublished: false,
       kind: "form",
+      phase: "draft",
     });
     saveDraftFormData(storage, id, JSON.stringify({ name: "Draft Form" }));
 
@@ -132,13 +132,38 @@ describe("recent forms storage", () => {
       id,
       name: "Template Draft",
       encrypted: false,
-      isPublished: false,
       kind: "template",
+      phase: "draft",
     });
 
     const recentForms = loadRecentForms(storage);
 
     expect(recentForms).toHaveLength(1);
     expect(recentForms[0]?.kind).toBe("template");
+    expect(recentForms[0]?.phase).toBe("draft");
+  });
+
+  test("derives lifecycle phase from legacy published metadata", () => {
+    const storage = new MockStorage();
+    const id = "template_legacy";
+
+    storage.setItem(
+      getRecentFormMetaKey(id),
+      JSON.stringify({
+        name: "Legacy Finalized Template",
+        date: new Date("2026-04-03T10:00:00.000Z").toISOString(),
+        encrypted: false,
+        isPublished: true,
+        kind: "template",
+      }),
+    );
+
+    const recentForms = loadRecentForms(storage);
+
+    expect(recentForms[0]).toMatchObject({
+      id,
+      kind: "template",
+      phase: "finalized",
+    });
   });
 });

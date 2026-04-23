@@ -1,12 +1,13 @@
 export type RecentItemKind = "form" | "template";
+export type RecentItemPhase = "draft" | "finalized" | "published";
 
 export type RecentItemMeta = {
   id: string;
   name: string;
   date: Date;
   encrypted: boolean;
-  isPublished: boolean;
   kind: RecentItemKind;
+  phase: RecentItemPhase;
 };
 
 export type RecentFormMeta = RecentItemMeta;
@@ -15,6 +16,7 @@ type RecentFormMetaRecord = {
   name: string;
   date: string;
   encrypted?: boolean;
+  phase?: RecentItemPhase;
   isPublished?: boolean;
   kind?: RecentItemKind;
 };
@@ -45,8 +47,8 @@ export function saveRecentFormMeta(
       name: meta.name,
       date: (meta.date ?? new Date()).toISOString(),
       encrypted: meta.encrypted,
-      isPublished: meta.isPublished,
       kind: meta.kind,
+      phase: meta.phase,
     }),
   );
 }
@@ -110,8 +112,8 @@ export function loadRecentForms(
         name: parsed.name,
         date: new Date(parsed.date),
         encrypted: parsed.encrypted ?? false,
-        isPublished: parsed.isPublished ?? false,
         kind: parsed.kind ?? "form",
+        phase: deriveRecentItemPhase(parsed),
       });
     } catch (error) {
       console.error("Error parsing recent form metadata:", error);
@@ -120,6 +122,21 @@ export function loadRecentForms(
 
   forms.sort((a, b) => b.date.getTime() - a.date.getTime());
   return forms;
+}
+
+function deriveRecentItemPhase(parsed: RecentFormMetaRecord): RecentItemPhase {
+  if (parsed.phase) {
+    return parsed.phase;
+  }
+
+  const kind = parsed.kind ?? "form";
+  const isPublished = parsed.isPublished ?? false;
+
+  if (kind === "template") {
+    return isPublished ? "finalized" : "draft";
+  }
+
+  return isPublished ? "published" : "draft";
 }
 
 function getRecentFormIds(

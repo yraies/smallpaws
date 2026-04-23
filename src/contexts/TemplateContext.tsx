@@ -91,8 +91,8 @@ function TemplateContextProvider({ children }: { children: React.ReactNode }) {
           id,
           name: result.template.name,
           encrypted: true,
-          isPublished: true,
           kind: "template",
+          phase: "finalized",
         });
         removeDraftFormData(localStorage, id);
       } catch (error) {
@@ -146,8 +146,8 @@ function TemplateContextProvider({ children }: { children: React.ReactNode }) {
       id,
       name: template.name,
       encrypted: false,
-      isPublished: false,
       kind: "template",
+      phase: "draft",
     });
     saveDraftFormData(
       localStorage,
@@ -209,8 +209,8 @@ async function loadTemplate(
           id,
           name: storedTemplate.templateName,
           encrypted: true,
-          isPublished: true,
           kind: "template",
+          phase: "finalized",
         });
         removeDraftFormData(localStorage, id);
         setIsLoading(false);
@@ -228,8 +228,8 @@ async function loadTemplate(
         id,
         name: storedTemplate.name,
         encrypted: Boolean(storedTemplate.encrypted),
-        isPublished: true,
         kind: "template",
+        phase: "finalized",
       });
       removeDraftFormData(localStorage, id);
       setIsLoading(false);

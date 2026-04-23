@@ -122,8 +122,8 @@ function TemplatePageContent() {
         id: templateId,
         name: template.name,
         encrypted: shouldEncrypt,
-        isPublished: true,
         kind: "template",
+        phase: "finalized",
       });
       removeDraftFormData(localStorage, templateId);
       setIsEncrypted(shouldEncrypt);
@@ -145,8 +145,8 @@ function TemplatePageContent() {
       id: formId,
       name: draftForm.name,
       encrypted: false,
-      isPublished: false,
       kind: "form",
+      phase: "draft",
     });
     saveDraftFormData(localStorage, formId, JSON.stringify(draftForm));
 

@@ -144,8 +144,8 @@ function SharedTemplatePageContent() {
       id: formId,
       name: draftForm.name,
       encrypted: false,
-      isPublished: false,
       kind: "form",
+      phase: "draft",
     });
     saveDraftFormData(localStorage, formId, JSON.stringify(draftForm));
 

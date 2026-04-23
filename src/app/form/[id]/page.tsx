@@ -204,8 +204,8 @@ function FormPageContent() {
           id: formId,
           name: form.name,
           encrypted,
-          isPublished: true,
           kind: "form",
+          phase: "published",
         });
         removeDraftFormData(localStorage, formId);
         setIsEncrypted(encrypted);
