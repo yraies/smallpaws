@@ -118,7 +118,7 @@ function CategoryBox({
         );
       }}
       buttons={structureEditable ? buttons : null}
-      className="category border border-[rgba(198,144,85,0.18)]"
+      className="category border border-sand-200"
       role="region"
       aria-label={`${category.name} category`}
     >

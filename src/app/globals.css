@@ -1,17 +1,63 @@
 @import "@fontsource-variable/outfit";
 @import "tailwindcss";
 
+@theme {
+  /* ── Palette: Sand (primary) ── */
+  --color-sand-50: #FFFDF8;
+  --color-sand-100: #FFF4D4;
+  --color-sand-200: #FFEAAB;
+  --color-sand-300: #FFE08A;
+  --color-sand-500: #C5A958;
+  --color-sand-700: #776224;
+  --color-sand-900: #4A3C15;
+
+  /* ── Palette: Pistachio (secondary #1) ── */
+  --color-pistachio-50: #FFFEF5;
+  --color-pistachio-100: #FFFDD4;
+  --color-pistachio-200: #FFFCAB;
+  --color-pistachio-500: #C5C158;
+  --color-pistachio-700: #777424;
+  --color-pistachio-900: #4A4815;
+
+  /* ── Palette: Lavender (secondary #2) ── */
+  --color-lavender-50: #F3EBF8;
+  --color-lavender-100: #E3D2EE;
+  --color-lavender-200: #C7B4D6;
+  --color-lavender-300: #B89DCA;
+  --color-lavender-500: #9C7DB5;
+  --color-lavender-700: #664084;
+  --color-lavender-900: #391C50;
+
+  /* ── Palette: Complement (blue-violet) ── */
+  --color-complement-50: #EDEDF5;
+  --color-complement-100: #D5D5E9;
+  --color-complement-200: #BABAD9;
+  --color-complement-500: #8787BB;
+  --color-complement-700: #49498A;
+  --color-complement-900: #222254;
+
+  /* ── Semantic: derived from palette ── */
+  --color-danger-50: #FDF2F1;
+  --color-danger-100: #F5D5D3;
+  --color-danger-300: #D4908B;
+  --color-danger-500: #AA6C67;
+  --color-danger-700: #7D3E3A;
+  --color-danger-900: #4E2523;
+}
+
 :root {
-  --page-bg: #efe4d3;
-  --ink: #2f2431;
-  --muted-ink: #665568;
-  --accent-block: #9f7aea;
-  --accent-block-dark: #805ad5;
+  --page-bg: #fff8e8;
+  --ink: #391c50;
+  --muted-ink: #664084;
+  --accent-block: #9c7db5;
+  --accent-block-dark: #664084;
   --paper: #fffdf8;
-  --paper-line: #d9c9b8;
-  --warning: #f6ad55;
-  --success: #68d391;
-  --info: #63b3ed;
+  --paper-line: #ffeaab;
+  --plum: #c7b4d6;
+  --paper-accent: #f3ebf8;
+  --warning: #c5a958;
+  --success: #c5c158;
+  --info: #8787bb;
 }
 
 html,
@@ -196,7 +242,7 @@ body {
     width: 100%;
     max-width: 100%;
     display: block;
-    border: 1.5pt solid #8b5cf6;
+    border: 1.5pt solid #9c7db5;
   }
 
   [class*="CategoryPage"] h2,
@@ -331,30 +377,30 @@ body {
     page-break-after: avoid;
   }
 
-  .text-green-500,
-  .text-blue-400,
-  .text-amber-400,
-  .text-red-400 {
+  /* Reset semantic palette colors for print */
+  [class*="text-pistachio"],
+  [class*="text-complement"],
+  [class*="text-sand"],
+  [class*="text-danger"] {
     color: #000;
   }
 
-  .border-green-500,
-  .border-blue-400,
-  .border-amber-400,
-  .border-red-400 {
+  [class*="border-pistachio"],
+  [class*="border-complement"],
+  [class*="border-sand"],
+  [class*="border-danger"] {
     border-color: #666;
   }
 
-  [class*="bg-green"],
-  [class*="bg-blue"],
-  [class*="bg-red"],
-  [class*="bg-amber"],
-  [class*="bg-slate"] {
+  [class*="bg-pistachio"],
+  [class*="bg-complement"],
+  [class*="bg-danger"],
+  [class*="bg-sand"] {
     background-color: white;
   }
 
-  .category[class*="bg-violet"] {
-    background-color: #e9d5ff;
+  .category[class*="bg-lavender"] {
+    background-color: #e3d2ee;
   }
 
   input[type="text"],

@@ -14,7 +14,7 @@ interface ShareInfoOverlayProps {
 
 export default function ShareInfoOverlay({ shareInfo }: ShareInfoOverlayProps) {
   return (
-    <div className="absolute top-14 right-2 space-y-1 border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-700 shadow-sm">
+    <div className="absolute top-14 right-2 space-y-1 border border-complement-200 bg-complement-50 px-3 py-2 text-xs text-complement-700 shadow-sm">
       <div className="flex items-center">
         <EyeIcon className="mr-1 h-3 w-3" />
         <span>{shareInfo.viewCount} views</span>

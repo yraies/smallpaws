@@ -49,7 +49,7 @@ const Box: React.FC<BoxProps> = ({
           </div>
         )}
       </header>
-      <div className="w-full bg-white p-1 text-black">{children}</div>
+      <div className="w-full bg-sand-50 p-1 text-lavender-900">{children}</div>
     </div>
   );
 };

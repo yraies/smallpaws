@@ -26,7 +26,7 @@ export default function FormHeader({
         title="Home"
         aria-label="Go home"
       >
-        <HomeIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-violet-400" />
+        <HomeIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-lavender-500" />
       </IconButton>
 
       <div className="fixed top-6 left-6 z-10 hidden lg:flex xl:left-10">

@@ -11,10 +11,10 @@ interface EdgeActionButtonProps {
 }
 
 const variantClasses = {
-  default: "border-violet-300 bg-white text-violet-800",
-  success: "border-green-300 bg-white text-green-800",
-  info: "border-blue-300 bg-white text-blue-800",
-  danger: "border-red-300 bg-white text-red-800",
+  default: "border-lavender-300 bg-sand-50 text-lavender-900",
+  success: "border-pistachio-500 bg-sand-50 text-pistachio-700",
+  info: "border-complement-500 bg-sand-50 text-complement-700",
+  danger: "border-danger-300 bg-sand-50 text-danger-700",
 } as const;
 
 export default function EdgeActionButton({

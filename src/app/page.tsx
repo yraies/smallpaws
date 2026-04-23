@@ -19,7 +19,7 @@ import {
 } from "../utils/recentForms";
 
 function Spacer() {
-  return <div className="col-span-2 mx-auto my-2 w-4/5" />;
+  return <div className="col-span-full mx-auto my-2 w-4/5" />;
 }
 
 function HomePageContent() {
@@ -34,9 +34,9 @@ function HomePageContent() {
 
   return (
     <div className="flex w-full flex-col items-center gap-4">
-      <section className="w-full border border-neutral-300 bg-white px-4 py-3 text-left">
+      <section className="w-full border border-sand-200 bg-sand-50 px-4 py-3 text-left">
         <h2 className="text-base font-semibold">What Small Paws helps with</h2>
-        <p className="mt-2 text-sm leading-6 text-neutral-700">
+        <p className="mt-2 text-sm leading-6 text-lavender-700">
           Small Paws helps people talk through sensitive topics by turning them
           into a shared list of prompts. You can set up the questions first,
           fill them in later, and then review the answers without needing user
@@ -58,21 +58,21 @@ function HomePageContent() {
           />
         </div>
 
-        <p className="mt-3 border-l-4 border-violet-300 px-3 py-1 text-sm text-neutral-700">
+        <p className="mt-3 border-l-4 border-lavender-300 px-3 py-1 text-sm text-lavender-700">
           Recent work stays in this browser for convenience. If you use
           encryption, the decryption password stays client-side.
         </p>
       </section>
 
       <Box title="New Template" onTitleChange={() => {}} buttons={null}>
-        <div className="grid w-full grid-cols-2">
-          <p className="col-span-2 px-2 text-sm text-neutral-700">
+        <div className="grid w-full grid-cols-1 md:grid-cols-2">
+          <p className="col-span-full px-2 text-sm text-lavender-700">
             Choose a starting point, give it a title if you want, then create a
             draft template. You can still edit the structure before finalizing
             it.
           </p>
           <Spacer />
-          <div className="col-span-2 flex flex-row gap-2 px-2">
+          <div className="col-span-full flex flex-row gap-2 px-2">
             <p className="text-lg font-semibold">Template Title</p>
             <input
               type="text"
@@ -84,7 +84,7 @@ function HomePageContent() {
             />
           </div>
           <Spacer />
-          <p className="col-span-2 px-2 text-lg font-semibold">Templates</p>
+          <p className="col-span-full px-2 text-lg font-semibold">Templates</p>
           {FormTemplates.map((template) =>
             renderTemplateOption(
               template,
@@ -95,7 +95,7 @@ function HomePageContent() {
           <Spacer />
           <button
             type="button"
-            className="col-start-2 px-2 py-1 hover:backdrop-brightness-90"
+            className="justify-self-end px-2 py-1 hover:backdrop-brightness-90 md:col-start-2"
             onClick={() =>
               createAndNavigateTemplate(selectedTemplate, templateName, router)
             }
@@ -113,13 +113,13 @@ function HomePageContent() {
               onClick={() => clearRecents(setRecentItems)}
               title="Clear Recent Work"
             >
-              <TrashIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-red-400" />
+              <TrashIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-danger-500" />
             </IconButton>
           ) : null
         }
       >
         <div className="grid w-full grid-cols-1 gap-2">
-          <p className="px-2 text-sm text-neutral-700">
+          <p className="px-2 text-sm text-lavender-700">
             Reopen recent drafts, finalized templates, or published forms from
             this browser.
           </p>
@@ -136,7 +136,7 @@ function HomePageContent() {
                     title={item.date.toLocaleString()}
                   >
                     {item.name}{" "}
-                    <span className="text-xs text-neutral-600">
+                    <span className="text-xs text-lavender-700">
                       ({describeRecentItem(item)} -{" "}
                       {formatRelativeTime(item.date)})
                     </span>
@@ -151,7 +151,7 @@ function HomePageContent() {
                   }
                   title="Delete item from recent work"
                 >
-                  <TrashIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-red-400" />
+                  <TrashIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-danger-500" />
                 </IconButton>
               </div>
             ))
@@ -183,9 +183,9 @@ function WorkflowStep({
   description: string;
 }) {
   return (
-    <div className="border-l-2 border-violet-300 px-3 py-1">
+    <div className="border-l-2 border-lavender-300 px-3 py-1">
       <p className="font-semibold">{title}</p>
-      <p className="text-sm text-neutral-700">{description}</p>
+      <p className="text-sm text-lavender-700">{description}</p>
     </div>
   );
 }

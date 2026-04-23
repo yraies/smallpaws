@@ -80,7 +80,7 @@ const SelectionButtonComponent: React.FC<SelectionButtonProps> = ({
     return (
       <button
         type="button"
-        className={`selection-button group -m-2 flex h-12 w-12 cursor-pointer items-center justify-center border border-neutral-300 bg-white ${disabled ? "cursor-not-allowed" : ""}`}
+        className={`selection-button group -m-2 flex h-12 w-12 cursor-pointer items-center justify-center border border-sand-200 bg-sand-50 ${disabled ? "cursor-not-allowed" : ""}`}
         onClick={disabled ? undefined : onClick}
         title={config.text}
         disabled={disabled}

@@ -16,18 +16,18 @@ const EncryptionStatus: React.FC<EncryptionStatusProps> = ({
     <div className="flex items-center gap-1">
       {isEncrypted ? (
         <>
-          <LockClosedIcon className={`${className} text-green-600`} />
+          <LockClosedIcon className={`${className} text-pistachio-700`} />
           {showText && (
-            <span className="text-sm text-green-600 font-medium">
+            <span className="text-sm text-pistachio-700 font-medium">
               Encrypted
             </span>
           )}
         </>
       ) : (
         <>
-          <LockOpenIcon className={`${className} text-gray-400`} />
+          <LockOpenIcon className={`${className} text-lavender-200`} />
           {showText && (
-            <span className="text-sm text-gray-500">Not encrypted</span>
+            <span className="text-sm text-lavender-500">Not encrypted</span>
           )}
         </>
       )}

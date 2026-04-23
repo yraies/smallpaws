@@ -150,18 +150,18 @@ export default function TemplateShareModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto border border-neutral-300 bg-white">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto border border-sand-200 bg-sand-50">
         <div className="flex items-center justify-between border-b px-5 py-4">
           <div className="flex items-center gap-3">
-            <ShareIcon className="h-6 w-6 text-violet-600" />
-            <h2 className="text-xl font-semibold text-gray-900">
+            <ShareIcon className="h-6 w-6 text-lavender-700" />
+            <h2 className="text-xl font-semibold text-lavender-900">
               Share &quot;{templateName}&quot;
             </h2>
           </div>
           <button
             type="button"
             onClick={handleClose}
-            className="text-gray-400 transition-colors hover:text-gray-600"
+            className="text-lavender-300 transition-colors hover:text-lavender-700"
             aria-label="Close"
           >
             <XMarkIcon className="h-6 w-6" />
@@ -169,12 +169,12 @@ export default function TemplateShareModal({
         </div>
 
         <div className="space-y-5 px-5 py-4">
-          <p className="text-sm text-neutral-700">
+          <p className="text-sm text-lavender-700">
             Shared template links are read-only. Recipients can inspect the
             structure and create their own local form from it.
           </p>
 
-          <div className="border-l-4 border-blue-300 bg-blue-50 px-3 py-2 text-sm text-blue-900">
+          <div className="border-l-4 border-complement-500 bg-complement-50 px-3 py-2 text-sm text-complement-900">
             Shared links use the template&apos;s own protection settings.
             <br />
             {requiresPassword || shareInfo?.requiresPassword
@@ -183,10 +183,10 @@ export default function TemplateShareModal({
           </div>
 
           {shareInfo ? (
-            <div className="space-y-3 border border-neutral-300 bg-neutral-50 px-3 py-3">
+            <div className="space-y-3 border border-sand-200 bg-sand-100 px-3 py-3">
               <div>
                 <p className="text-sm font-semibold">Active share link</p>
-                <p className="mt-1 text-sm text-neutral-700">
+                <p className="mt-1 text-sm text-lavender-700">
                   You can copy this link or remove it when you no longer want to
                   share this template.
                 </p>
@@ -197,15 +197,15 @@ export default function TemplateShareModal({
                   type="text"
                   value={shareInfo.shareUrl}
                   readOnly
-                  className="flex-1 border border-neutral-300 bg-white px-3 py-2 text-sm"
+                  className="flex-1 border border-sand-200 bg-sand-50 px-3 py-2 text-sm"
                 />
                 <button
                   type="button"
                   onClick={() => copyToClipboard(shareInfo.shareUrl)}
                   className={`border px-3 py-2 ${
                     copied
-                      ? "border-green-300 bg-green-100 text-green-800"
-                      : "border-violet-300 bg-white text-violet-800"
+                      ? "border-pistachio-500 bg-pistachio-100 text-pistachio-700"
+                      : "border-lavender-300 bg-sand-50 text-lavender-900"
                   }`}
                   aria-label="Copy share link"
                 >
@@ -217,16 +217,16 @@ export default function TemplateShareModal({
                 </button>
               </div>
 
-              <p className="text-xs text-neutral-600">
+              <p className="text-xs text-lavender-700">
                 Created {new Date(shareInfo.createdAt).toLocaleString()}
                 {shareInfo.requiresPassword ? " • Uses template password" : ""}
               </p>
             </div>
           ) : (
-            <div className="space-y-3 border border-neutral-300 bg-white px-3 py-3">
+            <div className="space-y-3 border border-sand-200 bg-sand-50 px-3 py-3">
               <h3 className="text-base font-semibold">Create a share link</h3>
 
-              <p className="text-sm text-neutral-700">
+              <p className="text-sm text-lavender-700">
                 Create a link people can open to inspect this template and start
                 their own local form from it.
               </p>
@@ -234,7 +234,7 @@ export default function TemplateShareModal({
           )}
 
           {error && (
-            <div className="border-l-4 border-red-400 bg-red-50 px-3 py-2 text-sm text-red-800">
+            <div className="border-l-4 border-danger-500 bg-danger-50 px-3 py-2 text-sm text-danger-700">
               {error}
             </div>
           )}
@@ -245,7 +245,7 @@ export default function TemplateShareModal({
                 type="button"
                 onClick={deleteShare}
                 disabled={isDeleting}
-                className="flex items-center justify-center gap-2 border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex items-center justify-center gap-2 border border-danger-300 bg-sand-50 px-4 py-2 text-sm font-medium text-danger-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <TrashIcon className="h-4 w-4" />
                 {isDeleting ? "Removing..." : "Remove share link"}
@@ -258,7 +258,7 @@ export default function TemplateShareModal({
               type="button"
               onClick={createShare}
               disabled={isCreating}
-              className="flex items-center justify-center gap-2 bg-violet-600 px-4 py-2 text-white disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex items-center justify-center gap-2 bg-lavender-700 px-4 py-2 text-white disabled:cursor-not-allowed disabled:opacity-50"
             >
               <ShareIcon className="h-4 w-4" />
               {isCreating
@@ -273,7 +273,7 @@ export default function TemplateShareModal({
             <button
               type="button"
               onClick={handleClose}
-              className="border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700"
+              className="border border-sand-200 bg-sand-50 px-4 py-2 text-sm font-medium text-lavender-700"
             >
               Done
             </button>
