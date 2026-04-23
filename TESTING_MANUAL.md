@@ -70,6 +70,6 @@ Run this checklist in a real Chrome instance when it is used as the final valida
 
 ## Docker Deployment
 
-- [ ] `podman build -t smallpaws .` builds successfully.
+- [ ] `podman build -t garden-walk .` builds successfully.
 - [ ] Container starts and serves on port 3000.
-- [ ] Persistent volume (`smallpaws-data:/app/data`) preserves data across restarts.
+- [ ] Persistent volume (`garden-walk-data:/app/data`) preserves data across restarts.

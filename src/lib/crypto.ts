@@ -1,7 +1,7 @@
 import CryptoJS from "crypto-js";
 
 /**
- * Client-side encryption utilities for Small Paws forms
+ * Client-side encryption utilities for Garden Walk forms
  * Provides AES encryption with password-based key derivation
  */
 

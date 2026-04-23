@@ -1,8 +1,8 @@
-# GitHub Copilot Instructions — Small Paws
+# GitHub Copilot Instructions — Garden Walk
 
 ## Project Overview
 
-Small Paws is a privacy-first conversation starter tool for complex personal topics. It's a Next.js 16 fullstack app with React 19, TypeScript, Tailwind CSS 4, SQLite (better-sqlite3), and client-side AES encryption (crypto-js).
+Garden Walk is a privacy-first conversation starter tool for complex personal topics. It's a Next.js 16 fullstack app with React 19, TypeScript, Tailwind CSS 4, SQLite (better-sqlite3), and client-side AES encryption (crypto-js).
 
 ## Agent Rules
 

@@ -31,6 +31,7 @@ Detailed chronological history is preserved in `FEEDBACK_LOG_ARCHIVE.md`.
 - **Data portability and comparison**: Exported JSON files should be re-importable as new local drafts. A dedicated comparison view should let users compare 2+ published forms from the same parent template, showing agreements and disagreements side by side. (F-018)
 - **Prioritization**: Display modes (high contrast, simplified) and keyboard navigation are lower priority than custom answer enumerations and data portability features. (F-019)
 - **Answer option customization UX**: Preset pastel color swatches (12 named colors harmonizing with the app aesthetic) should be offered alongside the free color picker. Icons should be selectable via clickable picker (5-10 options) rather than text entry. (F-020)
+- **Product name and theming direction**: The app is now "Garden Walk" (evoking a walk through a mental garden of thoughts, expectations, wants, and needs). Future direction includes four seasonal color themes, per-template customizable block/background colors, and 2-3 semantic colors for side-rail action buttons (delete, publish, info) derived from the active theme. (F-021)
 
 ## Severity Scale
 

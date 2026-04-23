@@ -11,7 +11,7 @@ This is the canonical requirement document.
 
 ## Product Goal
 
-Small Paws is a privacy-first conversation starter tool for complex personal topics, particularly relationship discussions. It helps users identify areas of agreement/disagreement and ensures important topics aren't overlooked during sensitive conversations.
+Garden Walk is a privacy-first conversation starter tool for complex personal topics, particularly relationship discussions. It helps users identify areas of agreement/disagreement and ensures important topics aren't overlooked during sensitive conversations.
 
 ## Product Stage
 

@@ -25,7 +25,7 @@ Migrated the entire React frontend to a fullstack Next.js 15 application with Ap
 - Migrated from React Router to Next.js App Router with dynamic `/form/[id]` route.
 - Migrated FormContext to work with Next.js (useParams from next/navigation).
 - Integrated hybrid localStorage/API storage with fallback.
-- Updated layout with Small Paws branding, @fontsource-variable/outfit.
+- Updated layout with Garden Walk branding, @fontsource-variable/outfit.
 - Preserved all existing frontend features: template creation, form editing, drag-and-drop, real-time saving, recent forms, advanced/simple mode toggle, icon/text display toggle.
 
 ### Phase 1: Privacy & Encryption (Aug 2025)
@@ -92,7 +92,7 @@ Stabilized browser-local recent-form tracking after the root-level repo migratio
 - Extended that side-rail rule across finalized templates and shared templates, and removed duplicated primary actions from center-column phase notices so page chrome stays consistent across workflow phases.
 - Removed the small Published/Shared/Finalized header badges so phase context is conveyed only by the page notices instead of being repeated next to the document name.
 - Made print a first-class action in the side rails for finalized templates, shared templates, and form views, keeping export/print affordances visible in the phases where they matter.
-- Added first-run onboarding copy to the home page covering what Small Paws is for, how privacy works, and how the template -> form -> results workflow fits together.
+- Added first-run onboarding copy to the home page covering what Garden Walk is for, how privacy works, and how the template -> form -> results workflow fits together.
 - Extracted a shared document page shell so finalized templates, shared templates, editable forms, and shared results all compose the same header, action-rail, notice, and overlay structure.
 - Fixed the published/shared form toolbar to react to the live publication state instead of leaving stale publish actions visible after publication.
 - Unified access control so protected templates now mirror protected forms: finalized templates can be password-protected, direct template access uses a verifier-backed unlock flow, and shared template links reuse the same artifact password instead of inventing a second one.

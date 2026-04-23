@@ -36,6 +36,15 @@ Required fields for new entries:
 
 ## Entries
 
+### F-021 (2026-04-24) - Rename to "Garden Walk" and future theming direction
+
+- **Date**: 2026-04-24
+- **Source**: Stakeholder chat
+- **Exact Quote**: "I would also like to rename the app from the working title into 'Garden Walk', because the users are encouraged to take a walk through their mental garden of thoughts, expectations, wants and needs etc, either alone or with others. Based on that we could later on make color schemes fitting four seasonal themes. The question/category blocks as well as the page background colors should also be customizable per template down the line. Based on the seasonal theme we should be able to make things harmoneous and also provide two to three semantic colors for the side-rail buttons (delete, publish, info? not sure)"
+- **Normalized Intent**: (1) Rename from "Small Paws" to "Garden Walk" everywhere. (2) Future: four seasonal color themes. (3) Future: per-template customizable block/background colors. (4) Future: 2-3 semantic colors for side-rail action buttons (delete, publish, info) derived from the active theme.
+- **Feedback**: The product name should be "Garden Walk" — evoking walking through a mental garden of thoughts, expectations, wants and needs. Future theming direction includes seasonal palettes, per-template color customization, and semantic button colors tied to the active theme.
+- **Action taken**: Renamed all 26 occurrences across 13 files (UI, docs, package name, container names). Future theming direction captured for backlog.
+
 ### F-020 (2026-04-23) - Preset colors and icon picker for answer options
 
 - **Date**: 2026-04-23

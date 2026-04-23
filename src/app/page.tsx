@@ -51,9 +51,9 @@ function HomePageContent() {
   return (
     <main id="main-content" className="flex w-full flex-col items-center gap-4">
       <section className="w-full border border-sand-200 bg-sand-50 px-4 py-3 text-left">
-        <h2 className="text-base font-semibold">What Small Paws helps with</h2>
+        <h2 className="text-base font-semibold">What Garden Walk helps with</h2>
         <p className="mt-2 text-sm leading-6 text-lavender-700">
-          Small Paws helps people talk through sensitive topics by turning them
+          Garden Walk helps people talk through sensitive topics by turning them
           into a shared list of prompts. You can set up the questions first,
           fill them in later, and then review the answers without needing user
           accounts or server-side access to your plaintext answers.

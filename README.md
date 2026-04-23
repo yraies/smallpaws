@@ -1,6 +1,6 @@
-# Small Paws 🐾
+# Garden Walk
 
-A privacy-first conversation starter tool for complex personal topics, particularly relationship discussions. Small Paws helps users identify areas of agreement and disagreement while ensuring important topics aren't overlooked during sensitive conversations.
+A privacy-first conversation starter tool for complex personal topics, particularly relationship discussions. Garden Walk helps users identify areas of agreement and disagreement while ensuring important topics aren't overlooked during sensitive conversations.
 
 ## 🎯 Key Features
 
@@ -14,7 +14,7 @@ A privacy-first conversation starter tool for complex personal topics, particula
 
 ## 🏗️ Architecture
 
-Small Paws is a Next.js application with:
+Garden Walk is a Next.js application with:
 
 - **Frontend**: React with TypeScript and Tailwind CSS
 - **Backend**: Next.js API routes
@@ -28,17 +28,17 @@ Small Paws is a Next.js application with:
 Build the image:
 
 ```bash
-podman build -t smallpaws .
+podman build -t garden-walk .
 ```
 
 Run with a persistent volume:
 
 ```bash
 podman run -d \
-  --name smallpaws \
+  --name garden-walk \
   -p 3000:3000 \
-  -v smallpaws-data:/app/data \
-  smallpaws
+  -v garden-walk-data:/app/data \
+  garden-walk
 ```
 
 Access at `http://localhost:3000`

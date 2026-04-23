@@ -6,7 +6,7 @@ This file stores completed, cancelled, and superseded backlog items.
 
 ### Phase 4.6: UI/UX Polish & Accessibility (Apr 2026)
 
-- **B-017** — Add onboarding/help copy that explains the product purpose, privacy model, and the three workflow phases. Home page now has a "What Small Paws helps with" section with workflow steps and privacy note.
+- **B-017** — Add onboarding/help copy that explains the product purpose, privacy model, and the three workflow phases. Home page now has a "What Garden Walk helps with" section with workflow steps and privacy note.
 - **B-021** — Screen reader support. Added ARIA dialog roles to all modals, aria-hidden on decorative icons, sr-only labels for icon-only controls, role="status" on loading indicators, aria-live error regions, nav landmark for action rails, proper label associations on form inputs, skip-nav link, and heading hierarchy review.
 - **B-022** — Extract shared components between finalized-template, form, and shared-result pages. DocumentPageShell, PageActionRails, DocumentPhaseNotice, FormCategoryList, FormHeader, and EdgeActionButton are now shared across all document pages.
 
