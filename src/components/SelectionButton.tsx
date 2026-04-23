@@ -1,8 +1,12 @@
 import {
   CheckCircleIcon,
   ExclamationCircleIcon,
+  HandThumbUpIcon,
+  HeartIcon,
   MinusCircleIcon,
   QuestionMarkCircleIcon,
+  StarIcon,
+  XCircleIcon,
 } from "@heroicons/react/16/solid";
 import dynamic from "next/dynamic";
 import type React from "react";
@@ -30,22 +34,59 @@ function EmptyCircleIcon(props: React.ComponentProps<"svg">) {
   );
 }
 
-/** Icon lookup for the built-in default answer keys. Custom keys use EmptyCircleIcon. */
-const DEFAULT_ICONS: Record<
-  string,
-  React.ComponentType<React.ComponentProps<"svg">>
-> = {
-  must: ExclamationCircleIcon,
-  like: CheckCircleIcon,
-  maybe: QuestionMarkCircleIcon,
-  off_limits: MinusCircleIcon,
-  unset: EmptyCircleIcon,
+type IconComponent = React.ComponentType<React.ComponentProps<"svg">>;
+
+/**
+ * Available icons for answer options. Each entry has a stable string key,
+ * a display label, and the React icon component.
+ * Exported so the AnswerSchemaEditor icon picker can reuse the same set.
+ */
+export const AVAILABLE_ICONS: {
+  key: string;
+  label: string;
+  Icon: IconComponent;
+}[] = [
+  { key: "exclamation", label: "Exclamation", Icon: ExclamationCircleIcon },
+  { key: "check", label: "Check", Icon: CheckCircleIcon },
+  { key: "question", label: "Question", Icon: QuestionMarkCircleIcon },
+  { key: "minus", label: "Minus", Icon: MinusCircleIcon },
+  { key: "x", label: "Cross", Icon: XCircleIcon },
+  { key: "heart", label: "Heart", Icon: HeartIcon },
+  { key: "star", label: "Star", Icon: StarIcon },
+  { key: "thumbsup", label: "Thumbs Up", Icon: HandThumbUpIcon },
+  { key: "empty", label: "Empty", Icon: EmptyCircleIcon },
+];
+
+/** Icon registry keyed by icon identifier string. */
+const ICON_MAP: Record<string, IconComponent> = Object.fromEntries(
+  AVAILABLE_ICONS.map((i) => [i.key, i.Icon]),
+);
+
+/**
+ * Legacy lookup: maps old built-in answer keys to icon identifiers
+ * for backward compatibility with data that lacks an explicit `icon` field.
+ */
+const LEGACY_KEY_TO_ICON: Record<string, string> = {
+  must: "exclamation",
+  like: "check",
+  maybe: "question",
+  off_limits: "minus",
+  unset: "empty",
 };
 
-function getIconForKey(
-  key: string,
-): React.ComponentType<React.ComponentProps<"svg">> {
-  return DEFAULT_ICONS[key] ?? EmptyCircleIcon;
+/**
+ * Resolves the icon component for an answer option.
+ * Prefers the explicit `icon` field; falls back to legacy key mapping; then EmptyCircleIcon.
+ */
+function getIconForOption(option: AnswerOption): IconComponent {
+  if (option.icon && ICON_MAP[option.icon]) {
+    return ICON_MAP[option.icon];
+  }
+  const legacyIcon = LEGACY_KEY_TO_ICON[option.key];
+  if (legacyIcon && ICON_MAP[legacyIcon]) {
+    return ICON_MAP[legacyIcon];
+  }
+  return EmptyCircleIcon;
 }
 
 interface SelectionButtonProps {
@@ -70,7 +111,7 @@ const SelectionButtonComponent: React.FC<SelectionButtonProps> = ({
   const option =
     options.find((o) => o.key === selection) ?? options[options.length - 1];
 
-  const Icon = getIconForKey(option.key);
+  const Icon = getIconForOption(option);
   const isSelected = selection !== unsetKey;
 
   // Icon button rendering

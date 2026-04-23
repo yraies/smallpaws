@@ -36,6 +36,15 @@ Required fields for new entries:
 
 ## Entries
 
+### F-020 (2026-04-23) - Preset colors and icon picker for answer options
+
+- **Date**: 2026-04-23
+- **Source**: Stakeholder chat
+- **Exact Quote**: "I would like to provide a set of preset colors in addition to the free color choice (fitting the rest of the app harmonious pastel colors: lavender, sky, pistachio, sand, raspberry, sepia, limoncello, rose, coral, peach, mint, grey) In addition I would like to specify some Icons via mouse clicks. I presume they can currently be set via text, but users will not know what is available. I think 5 to 10 icons should be enough."
+- **Normalized Intent**: The answer option color picker should offer named preset pastel swatches alongside the free color input. Icon selection should be clickable rather than text-entry, with 5-10 recognizable icons.
+- **Feedback**: Stakeholder wants (1) a preset color palette of 12 named pastels harmonizing with the app aesthetic, and (2) a clickable icon picker with ~8 icons for answer options, since users won't know what icon identifiers are available.
+- **Action taken**: Added `PRESET_COLORS` (12 pastels) and `icon` field to `AnswerOption` type. Added `AVAILABLE_ICONS` registry (9 icons: exclamation, check, question, minus, cross, heart, star, thumbs-up, empty). Built inline color swatch + icon picker in AnswerSchemaEditor. Updated SelectionButton to resolve icons from `option.icon` with legacy key fallback.
+
 ### F-019 (2026-04-23) - Deprioritize display modes, prioritize custom answer enums
 
 - **Date**: 2026-04-23

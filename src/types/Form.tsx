@@ -17,20 +17,67 @@ export type AnswerOption = {
   label: string;
   shortLabel: string;
   color: string;
+  /** Optional icon identifier. See AVAILABLE_ICONS in AnswerSchemaEditor. */
+  icon?: string;
 };
+
+/**
+ * Preset color palette for answer options.
+ * Warm, muted pastels that harmonize with the app's paper aesthetic and
+ * provide enough contrast for white text overlays.
+ */
+export const PRESET_COLORS: { name: string; hex: string }[] = [
+  { name: "Lavender", hex: "#9C7DB5" },
+  { name: "Sky", hex: "#7094B0" },
+  { name: "Pistachio", hex: "#8A9B58" },
+  { name: "Sand", hex: "#C5A958" },
+  { name: "Raspberry", hex: "#B5586A" },
+  { name: "Sepia", hex: "#8D6A4F" },
+  { name: "Limoncello", hex: "#B8A535" },
+  { name: "Rose", hex: "#C0808A" },
+  { name: "Coral", hex: "#CC7A68" },
+  { name: "Peach", hex: "#D09468" },
+  { name: "Mint", hex: "#68A58A" },
+  { name: "Grey", hex: "#908A82" },
+];
 
 /** The built-in default answer options matching the original Selection enum. */
 export const DEFAULT_ANSWER_OPTIONS: AnswerOption[] = [
-  { key: "must", label: "Must Have", shortLabel: "Must", color: "#8d4f3f" },
-  { key: "like", label: "Would Like", shortLabel: "Like", color: "#7c4f73" },
-  { key: "maybe", label: "Maybe", shortLabel: "Maybe", color: "#c69055" },
+  {
+    key: "must",
+    label: "Must Have",
+    shortLabel: "Must",
+    color: "#8d4f3f",
+    icon: "exclamation",
+  },
+  {
+    key: "like",
+    label: "Would Like",
+    shortLabel: "Like",
+    color: "#7c4f73",
+    icon: "check",
+  },
+  {
+    key: "maybe",
+    label: "Maybe",
+    shortLabel: "Maybe",
+    color: "#c69055",
+    icon: "question",
+  },
   {
     key: "off_limits",
     label: "Off Limits",
     shortLabel: "Limit",
     color: "#aa6c67",
+    icon: "minus",
   },
-  { key: "unset", label: "Unset", shortLabel: "Unset", color: "#b39a84" },
+  {
+    key: "unset",
+    label: "Unset",
+    shortLabel: "Unset",
+    color: "#b39a84",
+    icon: "empty",
+  },
 ];
 
 /**

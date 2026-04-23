@@ -18,6 +18,7 @@ Detailed historical notes are preserved in `CHANGELOG_ARCHIVE.md`.
 - Screen reader users can now navigate the app with proper ARIA landmarks, dialog roles on modals, labeled form inputs, status announcements for loading states, and live error regions.
 - Template creators can now define custom answer options (label, short label, color) that apply to all questions in a template. Custom options carry into forms and exports. Built-in defaults are used when no custom options are set.
 - Users can now import a previously exported JSON file from the home page to create a new local draft. If the JSON has filled answers, it imports as a form draft; otherwise it imports as a template draft. Custom answer options are preserved through the export-import roundtrip.
+- Answer option editor now offers 12 preset color swatches (lavender, sky, pistachio, sand, raspberry, sepia, limoncello, rose, coral, peach, mint, grey) alongside the free color picker, and a clickable icon picker with 9 icons (exclamation, check, question, minus, cross, heart, star, thumbs-up, empty circle).
 
 ### Changed
 

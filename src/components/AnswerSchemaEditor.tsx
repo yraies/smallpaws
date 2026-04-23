@@ -9,13 +9,86 @@ import {
   type AnswerOption,
   DEFAULT_ANSWER_OPTIONS,
   getEffectiveAnswerOptions,
+  PRESET_COLORS,
 } from "../types/Form";
 import IconButton from "./IconButton";
+import { AVAILABLE_ICONS } from "./SelectionButton";
 
 interface AnswerSchemaEditorProps {
   answerOptions: AnswerOption[] | undefined;
   onChange: (options: AnswerOption[] | undefined) => void;
   disabled?: boolean;
+}
+
+/** Inline picker for color presets + free color + icon selection. */
+function ColorIconPicker({
+  option,
+  onColorChange,
+  onIconChange,
+}: {
+  option: AnswerOption;
+  onColorChange: (color: string) => void;
+  onIconChange: (icon: string) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-2 border-t border-sand-200 bg-sand-50 px-2 pt-2 pb-2">
+      {/* Color presets */}
+      <div className="flex flex-wrap items-center gap-1">
+        <span className="mr-1 text-xs text-lavender-500">Color:</span>
+        {PRESET_COLORS.map((preset) => (
+          <button
+            key={preset.hex}
+            type="button"
+            className={`h-5 w-5 rounded-sm border ${
+              option.color.toLowerCase() === preset.hex.toLowerCase()
+                ? "border-lavender-700 ring-1 ring-lavender-500"
+                : "border-sand-300"
+            }`}
+            style={{ backgroundColor: preset.hex }}
+            onClick={() => onColorChange(preset.hex)}
+            title={preset.name}
+            aria-label={`Set color to ${preset.name}`}
+          />
+        ))}
+        <label
+          className="flex items-center gap-1 text-xs text-lavender-500"
+          title="Custom color"
+        >
+          <input
+            type="color"
+            value={option.color}
+            onChange={(e) => onColorChange(e.target.value)}
+            className="h-5 w-5 cursor-pointer border-none bg-transparent p-0"
+            aria-label="Custom color"
+          />
+        </label>
+      </div>
+      {/* Icon picker */}
+      <div className="flex flex-wrap items-center gap-1">
+        <span className="mr-1 text-xs text-lavender-500">Icon:</span>
+        {AVAILABLE_ICONS.map(({ key, label, Icon }) => (
+          <button
+            key={key}
+            type="button"
+            className={`flex h-6 w-6 items-center justify-center rounded-sm border ${
+              (option.icon ?? "") === key || (!option.icon && key === "empty")
+                ? "border-lavender-700 bg-lavender-100 ring-1 ring-lavender-500"
+                : "border-sand-300 hover:bg-sand-100"
+            }`}
+            onClick={() => onIconChange(key)}
+            title={label}
+            aria-label={`Set icon to ${label}`}
+          >
+            <Icon
+              className="h-4 w-4"
+              style={{ color: option.color }}
+              aria-hidden="true"
+            />
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 export default function AnswerSchemaEditor({
@@ -24,6 +97,8 @@ export default function AnswerSchemaEditor({
   disabled = false,
 }: AnswerSchemaEditorProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  /** Index of the option row whose color/icon picker is open, or null. */
+  const [pickerOpenIndex, setPickerOpenIndex] = useState<number | null>(null);
   const effectiveOptions = getEffectiveAnswerOptions(answerOptions);
   const isCustom = answerOptions !== undefined && answerOptions.length > 0;
 
@@ -34,6 +109,7 @@ export default function AnswerSchemaEditor({
 
   const resetToDefaults = () => {
     onChange(undefined);
+    setPickerOpenIndex(null);
   };
 
   const updateOption = (
@@ -69,6 +145,7 @@ export default function AnswerSchemaEditor({
       label: "",
       shortLabel: "",
       color: "#888888",
+      icon: "empty",
     };
     const updated = [...effectiveOptions];
     updated.splice(updated.length - 1, 0, newOption);
@@ -78,6 +155,7 @@ export default function AnswerSchemaEditor({
   const removeOption = (index: number) => {
     if (effectiveOptions.length <= 2) return; // Must keep at least one option + unset
     const updated = effectiveOptions.filter((_, i) => i !== index);
+    if (pickerOpenIndex === index) setPickerOpenIndex(null);
     onChange(updated);
   };
 
@@ -90,6 +168,9 @@ export default function AnswerSchemaEditor({
     const temp = updated[newIndex];
     updated[newIndex] = updated[index];
     updated[index] = temp;
+    // Follow the picker if its row moved
+    if (pickerOpenIndex === index) setPickerOpenIndex(newIndex);
+    else if (pickerOpenIndex === newIndex) setPickerOpenIndex(index);
     onChange(updated);
   };
 
@@ -181,82 +262,104 @@ export default function AnswerSchemaEditor({
           <div className="space-y-1">
             {effectiveOptions.map((option, index) => {
               const isLast = index === effectiveOptions.length - 1;
+              const isPickerOpen = pickerOpenIndex === index;
               return (
-                <div
-                  key={index}
-                  className={`flex items-center gap-2 border border-sand-200 px-2 py-1 ${isLast ? "bg-sand-100" : "bg-sand-50"}`}
-                >
-                  <input
-                    type="color"
-                    value={option.color}
-                    onChange={(e) =>
-                      updateOption(index, "color", e.target.value)
-                    }
-                    className="h-6 w-6 cursor-pointer border-none bg-transparent p-0"
-                    disabled={!isCustom}
-                    aria-label={`Color for ${option.label || "answer option"}`}
-                    title="Answer color"
-                  />
-                  <input
-                    type="text"
-                    value={option.label}
-                    onChange={(e) =>
-                      updateOption(index, "label", e.target.value)
-                    }
-                    placeholder="Label"
-                    className="min-w-0 flex-1 border-b border-sand-200 bg-transparent px-1 py-0.5 text-sm focus:outline-none"
-                    disabled={!isCustom}
-                    aria-label="Answer label"
-                  />
-                  <input
-                    type="text"
-                    value={option.shortLabel}
-                    onChange={(e) =>
-                      updateOption(index, "shortLabel", e.target.value)
-                    }
-                    placeholder="Short"
-                    className="w-16 border-b border-sand-200 bg-transparent px-1 py-0.5 text-sm focus:outline-none"
-                    disabled={!isCustom}
-                    aria-label="Short label"
-                  />
+                <div key={index} className="flex flex-col">
+                  <div
+                    className={`flex items-center gap-2 border border-sand-200 px-2 py-1 ${isLast ? "bg-sand-100" : "bg-sand-50"}`}
+                  >
+                    {/* Color swatch — click to toggle picker */}
+                    <button
+                      type="button"
+                      className={`h-6 w-6 shrink-0 rounded-sm border ${
+                        isPickerOpen
+                          ? "border-lavender-700 ring-1 ring-lavender-500"
+                          : "border-sand-300"
+                      }`}
+                      style={{ backgroundColor: option.color }}
+                      onClick={() =>
+                        isCustom &&
+                        setPickerOpenIndex(isPickerOpen ? null : index)
+                      }
+                      disabled={!isCustom}
+                      aria-label={`Pick color and icon for ${option.label || "answer option"}`}
+                      title="Pick color and icon"
+                    />
+                    <input
+                      type="text"
+                      value={option.label}
+                      onChange={(e) =>
+                        updateOption(index, "label", e.target.value)
+                      }
+                      placeholder="Label"
+                      className="min-w-0 flex-1 border-b border-sand-200 bg-transparent px-1 py-0.5 text-sm focus:outline-none"
+                      disabled={!isCustom}
+                      aria-label="Answer label"
+                    />
+                    <input
+                      type="text"
+                      value={option.shortLabel}
+                      onChange={(e) =>
+                        updateOption(index, "shortLabel", e.target.value)
+                      }
+                      placeholder="Short"
+                      className="w-16 border-b border-sand-200 bg-transparent px-1 py-0.5 text-sm focus:outline-none"
+                      disabled={!isCustom}
+                      aria-label="Short label"
+                    />
 
-                  {isCustom && !isLast && (
-                    <div
-                      className="flex items-center gap-0.5"
-                      role="toolbar"
-                      aria-label={`Actions for ${option.label || "answer option"}`}
-                    >
-                      <IconButton
-                        onClick={() => moveOption(index, "up")}
-                        disabled={index === 0}
-                        title="Move up"
-                        aria-label="Move up"
+                    {isCustom && !isLast && (
+                      <div
+                        className="flex items-center gap-0.5"
+                        role="toolbar"
+                        aria-label={`Actions for ${option.label || "answer option"}`}
                       >
-                        <ArrowUpIcon className="h-3 w-3" aria-hidden="true" />
-                      </IconButton>
-                      <IconButton
-                        onClick={() => moveOption(index, "down")}
-                        disabled={index >= effectiveOptions.length - 2}
-                        title="Move down"
-                        aria-label="Move down"
-                      >
-                        <ArrowDownIcon className="h-3 w-3" aria-hidden="true" />
-                      </IconButton>
-                      <IconButton
-                        onClick={() => removeOption(index)}
-                        disabled={effectiveOptions.length <= 2}
-                        title="Remove"
-                        aria-label={`Remove ${option.label || "answer option"}`}
-                      >
-                        <TrashIcon className="h-3 w-3" aria-hidden="true" />
-                      </IconButton>
-                    </div>
-                  )}
+                        <IconButton
+                          onClick={() => moveOption(index, "up")}
+                          disabled={index === 0}
+                          title="Move up"
+                          aria-label="Move up"
+                        >
+                          <ArrowUpIcon className="h-3 w-3" aria-hidden="true" />
+                        </IconButton>
+                        <IconButton
+                          onClick={() => moveOption(index, "down")}
+                          disabled={index >= effectiveOptions.length - 2}
+                          title="Move down"
+                          aria-label="Move down"
+                        >
+                          <ArrowDownIcon
+                            className="h-3 w-3"
+                            aria-hidden="true"
+                          />
+                        </IconButton>
+                        <IconButton
+                          onClick={() => removeOption(index)}
+                          disabled={effectiveOptions.length <= 2}
+                          title="Remove"
+                          aria-label={`Remove ${option.label || "answer option"}`}
+                        >
+                          <TrashIcon className="h-3 w-3" aria-hidden="true" />
+                        </IconButton>
+                      </div>
+                    )}
 
-                  {isLast && (
-                    <span className="text-xs italic text-lavender-500">
-                      default
-                    </span>
+                    {isLast && (
+                      <span className="text-xs italic text-lavender-500">
+                        default
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Inline color preset + icon picker */}
+                  {isCustom && isPickerOpen && (
+                    <ColorIconPicker
+                      option={option}
+                      onColorChange={(color) =>
+                        updateOption(index, "color", color)
+                      }
+                      onIconChange={(icon) => updateOption(index, "icon", icon)}
+                    />
                   )}
                 </div>
               );
