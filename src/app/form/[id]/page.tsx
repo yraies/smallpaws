@@ -24,8 +24,8 @@ import {
 } from "../../../lib/crypto";
 import { Form, type FormPOJO } from "../../../types/Form";
 import {
-  hasDraftFormData,
-  removeDraftFormData,
+  hasLocalDraft,
+  removeLocalDraft,
   saveRecentFormMeta,
 } from "../../../utils/recentForms";
 
@@ -46,7 +46,7 @@ function FormPageContent() {
 
   const checkFormStatus = React.useCallback(async (id: string) => {
     try {
-      if (hasDraftFormData(localStorage, id)) {
+      if (hasLocalDraft(localStorage, id)) {
         setIsPublished(false);
         setIsLoadingForm(false);
         return;
@@ -207,7 +207,7 @@ function FormPageContent() {
           kind: "form",
           phase: "published",
         });
-        removeDraftFormData(localStorage, formId);
+        removeLocalDraft(localStorage, formId);
         setIsEncrypted(encrypted);
         setIsPublished(true);
         setShowPasswordModal(false);
@@ -255,6 +255,7 @@ function FormPageContent() {
           categories={form.categories}
           answerMode={isPublished ? "readonly" : "editable"}
           structureEditable={false}
+          answerOptions={form.answerOptions}
         />
 
         <PasswordModal

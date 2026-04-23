@@ -10,12 +10,13 @@ import {
 } from "react";
 import { Form } from "../types/Form";
 import {
-  hasDraftFormData,
-  loadDraftFormData,
-  removeDraftFormData,
-  saveDraftFormData,
+  hasLocalDraft,
+  loadLocalDraft,
+  removeLocalDraft,
+  saveLocalDraft,
   saveRecentFormMeta,
 } from "../utils/recentForms";
+import { consumePendingFormDraft } from "../utils/templateLifecycle";
 
 type FormContextType = {
   form: Form | undefined;
@@ -35,14 +36,11 @@ function FormContextProvider({ children }: { children: React.ReactNode }) {
   const [isPublished, setIsPublished] = useState<boolean>(false);
 
   useEffect(() => {
-    // Check if this is a new form creation from sessionStorage
-    if (sessionStorage.getItem("create_new") === "true") {
-      // biome-ignore lint/style/noNonNullAssertion: guarded by create_new check above
-      const form = Form.fromPOJO(JSON.parse(sessionStorage.getItem("form")!));
-      setForm(form);
-      sessionStorage.removeItem("create_new");
-      sessionStorage.removeItem("form");
-      setIsPublished(false); // New forms are drafts
+    // Check if this is a new form creation from a pending draft
+    const pendingForm = consumePendingFormDraft();
+    if (pendingForm) {
+      setForm(pendingForm);
+      setIsPublished(false);
     } else if (id) {
       // First check if the form is encrypted via API
       checkIfEncrypted(id, setIsEncrypted, setForm, setIsPublished);
@@ -60,7 +58,7 @@ function FormContextProvider({ children }: { children: React.ReactNode }) {
         kind: "form",
         phase: "draft",
       });
-      saveDraftFormData(localStorage, id, JSON.stringify(form));
+      saveLocalDraft(localStorage, id, JSON.stringify(form));
       console.log("Saved draft form to localStorage");
     }
   }, [id, form, isEncrypted, isPublished]);
@@ -87,9 +85,9 @@ async function checkIfEncrypted(
   setIsPublished: (published: boolean) => void,
 ) {
   try {
-    if (hasDraftFormData(localStorage, id)) {
+    if (hasLocalDraft(localStorage, id)) {
       setIsPublished(false);
-      const storedData = loadDraftFormData(localStorage, id);
+      const storedData = loadLocalDraft(localStorage, id);
       if (!storedData) {
         return;
       }
@@ -126,7 +124,7 @@ async function checkIfEncrypted(
         kind: "form",
         phase: "published",
       });
-      removeDraftFormData(localStorage, id);
+      removeLocalDraft(localStorage, id);
 
       if (storedForm.encrypted) {
         // Form is encrypted - do NOT load from localStorage or anywhere

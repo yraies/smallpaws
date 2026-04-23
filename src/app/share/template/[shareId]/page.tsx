@@ -1,6 +1,10 @@
 "use client";
 
-import { PlayIcon, PrinterIcon } from "@heroicons/react/16/solid";
+import {
+  ArrowDownTrayIcon,
+  PlayIcon,
+  PrinterIcon,
+} from "@heroicons/react/16/solid";
 import dynamic from "next/dynamic";
 import { useParams, useRouter } from "next/navigation";
 import React from "react";
@@ -16,12 +20,18 @@ import PageActionRails, {
 import PasswordModal from "../../../../components/PasswordModal";
 import { decryptFormData } from "../../../../lib/crypto";
 import { Form, type FormPOJO } from "../../../../types/Form";
-import { printCurrentView } from "../../../../utils/formActions";
 import {
-  saveDraftFormData,
+  exportFormAsJSON,
+  printCurrentView,
+} from "../../../../utils/formActions";
+import {
+  saveLocalDraft,
   saveRecentFormMeta,
 } from "../../../../utils/recentForms";
-import { createFormDraftFromTemplate } from "../../../../utils/templateLifecycle";
+import {
+  createFormDraftFromTemplate,
+  setPendingFormDraft,
+} from "../../../../utils/templateLifecycle";
 
 function SharedTemplatePageContent() {
   const [template, setTemplate] = React.useState<Form | null>(null);
@@ -147,10 +157,9 @@ function SharedTemplatePageContent() {
       kind: "form",
       phase: "draft",
     });
-    saveDraftFormData(localStorage, formId, JSON.stringify(draftForm));
+    saveLocalDraft(localStorage, formId, JSON.stringify(draftForm));
 
-    sessionStorage.setItem("create_new", "true");
-    sessionStorage.setItem("form", JSON.stringify(draftForm));
+    setPendingFormDraft(draftForm);
     router.push(`/form/${formId}`);
   };
 
@@ -162,6 +171,18 @@ function SharedTemplatePageContent() {
       readOnly={true}
       actions={
         <PageActionRails
+          leftActions={
+            [
+              {
+                key: "json",
+                label: "Export JSON",
+                onClick: () => exportFormAsJSON(template),
+                title: "Export as JSON",
+                variant: "info",
+                icon: <ArrowDownTrayIcon className="h-5 w-5" />,
+              },
+            ] satisfies RailAction[]
+          }
           rightActions={
             [
               {
@@ -197,6 +218,7 @@ function SharedTemplatePageContent() {
         categories={template.categories}
         answerMode="hidden"
         structureEditable={false}
+        answerOptions={template.answerOptions}
       />
     </DocumentPageShell>
   );

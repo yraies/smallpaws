@@ -28,6 +28,8 @@ Detailed chronological history is preserved in `FEEDBACK_LOG_ARCHIVE.md`.
 - **Share-link simplification**: For now, each document should have one reusable share link rather than a multi-link management UI, and copy actions next to share links must work reliably. (F-014)
 - **Share wording and controls**: Share UI text should match the user mental model directly: create a share link, optionally set expiry, and remove the link again when needed. Avoid abstract wording like "one link". (F-015)
 - **Shared results consistency**: The shared filled-form page should match the rest of the app's current design and UX system instead of using an older special-case layout and interaction style. (F-016)
+- **Data portability and comparison**: Exported JSON files should be re-importable as new local drafts. A dedicated comparison view should let users compare 2+ published forms from the same parent template, showing agreements and disagreements side by side. (F-018)
+- **Prioritization**: Display modes (high contrast, simplified) and keyboard navigation are lower priority than custom answer enumerations and data portability features. (F-019)
 
 ## Severity Scale
 

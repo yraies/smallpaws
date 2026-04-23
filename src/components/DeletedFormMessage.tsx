@@ -12,7 +12,10 @@ export default function DeletedFormMessage({
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center">
-        <TrashIcon className="h-16 w-16 text-danger-500 mx-auto mb-4" />
+        <TrashIcon
+          className="h-16 w-16 text-danger-500 mx-auto mb-4"
+          aria-hidden="true"
+        />
         <h1 className="text-2xl font-bold mb-2">This form has been deleted</h1>
         <p className="text-lavender-300 mb-6">{message}</p>
         <button

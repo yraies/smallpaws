@@ -1,6 +1,6 @@
 import { PlusIcon } from "@heroicons/react/16/solid";
 import type { Dispatch, SetStateAction } from "react";
-import type { Category, Form } from "../types/Form";
+import type { AnswerOption, Category, Form } from "../types/Form";
 import CategoryBox from "./CategoryPage";
 
 interface FormCategoryListProps {
@@ -10,6 +10,7 @@ interface FormCategoryListProps {
   structureEditable: boolean;
   showAddButton?: boolean;
   onAddCategory?: () => void;
+  answerOptions?: AnswerOption[];
 }
 
 export default function FormCategoryList({
@@ -19,6 +20,7 @@ export default function FormCategoryList({
   structureEditable,
   showAddButton = false,
   onAddCategory,
+  answerOptions,
 }: FormCategoryListProps) {
   return (
     <main
@@ -32,6 +34,7 @@ export default function FormCategoryList({
           setDocument={setDocument}
           answerMode={answerMode}
           structureEditable={structureEditable}
+          answerOptions={answerOptions}
         />
       ))}
 

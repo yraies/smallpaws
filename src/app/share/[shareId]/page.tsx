@@ -1,6 +1,10 @@
 "use client";
 
-import { DocumentDuplicateIcon, PrinterIcon } from "@heroicons/react/16/solid";
+import {
+  ArrowDownTrayIcon,
+  DocumentDuplicateIcon,
+  PrinterIcon,
+} from "@heroicons/react/16/solid";
 import dynamic from "next/dynamic";
 import { useParams, useRouter } from "next/navigation";
 import React from "react";
@@ -22,7 +26,12 @@ import {
 } from "../../../contexts/FormContext";
 import { decryptFormData } from "../../../lib/crypto";
 import { Form, type FormPOJO } from "../../../types/Form";
-import { prepareFormClone, printCurrentView } from "../../../utils/formActions";
+import {
+  exportFormAsCSV,
+  exportFormAsJSON,
+  prepareFormClone,
+  printCurrentView,
+} from "../../../utils/formActions";
 
 interface ShareInfo {
   shareId: string;
@@ -250,6 +259,22 @@ function SharedFormPageContent() {
                 variant: "default",
                 icon: <DocumentDuplicateIcon className="h-5 w-5" />,
               },
+              {
+                key: "csv",
+                label: "Export CSV",
+                onClick: () => exportFormAsCSV(form),
+                title: "Export as CSV",
+                variant: "success",
+                icon: <ArrowDownTrayIcon className="h-5 w-5" />,
+              },
+              {
+                key: "json",
+                label: "Export JSON",
+                onClick: () => exportFormAsJSON(form),
+                title: "Export as JSON",
+                variant: "info",
+                icon: <ArrowDownTrayIcon className="h-5 w-5" />,
+              },
             ] satisfies RailAction[]
           }
           rightActions={
@@ -273,6 +298,7 @@ function SharedFormPageContent() {
         categories={form.categories}
         answerMode="readonly"
         structureEditable={false}
+        answerOptions={form.answerOptions}
       />
     </DocumentPageShell>
   );

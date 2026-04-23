@@ -36,6 +36,24 @@ Required fields for new entries:
 
 ## Entries
 
+### F-019 (2026-04-23) - Deprioritize display modes, prioritize custom answer enums
+
+- **Date**: 2026-04-23
+- **Source**: Stakeholder chat
+- **Exact Quote**: "please deprioritize B018, B019 and B020. then continue with custom answer enumerations"
+- **Normalized Intent**: High contrast, simplified, and keyboard-nav modes are less important right now. Custom answer enumerations (B-040/REQ-11) should be the next feature implemented.
+- **Feedback**: Stakeholder deprioritizes the remaining accessibility/display-mode items (B-018, B-019, B-020) and wants custom answer enumerations (B-040) done next.
+- **Action taken**: Moved B-018, B-019, B-020 to postponed in BACKLOG.md. Starting B-040 implementation.
+
+### F-018 (2026-04-23) - Re-importable exports and multi-form comparison view
+
+- **Date:** 2026-04-23
+- **Source:** Chat-driven
+- **Exact Quote:** "exported templates/forms should be re-import-able" and "I want a view in which I can compare multiple published forms of the same 'mother template' (2 or more!)"
+- **Normalized Intent:** (1) JSON exports should be importable back into the app as new local drafts. (2) A dedicated comparison view should let users compare 2+ published forms that share the same parent template, showing agreements and disagreements across responses.
+- **Feedback:** Two new feature directions: round-trip data portability via import, and a multi-form comparison view for sibling forms. Import should create a new local draft (not restore the exact original artifact). The comparison view strengthens the earlier F-005 direction about comparing filled-out sibling forms.
+- **Action taken:** Added REQ-27 (JSON import) and REQ-28 (multi-form comparison) to SPEC.md. Added B-041 and updated B-033 in BACKLOG.md. Updated FEEDBACK_LOG.md.
+
 ### F-017 (2026-04-23) - Give built-in starter templates both draft and fill entry paths
 
 - **Date:** 2026-04-23

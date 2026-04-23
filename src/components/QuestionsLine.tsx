@@ -3,7 +3,12 @@ import {
   ArrowUpIcon,
   TrashIcon,
 } from "@heroicons/react/16/solid";
-import type { Category, CategoryID, Question } from "../types/Form";
+import type {
+  AnswerOption,
+  Category,
+  CategoryID,
+  Question,
+} from "../types/Form";
 import IconButton from "./IconButton";
 import SelectionButton from "./SelectionButton";
 
@@ -12,12 +17,14 @@ function QuestionLine({
   onChange,
   answerMode,
   structureEditable,
+  answerOptions,
 }: {
   question: Question;
   categoryID: CategoryID;
   onChange: (mapper: (category: Category) => Category) => void;
   answerMode: "hidden" | "editable" | "readonly";
   structureEditable: boolean;
+  answerOptions?: AnswerOption[];
 }) {
   return (
     <li
@@ -30,11 +37,14 @@ function QuestionLine({
           onClick={() => {
             if (answerMode !== "editable") return;
             onChange((cat) =>
-              cat.withQuestion(question.id, (q) => q.withNextSelection()),
+              cat.withQuestion(question.id, (q) =>
+                q.withNextSelection(answerOptions),
+              ),
             );
           }}
           className="h-6 w-6 min-w-4 shrink-0 transition-transform group-hover:scale-75"
           disabled={answerMode !== "editable"}
+          answerOptions={answerOptions}
         />
       )}
 

@@ -79,6 +79,14 @@ body {
   box-sizing: border-box;
 }
 
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
 .small-caps {
   font-variant: small-caps;
 }

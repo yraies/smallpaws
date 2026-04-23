@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ArrowDownTrayIcon,
   CloudArrowUpIcon,
   DocumentDuplicateIcon,
   PlayIcon,
@@ -12,6 +13,7 @@ import dynamic from "next/dynamic";
 import { useParams, useRouter } from "next/navigation";
 import React from "react";
 import { typeid } from "typeid-js";
+import AnswerSchemaEditor from "../../../components/AnswerSchemaEditor";
 import DocumentPageShell from "../../../components/DocumentPageShell";
 import DocumentPhaseNotice from "../../../components/DocumentPhaseNotice";
 import FormCategoryList from "../../../components/FormCategoryList";
@@ -28,16 +30,18 @@ import {
 import { encryptFormData, hashPassword } from "../../../lib/crypto";
 import { Category, Question } from "../../../types/Form";
 import { hasValidStructure } from "../../../utils/documentStructure";
-import { printCurrentView } from "../../../utils/formActions";
+import { exportFormAsJSON, printCurrentView } from "../../../utils/formActions";
 import {
-  removeDraftFormData,
+  removeLocalDraft,
   removeRecentFormFromStorage,
-  saveDraftFormData,
+  saveLocalDraft,
   saveRecentFormMeta,
 } from "../../../utils/recentForms";
 import {
   createFormDraftFromTemplate,
   createTemplateDraftFromStructure,
+  setPendingFormDraft,
+  setPendingTemplateDraft,
 } from "../../../utils/templateLifecycle";
 
 function TemplatePageContent() {
@@ -125,7 +129,7 @@ function TemplatePageContent() {
         kind: "template",
         phase: "finalized",
       });
-      removeDraftFormData(localStorage, templateId);
+      removeLocalDraft(localStorage, templateId);
       setIsEncrypted(shouldEncrypt);
       setIsFinalized(true);
       setShowPasswordModal(false);
@@ -148,20 +152,15 @@ function TemplatePageContent() {
       kind: "form",
       phase: "draft",
     });
-    saveDraftFormData(localStorage, formId, JSON.stringify(draftForm));
+    saveLocalDraft(localStorage, formId, JSON.stringify(draftForm));
 
-    sessionStorage.setItem("create_new", "true");
-    sessionStorage.setItem("form", JSON.stringify(draftForm));
+    setPendingFormDraft(draftForm);
     router.push(`/form/${formId}`);
   };
 
   const createNewDraft = () => {
     const newTemplateId = typeid("template");
-    sessionStorage.setItem("create_new_template", "true");
-    sessionStorage.setItem(
-      "template",
-      JSON.stringify(createTemplateDraftFromStructure(template)),
-    );
+    setPendingTemplateDraft(createTemplateDraftFromStructure(template));
     router.push(`/template/${newTemplateId}`);
   };
 
@@ -212,6 +211,14 @@ function TemplatePageContent() {
                 title: "Delete Template",
                 variant: "danger",
                 icon: <TrashIcon className="h-5 w-5" />,
+              },
+              {
+                key: "json",
+                label: "Export JSON",
+                onClick: () => exportFormAsJSON(template),
+                title: "Export as JSON",
+                variant: "info",
+                icon: <ArrowDownTrayIcon className="h-5 w-5" />,
               },
             ] satisfies RailAction[]
           }
@@ -285,6 +292,14 @@ function TemplatePageContent() {
         />
       }
     >
+      <AnswerSchemaEditor
+        answerOptions={template.answerOptions}
+        onChange={(options) =>
+          setTemplate((prev) => prev.withAnswerOptions(options))
+        }
+        disabled={isFinalized}
+      />
+
       <FormCategoryList
         setDocument={setTemplate}
         categories={template.categories}
@@ -296,6 +311,7 @@ function TemplatePageContent() {
             prev.addCategory(Category.new("", [Question.new("")])),
           )
         }
+        answerOptions={template.answerOptions}
       />
 
       <TemplateShareModal

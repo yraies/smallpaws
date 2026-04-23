@@ -4,26 +4,56 @@ import {
   MinusCircleIcon,
   QuestionMarkCircleIcon,
 } from "@heroicons/react/16/solid";
-import { StopIcon } from "@heroicons/react/24/outline";
 import dynamic from "next/dynamic";
 import type React from "react";
 import { useDisplayPreferences } from "../contexts/DisplayPreferencesContext";
-import { Selection } from "../types/Form";
+import {
+  type AnswerOption,
+  getEffectiveAnswerOptions,
+  getUnsetKey,
+} from "../types/Form";
 
-// Define selection type configuration for better organization
-type SelectionConfig = {
-  Icon: React.ComponentType<React.ComponentProps<"svg">>;
-  textColor: string;
-  bgColor: string;
-  text: string;
-  shortText: string;
+/** A simple open circle for unset/unknown answer keys in icon mode. */
+function EmptyCircleIcon(props: React.ComponentProps<"svg">) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      aria-hidden="true"
+      {...props}
+    >
+      <circle cx="10" cy="10" r="7" />
+    </svg>
+  );
+}
+
+/** Icon lookup for the built-in default answer keys. Custom keys use EmptyCircleIcon. */
+const DEFAULT_ICONS: Record<
+  string,
+  React.ComponentType<React.ComponentProps<"svg">>
+> = {
+  must: ExclamationCircleIcon,
+  like: CheckCircleIcon,
+  maybe: QuestionMarkCircleIcon,
+  off_limits: MinusCircleIcon,
+  unset: EmptyCircleIcon,
 };
 
+function getIconForKey(
+  key: string,
+): React.ComponentType<React.ComponentProps<"svg">> {
+  return DEFAULT_ICONS[key] ?? EmptyCircleIcon;
+}
+
 interface SelectionButtonProps {
-  selection: Selection;
+  selection: string;
   onClick: () => void;
   className?: string;
   disabled?: boolean;
+  answerOptions?: AnswerOption[];
 }
 
 const SelectionButtonComponent: React.FC<SelectionButtonProps> = ({
@@ -31,66 +61,35 @@ const SelectionButtonComponent: React.FC<SelectionButtonProps> = ({
   onClick,
   className = "",
   disabled = false,
+  answerOptions,
 }) => {
   const { showIcon } = useDisplayPreferences();
+  const options = getEffectiveAnswerOptions(answerOptions);
+  const unsetKey = getUnsetKey(answerOptions);
 
-  // Selection configuration map for easier maintenance
-  const selectionConfig: Record<Selection, SelectionConfig> = {
-    [Selection.MUST_HAVE]: {
-      Icon: ExclamationCircleIcon,
-      textColor: "text-[#8d4f3f]",
-      bgColor: "bg-[#8d4f3f]",
-      text: "Must Have",
-      shortText: "Must",
-    },
-    [Selection.WOULD_LIKE]: {
-      Icon: CheckCircleIcon,
-      textColor: "text-[#7c4f73]",
-      bgColor: "bg-[#7c4f73]",
-      text: "Would Like",
-      shortText: "Like",
-    },
-    [Selection.MAYBE]: {
-      Icon: QuestionMarkCircleIcon,
-      textColor: "text-[#c69055]",
-      bgColor: "bg-[#c69055]",
-      text: "Maybe",
-      shortText: "Maybe",
-    },
-    [Selection.OFF_LIMITS]: {
-      Icon: MinusCircleIcon,
-      textColor: "text-[#aa6c67]",
-      bgColor: "bg-[#aa6c67]",
-      text: "Off Limits",
-      shortText: "Limit",
-    },
-    [Selection.UNSET]: {
-      Icon: StopIcon,
-      textColor: "text-[#b39a84]",
-      bgColor: "bg-[#b39a84]",
-      text: "Unset",
-      shortText: "Unset",
-    },
-  };
+  const option =
+    options.find((o) => o.key === selection) ?? options[options.length - 1];
 
-  const config = selectionConfig[selection];
+  const Icon = getIconForKey(option.key);
+  const isSelected = selection !== unsetKey;
 
   // Icon button rendering
   if (showIcon) {
     return (
       <button
         type="button"
-        className={`selection-button group -m-2 flex h-12 w-12 cursor-pointer items-center justify-center border border-sand-200 bg-sand-50 ${disabled ? "cursor-not-allowed" : ""}`}
+        className={`selection-button group flex h-8 w-8 cursor-pointer items-center justify-center ${disabled ? "cursor-not-allowed" : ""}`}
         onClick={disabled ? undefined : onClick}
-        title={config.text}
+        title={option.label}
         disabled={disabled}
-        aria-label={`Set response to ${config.text}`}
-        aria-pressed={selection !== Selection.UNSET}
-        data-selected={selection !== Selection.UNSET}
-        data-label={config.shortText}
+        aria-label={`Set response to ${option.label}`}
+        aria-pressed={isSelected}
+        data-selected={isSelected}
+        data-label={option.shortLabel}
       >
-        <config.Icon
-          className={`${className} ${config.textColor}`}
+        <Icon
+          className={`${className}`}
+          style={{ color: option.color }}
           aria-hidden="true"
         />
       </button>
@@ -101,16 +100,17 @@ const SelectionButtonComponent: React.FC<SelectionButtonProps> = ({
   return (
     <button
       type="button"
-      className={`selection-button h-8 w-16 cursor-pointer font-extrabold text-white ${config.bgColor} ${className} ${disabled ? "cursor-not-allowed" : ""}`}
+      className={`selection-button h-8 w-16 cursor-pointer font-extrabold text-white ${className} ${disabled ? "cursor-not-allowed" : ""}`}
       onClick={disabled ? undefined : onClick}
-      title={config.text}
+      title={option.label}
       disabled={disabled}
-      aria-label={`Set response to ${config.text}`}
-      aria-pressed={selection !== Selection.UNSET}
-      data-selected={selection !== Selection.UNSET}
-      data-label={config.shortText}
+      aria-label={`Set response to ${option.label}`}
+      aria-pressed={isSelected}
+      data-selected={isSelected}
+      data-label={option.shortLabel}
+      style={{ backgroundColor: option.color }}
     >
-      {config.shortText}
+      {option.shortLabel}
     </button>
   );
 };

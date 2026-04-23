@@ -150,11 +150,22 @@ export default function TemplateShareModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto border border-sand-200 bg-sand-50">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="template-share-modal-title"
+        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto border border-sand-200 bg-sand-50"
+      >
         <div className="flex items-center justify-between border-b px-5 py-4">
           <div className="flex items-center gap-3">
-            <ShareIcon className="h-6 w-6 text-lavender-700" />
-            <h2 className="text-xl font-semibold text-lavender-900">
+            <ShareIcon
+              className="h-6 w-6 text-lavender-700"
+              aria-hidden="true"
+            />
+            <h2
+              id="template-share-modal-title"
+              className="text-xl font-semibold text-lavender-900"
+            >
               Share &quot;{templateName}&quot;
             </h2>
           </div>
@@ -193,7 +204,11 @@ export default function TemplateShareModal({
               </div>
 
               <div className="flex items-center gap-2">
+                <label htmlFor="template-share-url-display" className="sr-only">
+                  Share URL
+                </label>
                 <input
+                  id="template-share-url-display"
                   type="text"
                   value={shareInfo.shareUrl}
                   readOnly
@@ -233,11 +248,13 @@ export default function TemplateShareModal({
             </div>
           )}
 
-          {error && (
-            <div className="border-l-4 border-danger-500 bg-danger-50 px-3 py-2 text-sm text-danger-700">
-              {error}
-            </div>
-          )}
+          <div role="alert" aria-live="assertive">
+            {error && (
+              <div className="border-l-4 border-danger-500 bg-danger-50 px-3 py-2 text-sm text-danger-700">
+                {error}
+              </div>
+            )}
+          </div>
 
           <div className="flex justify-between gap-3">
             {shareInfo ? (

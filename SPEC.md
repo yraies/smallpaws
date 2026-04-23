@@ -44,8 +44,8 @@ Pre-release (~75% complete). No compatibility obligations.
 
 - **REQ-1: Create Template Draft** — Users create editable template drafts from scratch or by starting from an existing template structure. Templates are the structural source of truth for later forms. Status: ✅ implemented.
 - **REQ-2: Finalize Template Before Filling** — Users finalize template drafts into frozen template versions before creating forms. Only finalized templates, or built-in starter templates with valid structure, can be used to start fillable forms. Status: ✅ implemented.
-- **REQ-3: Edit Template Structure** — Template drafts allow editing titles, categories, questions, ordering, and the template-wide answer schema. Finalized templates are read-only. Status: ❌ not implemented.
-- **REQ-4: Template vs Fillable Form Distinction** — System distinguishes clearly between templates and forms. Templates contain structure and answer schema only; forms contain the same fixed structure plus filled answers. Status: ✅ partially implemented.
+- **REQ-3: Edit Template Structure** — Template drafts allow editing titles, categories, questions, ordering, and the template-wide answer schema. Finalized templates are read-only. Status: ✅ partially implemented.
+- **REQ-4: Template vs Fillable Form Distinction** — System distinguishes clearly between templates and forms. Templates contain structure and answer schema only; forms contain the same fixed structure plus filled answers. Status: ✅ implemented.
 - **REQ-20: Category-Based Organization** — Templates and forms are organized into categories, each containing related questions. Categories clearly separate different topic areas. Status: ✅ implemented.
 - **REQ-6: Template Structure Validation** — Templates must have at least one category and one question before they can be finalized or shared. Status: ✅ implemented.
 - **REQ-26: Built-In Starter Entry Paths** — On the home page, built-in starter templates with valid structure can start either a local template draft or a local fillable form. The empty starter only allows local template-draft creation. Status: ✅ implemented.
@@ -54,7 +54,7 @@ Pre-release (~75% complete). No compatibility obligations.
 
 - **REQ-22: Create Form from Finalized Template** — Starting a form from a finalized template creates an independent fillable copy with fixed categories, questions, and answer schema. Built-in starter templates with valid structure may act as ready-made finalized starters on the home page. Status: ✅ implemented.
 - **REQ-10: Predefined Answer Options** — Questions support: "must", "would like", "maybe", "off limits", and "unset" by default. Unset is the default state. Status: ✅ implemented.
-- **REQ-11: Template-Wide Custom Answer Enumerations** — Template creators can define custom answer options for all questions in a template. These answer options carry into forms created from that template. Status: ❌ not implemented.
+- **REQ-11: Template-Wide Custom Answer Enumerations** — Template creators can define custom answer options for all questions in a template. These answer options carry into forms created from that template. Status: ✅ implemented.
 - **REQ-12: Visual Answer Indication** — Visual indicators for different answer states show agreement/disagreement areas. Indicators must be clear and distinguishable. Status: ✅ implemented.
 - **REQ-17: Immutable Shared Forms** — Once a form is shared/published, its answers cannot be modified; changes require creating a new local form/copy. This protects recipients from silent changes. Status: ✅ partially implemented.
 - **REQ-23: Forms Only Edit Answers** — In the form-filling phase, users can edit answers/content but not the form structure. Status: ✅ implemented.
@@ -70,16 +70,18 @@ Pre-release (~75% complete). No compatibility obligations.
 
 #### Data Portability
 
-- **REQ-16: User-Friendly JSON and CSV Export** — Users can export forms and responses as JSON and CSV files through clearly labeled UI actions. Exported data includes all form structure and response data. Status: ✅ partially implemented.
+- **REQ-16: User-Friendly JSON and CSV Export** — Users can export forms and responses as JSON and CSV files through clearly labeled UI actions. Exported data includes all form structure and response data. Status: ✅ implemented.
+- **REQ-27: JSON Import** — Users can import a previously exported JSON file to create a new local draft (template or form). Importing always creates a fresh draft with a new ID rather than restoring the original artifact. Status: ✅ implemented.
 - **REQ-19: Print-Friendly and Accessible Display Modes** — Browser print plus print CSS must support printed output with handwritten response space. High contrast and simplified display modes remain planned. Status: ✅ partially implemented.
 - **REQ-21: Responsive Design** — Interface works on desktop and mobile. All functionality accessible on mobile. Status: ✅ implemented.
 
 #### Form Sharing and Collaboration
 
-- **REQ-7: Share Finalized Templates** — Finalized templates can be shared via unique read-only links. Recipients can inspect the structure and create their own local forms from it. Status: ❌ not implemented.
-- **REQ-8: Share Filled Forms** — Filled forms can be shared via unique read-only links that show answers/results without permitting mutation. Status: ✅ partially implemented.
-- **REQ-18: Phase Backtracking via New Local Copies** — Users can move back to an earlier workflow phase by creating a new local draft/copy rather than editing the finalized/shared artifact directly. Status: ❌ not implemented.
+- **REQ-7: Share Finalized Templates** — Finalized templates can be shared via unique read-only links. Recipients can inspect the structure and create their own local forms from it. Status: ✅ implemented.
+- **REQ-8: Share Filled Forms** — Filled forms can be shared via unique read-only links that show answers/results without permitting mutation. Status: ✅ implemented.
+- **REQ-18: Phase Backtracking via New Local Copies** — Users can move back to an earlier workflow phase by creating a new local draft/copy rather than editing the finalized/shared artifact directly. Status: ✅ implemented.
 - **REQ-5: Convert a Form into a Derived Template** — Users can create a template from a form's structure, preserving structural ancestry where useful for later reuse or comparison. Status: ❌ not implemented.
+- **REQ-28: Multi-Form Comparison View** — Users can compare 2 or more published forms that share the same parent template in a single view, showing agreements and disagreements across responses. Status: ❌ not implemented.
 
 ### 2) Important Constraints
 
@@ -103,6 +105,8 @@ Pre-release (~75% complete). No compatibility obligations.
 - Users can delete templates and forms from their direct non-shared URLs.
 - Deleting a form soft-deletes; shared links show a "form deleted" message.
 - JSON and CSV export produce downloadable files with the relevant structure/response data.
+- Importing a previously exported JSON file creates a new local draft with a fresh ID, not a restoration of the original artifact.
+- Comparing 2 or more published forms from the same parent template shows each form's answers side by side with visual agreement/disagreement indicators.
 - Browser print produces a readable print-friendly layout.
 - All UI is responsive and functional on mobile viewports.
 

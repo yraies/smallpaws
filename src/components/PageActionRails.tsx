@@ -21,7 +21,7 @@ export default function PageActionRails({
   rightActions = [],
 }: PageActionRailsProps) {
   return (
-    <div className="print:hidden">
+    <nav aria-label="Page actions" className="print:hidden">
       {leftActions.length > 0 && (
         <div className="fixed top-20 left-6 z-10 hidden flex-col gap-2 lg:flex xl:left-10">
           {leftActions.map((action) => (
@@ -72,6 +72,6 @@ export default function PageActionRails({
           ))}
         </div>
       )}
-    </div>
+    </nav>
   );
 }

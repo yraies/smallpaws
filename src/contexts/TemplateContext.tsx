@@ -11,11 +11,12 @@ import {
 import { decryptFormData } from "../lib/crypto";
 import { Form, type FormPOJO } from "../types/Form";
 import {
-  loadDraftFormData,
-  removeDraftFormData,
-  saveDraftFormData,
+  loadLocalDraft,
+  removeLocalDraft,
+  saveLocalDraft,
   saveRecentFormMeta,
 } from "../utils/recentForms";
+import { consumePendingTemplateDraft } from "../utils/templateLifecycle";
 
 type TemplateContextType = {
   template: Form | undefined;
@@ -94,7 +95,7 @@ function TemplateContextProvider({ children }: { children: React.ReactNode }) {
           kind: "template",
           phase: "finalized",
         });
-        removeDraftFormData(localStorage, id);
+        removeLocalDraft(localStorage, id);
       } catch (error) {
         console.error("Error verifying template password:", error);
         alert("Failed to unlock template.");
@@ -104,21 +105,13 @@ function TemplateContextProvider({ children }: { children: React.ReactNode }) {
   );
 
   useEffect(() => {
-    if (sessionStorage.getItem("create_new_template") === "true") {
-      const rawTemplate = sessionStorage.getItem("template");
-      if (!rawTemplate) {
-        setIsLoading(false);
-        return;
-      }
-
-      const draftTemplate = Form.fromPOJO(JSON.parse(rawTemplate));
-      setTemplate(draftTemplate);
-      setTemplateName(draftTemplate.name);
+    const pendingDraft = consumePendingTemplateDraft();
+    if (pendingDraft) {
+      setTemplate(pendingDraft);
+      setTemplateName(pendingDraft.name);
       setIsFinalized(false);
       setIsEncrypted(false);
       setNeedsPasswordVerification(false);
-      sessionStorage.removeItem("create_new_template");
-      sessionStorage.removeItem("template");
       setIsLoading(false);
       return;
     }
@@ -149,11 +142,7 @@ function TemplateContextProvider({ children }: { children: React.ReactNode }) {
       kind: "template",
       phase: "draft",
     });
-    saveDraftFormData(
-      localStorage,
-      id,
-      JSON.stringify(template.withoutAnswers()),
-    );
+    saveLocalDraft(localStorage, id, JSON.stringify(template.withoutAnswers()));
   }, [id, template, isFinalized]);
 
   const reSetTemplate: Dispatch<SetStateAction<Form>> = (newTemplate) => {
@@ -212,7 +201,7 @@ async function loadTemplate(
           kind: "template",
           phase: "finalized",
         });
-        removeDraftFormData(localStorage, id);
+        removeLocalDraft(localStorage, id);
         setIsLoading(false);
         return;
       }
@@ -231,7 +220,7 @@ async function loadTemplate(
         kind: "template",
         phase: "finalized",
       });
-      removeDraftFormData(localStorage, id);
+      removeLocalDraft(localStorage, id);
       setIsLoading(false);
       return;
     }
@@ -239,7 +228,7 @@ async function loadTemplate(
     setIsFinalized(false);
     setIsEncrypted(false);
     setNeedsPasswordVerification(false);
-    const storedData = loadDraftFormData(localStorage, id);
+    const storedData = loadLocalDraft(localStorage, id);
     if (storedData) {
       const draftTemplate = Form.fromPOJO(
         JSON.parse(storedData),

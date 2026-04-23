@@ -34,7 +34,10 @@ export default function EdgeActionButton({
       title={title ?? label}
       className={`flex items-center gap-2 border px-2 py-1 text-sm font-semibold shadow-sm ${variantClasses[variant]} ${disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:backdrop-brightness-95"} ${className}`}
     >
-      <span className="flex h-6 w-6 items-center justify-center">
+      <span
+        className="flex h-6 w-6 items-center justify-center"
+        aria-hidden="true"
+      >
         {children}
       </span>
       <span>{label}</span>

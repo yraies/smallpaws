@@ -101,3 +101,34 @@ Stabilized browser-local recent-form tracking after the root-level repo migratio
 - Collapsed template and form sharing to one canonical reusable link per document, removing the need to manage parallel share links that were effectively redundant in practice.
 - Fixed share-link copy actions with a fallback path so copying works reliably in real Chrome/local environments where the async Clipboard API may be unavailable.
 - Refactored shared filled-form links back onto the same document-page shell and calmer password/access flow as the rest of the product, removing an older dashboard-like special-case experience from that path.
+
+### Template-Wide Custom Answer Enumerations (Apr 2026)
+
+Added support for custom answer options that template creators define once and apply to all questions.
+
+- Added `AnswerOption` type and `answerOptions` field to `Form`/`FormPOJO`. When undefined, the built-in defaults (must/like/maybe/off limits/unset) are used.
+- `Question.selection` generalized from the `Selection` enum to `string`, allowing custom answer keys while maintaining backward compatibility.
+- New `AnswerSchemaEditor` component on template draft pages lets creators add, remove, reorder, and customize answer options with label, short label, and color.
+- `SelectionButton` now renders colors and labels dynamically from the form's answer options instead of a hardcoded config map.
+- Answer options thread through the full component chain: `FormCategoryList` -> `CategoryBox` -> `QuestionLine` -> `SelectionButton`.
+- CSV export now uses answer option labels instead of raw key strings.
+- Custom answer options propagate automatically when creating forms from templates (via `withoutAnswers()` and `createFormDraftFromTemplate()`).
+- JSON export/serialization includes `answerOptions` when present; older forms without the field fall back to defaults.
+- Print CSS requires no changes — `data-label` and `data-selected` attributes already carry dynamic values.
+
+### Screen Reader Accessibility Pass (Apr 2026)
+
+Comprehensive screen reader accessibility improvements across all components.
+
+- Added skip-nav link in the root layout and `<main>` landmark on the home page.
+- PasswordModal, ShareModal, and TemplateShareModal now use `role="dialog"`, `aria-modal`, and `aria-labelledby` for proper screen reader announcement.
+- Fixed duplicate `id="share-expiry"` in ShareModal (split into `share-expiry-active` and `share-expiry-new`).
+- Share URL inputs now have `sr-only` labels associated via `htmlFor`/`id`.
+- Error regions in all modals now use `role="alert"` with `aria-live="assertive"` for dynamic error announcements.
+- Password toggle buttons have descriptive `aria-label`s ("Show password" / "Hide password").
+- EdgeActionButton icon span marked `aria-hidden="true"` since the adjacent text label provides the accessible name.
+- PageActionRails changed from generic `<div>` to `<nav aria-label="Page actions">` landmark.
+- FormHeader input now has a proper `sr-only` `<label>` instead of relying on `title` attribute.
+- LoadingState uses `role="status"` and `aria-live="polite"` so screen readers announce loading transitions.
+- EncryptionStatus icons marked `aria-hidden="true"` with `sr-only` fallback text when `showText` is false.
+- Decorative icons in DeletedFormMessage and ShareInfoOverlay marked `aria-hidden="true"`.

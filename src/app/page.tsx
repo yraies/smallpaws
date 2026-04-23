@@ -1,15 +1,16 @@
 "use client";
 
-import { TrashIcon } from "@heroicons/react/16/solid";
+import { ArrowUpTrayIcon, TrashIcon } from "@heroicons/react/16/solid";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { typeid } from "typeid-js";
 import FormTemplates from "../assets/FormTemplates";
 import Box from "../components/Box";
 import EncryptionStatus from "../components/EncryptionStatus";
 import IconButton from "../components/IconButton";
 import type { Form } from "../types/Form";
+import { parseImportedJSON, readFileAsText } from "../utils/formActions";
 import { formatRelativeTime } from "../utils/RelativeDates";
 import {
   clearRecentFormsFromStorage,
@@ -21,6 +22,8 @@ import {
   canStartFormFromTemplate,
   createFormDraftFromTemplate,
   createTemplateDraftFromStructure,
+  setPendingFormDraft,
+  setPendingTemplateDraft,
 } from "../utils/templateLifecycle";
 
 function Spacer() {
@@ -32,6 +35,8 @@ function HomePageContent() {
   const [selectedTemplate, setSelectedTemplate] = React.useState("empty");
   const [templateName, setTemplateName] = React.useState("");
   const [recentItems, setRecentItems] = React.useState<RecentItemMeta[]>([]);
+  const [importError, setImportError] = React.useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const selectedStarterTemplate =
     FormTemplates.find((template) => template.id === selectedTemplate) ??
     FormTemplates[0];
@@ -44,7 +49,7 @@ function HomePageContent() {
   }, []);
 
   return (
-    <div className="flex w-full flex-col items-center gap-4">
+    <main id="main-content" className="flex w-full flex-col items-center gap-4">
       <section className="w-full border border-sand-200 bg-sand-50 px-4 py-3 text-left">
         <h2 className="text-base font-semibold">What Small Paws helps with</h2>
         <p className="mt-2 text-sm leading-6 text-lavender-700">
@@ -84,9 +89,12 @@ function HomePageContent() {
           </p>
           <Spacer />
           <div className="col-span-full flex flex-row gap-2 px-2">
-            <p className="text-lg font-semibold">Starting Title</p>
+            <label htmlFor="template-name" className="text-lg font-semibold">
+              Starting Title
+            </label>
             <input
               type="text"
+              id="template-name"
               className="paper-field min-w-1 grow"
               placeholder="My Template"
               value={templateName}
@@ -107,7 +115,7 @@ function HomePageContent() {
           <div className="col-span-full flex flex-wrap justify-end gap-2 px-2">
             <button
               type="button"
-              className="border border-sand-200 bg-sand-50 px-3 py-2 text-sm font-semibold text-lavender-700 hover:backdrop-brightness-95"
+              className="cursor-pointer border border-sand-200 bg-sand-50 px-3 py-2 text-sm font-semibold text-lavender-700 hover:backdrop-brightness-95"
               onClick={() =>
                 createAndNavigateTemplateDraft(
                   selectedStarterTemplate.template,
@@ -121,7 +129,7 @@ function HomePageContent() {
             {canFillFormFromStarter && (
               <button
                 type="button"
-                className="bg-lavender-700 px-3 py-2 text-sm font-semibold text-white hover:backdrop-brightness-95"
+                className="cursor-pointer bg-lavender-700 px-3 py-2 text-sm font-semibold text-white hover:backdrop-brightness-95"
                 onClick={() =>
                   createAndNavigateFormDraft(
                     selectedStarterTemplate.template,
@@ -136,6 +144,40 @@ function HomePageContent() {
           </div>
         </div>
       </Box>
+
+      <section className="flex w-full items-center gap-3 border border-sand-200 bg-sand-50 px-4 py-3">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".json,application/json"
+          className="hidden"
+          onChange={(e) =>
+            handleFileImport(
+              e.target.files,
+              setImportError,
+              router,
+              fileInputRef,
+            )
+          }
+        />
+        <button
+          type="button"
+          className="flex cursor-pointer items-center gap-1.5 border border-sand-200 bg-sand-50 px-3 py-2 text-sm font-semibold text-lavender-700 hover:backdrop-brightness-95"
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <ArrowUpTrayIcon className="h-4 w-4" aria-hidden="true" />
+          Import JSON
+        </button>
+        <p className="text-sm text-lavender-700">
+          Import a previously exported JSON file as a new local draft.
+        </p>
+        {importError && (
+          <p className="text-sm text-danger-700" role="alert">
+            {importError}
+          </p>
+        )}
+      </section>
+
       <Box
         title="Recent Work"
         onTitleChange={() => {}}
@@ -194,7 +236,7 @@ function HomePageContent() {
           )}
         </div>
       </Box>
-    </div>
+    </main>
   );
 }
 
@@ -260,10 +302,8 @@ function createAndNavigateTemplateDraft(
   router: ReturnType<typeof useRouter>,
 ) {
   const id = typeid("template");
-  sessionStorage.setItem("create_new_template", "true");
-  sessionStorage.setItem(
-    "template",
-    JSON.stringify(createTemplateDraftFromStructure(template, templateName)),
+  setPendingTemplateDraft(
+    createTemplateDraftFromStructure(template, templateName),
   );
   router.push(`/template/${id}`);
 }
@@ -280,8 +320,7 @@ function createAndNavigateFormDraft(
   const id = typeid("form");
   const draftForm = createFormDraftFromTemplate(template, templateName);
 
-  sessionStorage.setItem("create_new", "true");
-  sessionStorage.setItem("form", JSON.stringify(draftForm));
+  setPendingFormDraft(draftForm);
   router.push(`/form/${id}`);
 }
 
@@ -314,4 +353,40 @@ function describeRecentItem(item: RecentItemMeta): string {
   }
 
   return item.phase === "published" ? "published form" : "form draft";
+}
+
+async function handleFileImport(
+  files: FileList | null,
+  setError: React.Dispatch<React.SetStateAction<string | null>>,
+  router: ReturnType<typeof useRouter>,
+  fileInputRef: React.RefObject<HTMLInputElement | null>,
+) {
+  setError(null);
+
+  if (!files || files.length === 0) return;
+  const file = files[0];
+
+  try {
+    const text = await readFileAsText(file);
+    const { form, hasAnswers } = parseImportedJSON(text);
+
+    if (hasAnswers) {
+      // Import as form draft (preserving answers)
+      const id = typeid("form");
+      setPendingFormDraft(form);
+      router.push(`/form/${id}`);
+    } else {
+      // Import as template draft (no answers to preserve)
+      const id = typeid("template");
+      setPendingTemplateDraft(form);
+      router.push(`/template/${id}`);
+    }
+  } catch (e) {
+    setError(e instanceof Error ? e.message : "Failed to import file.");
+  } finally {
+    // Reset the file input so the same file can be re-selected
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  }
 }

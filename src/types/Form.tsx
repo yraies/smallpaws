@@ -8,6 +8,65 @@ enum Selection {
   UNSET = "unset",
 }
 
+/**
+ * Defines one answer option in a template-wide answer schema.
+ * The `key` is stored in `Question.selection` and must be unique within a schema.
+ */
+export type AnswerOption = {
+  key: string;
+  label: string;
+  shortLabel: string;
+  color: string;
+};
+
+/** The built-in default answer options matching the original Selection enum. */
+export const DEFAULT_ANSWER_OPTIONS: AnswerOption[] = [
+  { key: "must", label: "Must Have", shortLabel: "Must", color: "#8d4f3f" },
+  { key: "like", label: "Would Like", shortLabel: "Like", color: "#7c4f73" },
+  { key: "maybe", label: "Maybe", shortLabel: "Maybe", color: "#c69055" },
+  {
+    key: "off_limits",
+    label: "Off Limits",
+    shortLabel: "Limit",
+    color: "#aa6c67",
+  },
+  { key: "unset", label: "Unset", shortLabel: "Unset", color: "#b39a84" },
+];
+
+/**
+ * Returns the effective answer options for a form, falling back to defaults.
+ */
+export function getEffectiveAnswerOptions(
+  answerOptions: AnswerOption[] | undefined,
+): AnswerOption[] {
+  return answerOptions && answerOptions.length > 0
+    ? answerOptions
+    : DEFAULT_ANSWER_OPTIONS;
+}
+
+/**
+ * Returns the "unset" key for a given answer option set.
+ * Always the last option in the array.
+ */
+export function getUnsetKey(answerOptions: AnswerOption[] | undefined): string {
+  const options = getEffectiveAnswerOptions(answerOptions);
+  return options[options.length - 1].key;
+}
+
+/**
+ * Returns the next selection key in the cycle order.
+ * Cycles through the answer options array, wrapping at the end.
+ */
+export function nextSelectionKey(
+  currentKey: string,
+  answerOptions: AnswerOption[] | undefined,
+): string {
+  const options = getEffectiveAnswerOptions(answerOptions);
+  const currentIndex = options.findIndex((o) => o.key === currentKey);
+  if (currentIndex === -1) return options[options.length - 1].key;
+  return options[(currentIndex + 1) % options.length].key;
+}
+
 type TypeIdPOJO = { prefix: string; suffix: string };
 
 const QuestionIDLiteral = "question";
@@ -20,34 +79,36 @@ export type QuestionPOJO = {
 
 class Question {
   readonly id: QuestionID;
-  readonly selection: Selection;
+  readonly selection: string;
   readonly value: string;
 
-  private constructor(id: QuestionID, selection: Selection, value: string) {
+  private constructor(id: QuestionID, selection: string, value: string) {
     this.id = id;
     this.selection = selection;
     this.value = value;
   }
 
-  static new(value: string): Question {
-    return new Question(typeid(QuestionIDLiteral), Selection.UNSET, value);
+  static new(value: string, unsetKey = Selection.UNSET as string): Question {
+    return new Question(typeid(QuestionIDLiteral), unsetKey, value);
   }
 
-  static fromPOJO(obj: QuestionPOJO): Question {
+  static fromPOJO(obj: QuestionPOJO, answerOptions?: AnswerOption[]): Question {
     if (obj.id.prefix !== QuestionIDLiteral) {
       throw new Error("Invalid Question ID");
     }
-    if (!Object.values(Selection).includes(obj.selection as Selection)) {
-      throw new Error("Invalid Selection");
-    }
+    const options = getEffectiveAnswerOptions(answerOptions);
+    const validKeys = options.map((o) => o.key);
+    const selection = validKeys.includes(obj.selection)
+      ? obj.selection
+      : options[options.length - 1].key;
     return new Question(
       new TypeID(obj.id.prefix, obj.id.suffix),
-      obj.selection as Selection,
+      selection,
       obj.value,
     );
   }
 
-  withSelection(selection: Selection): Question {
+  withSelection(selection: string): Question {
     return new Question(this.id, selection, this.value);
   }
 
@@ -55,14 +116,15 @@ class Question {
     return new Question(this.id, this.selection, value);
   }
 
-  withNextSelection(): Question {
+  withNextSelection(answerOptions?: AnswerOption[]): Question {
     return new Question(
       this.id,
-      Question.nextSelection(this.selection),
+      nextSelectionKey(this.selection, answerOptions),
       this.value,
     );
   }
 
+  /** @deprecated Use nextSelectionKey() with answer options instead. */
   static nextSelection(selection: Selection): Selection {
     switch (selection) {
       case Selection.MUST_HAVE:
@@ -104,14 +166,14 @@ class Category {
     return new Category(typeid(CategoryIDLiteral), name, questions);
   }
 
-  static fromPOJO(obj: CategoryPOJO): Category {
+  static fromPOJO(obj: CategoryPOJO, answerOptions?: AnswerOption[]): Category {
     if (obj.id.prefix !== CategoryIDLiteral) {
       throw new Error("Invalid Category ID");
     }
     return new Category(
       new TypeID(obj.id.prefix, obj.id.suffix),
       obj.name,
-      obj.questions.map((q) => Question.fromPOJO(q)),
+      obj.questions.map((q) => Question.fromPOJO(q, answerOptions)),
     );
   }
 
@@ -163,14 +225,14 @@ class Category {
     );
   }
 
-  withoutAnswers(): Category {
+  withoutAnswers(unsetKey: string = Selection.UNSET): Category {
     return new Category(
       this.id,
       this.name,
       this.questions.map((question) =>
-        question.selection === Selection.UNSET
+        question.selection === unsetKey
           ? question
-          : question.withSelection(Selection.UNSET),
+          : question.withSelection(unsetKey),
       ),
     );
   }
@@ -179,25 +241,37 @@ class Category {
 export type FormPOJO = {
   name: string;
   categories: CategoryPOJO[];
+  answerOptions?: AnswerOption[];
 };
 
 class Form {
   readonly name: string;
   readonly categories: Category[];
+  readonly answerOptions?: AnswerOption[];
 
-  private constructor(name: string, categories: Category[]) {
+  private constructor(
+    name: string,
+    categories: Category[],
+    answerOptions?: AnswerOption[],
+  ) {
     this.name = name;
     this.categories = categories;
+    this.answerOptions = answerOptions;
   }
 
-  static new(name: string, categories: Category[]): Form {
-    return new Form(name, categories);
+  static new(
+    name: string,
+    categories: Category[],
+    answerOptions?: AnswerOption[],
+  ): Form {
+    return new Form(name, categories, answerOptions);
   }
 
   static fromPOJO(obj: FormPOJO): Form {
     return new Form(
       obj.name,
-      obj.categories.map((c) => Category.fromPOJO(c)),
+      obj.categories.map((c) => Category.fromPOJO(c, obj.answerOptions)),
+      obj.answerOptions,
     );
   }
 
@@ -206,11 +280,15 @@ class Form {
   }
 
   withName(name: string): Form {
-    return new Form(name, this.categories);
+    return new Form(name, this.categories, this.answerOptions);
   }
 
   withCategories(categories: Category[]): Form {
-    return new Form(this.name, categories);
+    return new Form(this.name, categories, this.answerOptions);
+  }
+
+  withAnswerOptions(answerOptions: AnswerOption[] | undefined): Form {
+    return new Form(this.name, this.categories, answerOptions);
   }
 
   withCategory(
@@ -220,7 +298,7 @@ class Form {
     const updatedCategories = this.categories.map((c) =>
       c.id === categoryID ? modifier(c) : c,
     );
-    return new Form(this.name, updatedCategories);
+    return new Form(this.name, updatedCategories, this.answerOptions);
   }
 
   withMovedCategory(categoryID: CategoryID, direction: "up" | "down"): Form {
@@ -235,24 +313,31 @@ class Form {
     const newCategories = [...this.categories];
     newCategories[index] = newCategories[newIndex];
     newCategories[newIndex] = this.categories[index];
-    return new Form(this.name, newCategories);
+    return new Form(this.name, newCategories, this.answerOptions);
   }
 
   addCategory(category: Category): Form {
-    return new Form(this.name, [...this.categories, category]);
+    return new Form(
+      this.name,
+      [...this.categories, category],
+      this.answerOptions,
+    );
   }
 
   removeCategory(categoryID: CategoryID): Form {
     return new Form(
       this.name,
       this.categories.filter((c) => c.id !== categoryID),
+      this.answerOptions,
     );
   }
 
   withoutAnswers(): Form {
+    const unsetKey = getUnsetKey(this.answerOptions);
     return new Form(
       this.name,
-      this.categories.map((category) => category.withoutAnswers()),
+      this.categories.map((category) => category.withoutAnswers(unsetKey)),
+      this.answerOptions,
     );
   }
 
@@ -267,15 +352,15 @@ class Form {
     return this.categories.length > 0 && this.questionCount() > 0;
   }
 
-  getStatistics(): Record<Selection, number> {
+  getStatistics(): Record<string, number> {
     return this.categories.reduce(
       (acc, category) => {
-        category.questions.forEach((question) => {
+        for (const question of category.questions) {
           acc[question.selection] = (acc[question.selection] || 0) + 1;
-        });
+        }
         return acc;
       },
-      {} as Record<Selection, number>,
+      {} as Record<string, number>,
     );
   }
 

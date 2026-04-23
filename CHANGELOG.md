@@ -15,6 +15,9 @@ Detailed historical notes are preserved in `CHANGELOG_ARCHIVE.md`.
 ### Added
 
 - Recent forms now persist entirely via browser storage metadata, including published-form recents without storing published plaintext locally.
+- Screen reader users can now navigate the app with proper ARIA landmarks, dialog roles on modals, labeled form inputs, status announcements for loading states, and live error regions.
+- Template creators can now define custom answer options (label, short label, color) that apply to all questions in a template. Custom options carry into forms and exports. Built-in defaults are used when no custom options are set.
+- Users can now import a previously exported JSON file from the home page to create a new local draft. If the JSON has filled answers, it imports as a form draft; otherwise it imports as a template draft. Custom answer options are preserved through the export-import roundtrip.
 
 ### Changed
 
@@ -31,6 +34,8 @@ Detailed historical notes are preserved in `CHANGELOG_ARCHIVE.md`.
 - Protected templates now use the same password model as protected forms: the artifact itself owns the password, and shared links reuse that same password instead of introducing a separate one.
 - Share dialogs now use a simpler, calmer layout that matches the rest of the UI instead of the older card-heavy share flow.
 - Template and form sharing now use one reusable share link per document instead of managing multiple parallel links.
+- Template/form lifecycle phases (draft, finalized, published) are now explicit in both metadata and persistence rather than inferred from scattered boolean flags.
+- All draft handoff between pages now goes through centralized session helpers instead of ad-hoc sessionStorage keys, reducing the risk of orphaned or mismatched keys.
 
 ### Fixed
 

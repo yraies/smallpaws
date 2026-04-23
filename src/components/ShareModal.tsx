@@ -188,11 +188,22 @@ const ShareModal: React.FC<ShareModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto border border-sand-200 bg-sand-50">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="share-modal-title"
+        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto border border-sand-200 bg-sand-50"
+      >
         <div className="flex items-center justify-between border-b px-5 py-4">
           <div className="flex items-center gap-3">
-            <ShareIcon className="h-6 w-6 text-complement-700" />
-            <h2 className="text-xl font-semibold text-lavender-900">
+            <ShareIcon
+              className="h-6 w-6 text-complement-700"
+              aria-hidden="true"
+            />
+            <h2
+              id="share-modal-title"
+              className="text-xl font-semibold text-lavender-900"
+            >
               Share &quot;{formName}&quot;
             </h2>
           </div>
@@ -230,7 +241,11 @@ const ShareModal: React.FC<ShareModalProps> = ({
               </div>
 
               <div className="flex items-center gap-2">
+                <label htmlFor="share-url-display" className="sr-only">
+                  Share URL
+                </label>
                 <input
+                  id="share-url-display"
                   type="text"
                   value={shareInfo.shareUrl}
                   readOnly
@@ -256,14 +271,14 @@ const ShareModal: React.FC<ShareModalProps> = ({
 
               <div>
                 <label
-                  htmlFor="share-expiry"
+                  htmlFor="share-expiry-active"
                   className="mb-2 flex items-center gap-2 text-sm font-medium text-lavender-700"
                 >
-                  <CalendarIcon className="h-4 w-4" />
+                  <CalendarIcon className="h-4 w-4" aria-hidden="true" />
                   Change expiry
                 </label>
                 <select
-                  id="share-expiry"
+                  id="share-expiry-active"
                   value={expiresInDays}
                   onChange={(e) =>
                     setExpiresInDays(
@@ -297,14 +312,14 @@ const ShareModal: React.FC<ShareModalProps> = ({
 
               <div>
                 <label
-                  htmlFor="share-expiry"
+                  htmlFor="share-expiry-new"
                   className="mb-2 flex items-center gap-2 text-sm font-medium text-lavender-700"
                 >
-                  <CalendarIcon className="h-4 w-4" />
+                  <CalendarIcon className="h-4 w-4" aria-hidden="true" />
                   Expiry (optional)
                 </label>
                 <select
-                  id="share-expiry"
+                  id="share-expiry-new"
                   value={expiresInDays}
                   onChange={(e) =>
                     setExpiresInDays(
@@ -323,11 +338,13 @@ const ShareModal: React.FC<ShareModalProps> = ({
             </div>
           )}
 
-          {error && (
-            <div className="border-l-4 border-danger-500 bg-danger-50 px-3 py-2 text-sm text-danger-700">
-              {error}
-            </div>
-          )}
+          <div role="alert" aria-live="assertive">
+            {error && (
+              <div className="border-l-4 border-danger-500 bg-danger-50 px-3 py-2 text-sm text-danger-700">
+                {error}
+              </div>
+            )}
+          </div>
 
           <div className="flex justify-between gap-3">
             {shareInfo ? (

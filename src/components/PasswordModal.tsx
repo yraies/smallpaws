@@ -69,12 +69,20 @@ const PasswordModal: React.FC<PasswordModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-md bg-sand-50 p-6 border border-sand-200">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="password-modal-title"
+        className="w-full max-w-md bg-sand-50 p-6 border border-sand-200"
+      >
         {/* Header */}
         <div className="mb-4 flex items-center gap-3">
-          <LockClosedIcon className="h-6 w-6 text-lavender-500" />
+          <LockClosedIcon
+            className="h-6 w-6 text-lavender-500"
+            aria-hidden="true"
+          />
           <div>
-            <h2 className="text-lg font-semibold">
+            <h2 id="password-modal-title" className="text-lg font-semibold">
               {title ||
                 (mode === "set" ? "Password Protection" : "Enter Password")}
             </h2>
@@ -128,6 +136,9 @@ const PasswordModal: React.FC<PasswordModalProps> = ({
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-lavender-300 hover:text-lavender-700"
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
                   >
                     {showPassword ? (
                       <EyeSlashIcon className="h-4 w-4" />
@@ -167,6 +178,9 @@ const PasswordModal: React.FC<PasswordModalProps> = ({
                       type="button"
                       onClick={() => setShowConfirm(!showConfirm)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-lavender-300 hover:text-lavender-700"
+                      aria-label={
+                        showConfirm ? "Hide confirmation" : "Show confirmation"
+                      }
                     >
                       {showConfirm ? (
                         <EyeSlashIcon className="h-4 w-4" />
@@ -176,7 +190,7 @@ const PasswordModal: React.FC<PasswordModalProps> = ({
                     </button>
                   </div>
                   {confirmPassword && !passwordsMatch && (
-                    <p className="mt-1 text-xs text-danger-700">
+                    <p className="mt-1 text-xs text-danger-700" role="alert">
                       Passwords do not match
                     </p>
                   )}

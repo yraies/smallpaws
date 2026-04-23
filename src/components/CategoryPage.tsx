@@ -5,6 +5,7 @@ import {
   TrashIcon,
 } from "@heroicons/react/16/solid";
 import type { Dispatch, SetStateAction } from "react";
+import type { AnswerOption } from "../types/Form";
 import { type Category, type Form, Question } from "../types/Form";
 import Box from "./Box";
 import IconButton from "./IconButton";
@@ -15,11 +16,13 @@ function CategoryBox({
   setDocument,
   answerMode,
   structureEditable,
+  answerOptions,
 }: {
   category: Category;
   setDocument?: Dispatch<SetStateAction<Form>>;
   answerMode: "hidden" | "editable" | "readonly";
   structureEditable: boolean;
+  answerOptions?: AnswerOption[];
 }) {
   const questionBlock = category.questions.map((question) => (
     <QuestionLine
@@ -37,6 +40,7 @@ function CategoryBox({
       }
       answerMode={answerMode}
       structureEditable={structureEditable}
+      answerOptions={answerOptions}
     />
   ));
 

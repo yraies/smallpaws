@@ -2,11 +2,11 @@ import {
   clearRecentFormsFromStorage,
   getRecentFormDataKey,
   getRecentFormMetaKey,
-  hasDraftFormData,
-  loadDraftFormData,
+  hasLocalDraft,
+  loadLocalDraft,
   loadRecentForms,
   removeRecentFormFromStorage,
-  saveDraftFormData,
+  saveLocalDraft,
   saveRecentFormMeta,
 } from "../recentForms";
 
@@ -65,9 +65,9 @@ describe("recent forms storage", () => {
     const id = "form_01jz-example-hyphenated-id";
     const payload = JSON.stringify({ name: "Draft Form" });
 
-    saveDraftFormData(storage, id, payload);
+    saveLocalDraft(storage, id, payload);
 
-    expect(loadDraftFormData(storage, id)).toBe(payload);
+    expect(loadLocalDraft(storage, id)).toBe(payload);
     expect(storage.getItem(getRecentFormDataKey(id))).toBe(payload);
   });
 
@@ -75,11 +75,11 @@ describe("recent forms storage", () => {
     const storage = new MockStorage();
     const id = "form_01jz-example-hyphenated-id";
 
-    expect(hasDraftFormData(storage, id)).toBe(false);
+    expect(hasLocalDraft(storage, id)).toBe(false);
 
-    saveDraftFormData(storage, id, JSON.stringify({ name: "Draft Form" }));
+    saveLocalDraft(storage, id, JSON.stringify({ name: "Draft Form" }));
 
-    expect(hasDraftFormData(storage, id)).toBe(true);
+    expect(hasLocalDraft(storage, id)).toBe(true);
   });
 
   test("removes both metadata and data for one recent form", () => {
@@ -93,7 +93,7 @@ describe("recent forms storage", () => {
       kind: "form",
       phase: "draft",
     });
-    saveDraftFormData(storage, id, JSON.stringify({ name: "Draft Form" }));
+    saveLocalDraft(storage, id, JSON.stringify({ name: "Draft Form" }));
 
     removeRecentFormFromStorage(storage, id);
 
@@ -112,7 +112,7 @@ describe("recent forms storage", () => {
       isPublished: false,
       kind: "form",
     });
-    saveDraftFormData(storage, id, JSON.stringify({ name: "Draft Form" }));
+    saveLocalDraft(storage, id, JSON.stringify({ name: "Draft Form" }));
     storage.setItem("display-preferences", JSON.stringify({ showIcon: true }));
 
     clearRecentFormsFromStorage(storage);

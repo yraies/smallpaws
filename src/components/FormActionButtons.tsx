@@ -42,34 +42,35 @@ export default function FormActionButtons() {
 
   const leftActions: ActionConfig[] = [];
   if (isPublished) {
-    leftActions.push(
-      {
-        key: "clone",
-        label: "New Draft",
-        onClick: handleClone,
-        title: "Create New Draft",
-        disabled: isCloning,
-        variant: "default",
-        icon: <DocumentDuplicateIcon className="h-5 w-5" />,
-      },
-      {
-        key: "csv",
-        label: "Export CSV",
-        onClick: handleExportCSV,
-        title: "Export as CSV",
-        variant: "success",
-        icon: <ArrowDownTrayIcon className="h-5 w-5" />,
-      },
-      {
-        key: "json",
-        label: "Export JSON",
-        onClick: handleExportJSON,
-        title: "Export as JSON",
-        variant: "info",
-        icon: <ArrowDownTrayIcon className="h-5 w-5" />,
-      },
-    );
+    leftActions.push({
+      key: "clone",
+      label: "New Draft",
+      onClick: handleClone,
+      title: "Create New Draft",
+      disabled: isCloning,
+      variant: "default",
+      icon: <DocumentDuplicateIcon className="h-5 w-5" />,
+    });
   }
+
+  leftActions.push(
+    {
+      key: "csv",
+      label: "Export CSV",
+      onClick: handleExportCSV,
+      title: "Export as CSV",
+      variant: "success",
+      icon: <ArrowDownTrayIcon className="h-5 w-5" />,
+    },
+    {
+      key: "json",
+      label: "Export JSON",
+      onClick: handleExportJSON,
+      title: "Export as JSON",
+      variant: "info",
+      icon: <ArrowDownTrayIcon className="h-5 w-5" />,
+    },
+  );
 
   if (handleDelete) {
     leftActions.push({

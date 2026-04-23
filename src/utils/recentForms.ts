@@ -53,7 +53,7 @@ export function saveRecentFormMeta(
   );
 }
 
-export function saveDraftFormData(
+export function saveLocalDraft(
   storage: StorageLike,
   id: string,
   data: string,
@@ -61,18 +61,18 @@ export function saveDraftFormData(
   storage.setItem(getRecentFormDataKey(id), data);
 }
 
-export function loadDraftFormData(
+export function loadLocalDraft(
   storage: Pick<StorageLike, "getItem">,
   id: string,
 ): string | null {
   return storage.getItem(getRecentFormDataKey(id));
 }
 
-export function hasDraftFormData(
+export function hasLocalDraft(
   storage: Pick<StorageLike, "getItem">,
   id: string,
 ): boolean {
-  return loadDraftFormData(storage, id) !== null;
+  return loadLocalDraft(storage, id) !== null;
 }
 
 export function removeRecentFormFromStorage(
@@ -80,10 +80,10 @@ export function removeRecentFormFromStorage(
   id: string,
 ): void {
   storage.removeItem(getRecentFormMetaKey(id));
-  removeDraftFormData(storage, id);
+  removeLocalDraft(storage, id);
 }
 
-export function removeDraftFormData(
+export function removeLocalDraft(
   storage: Pick<StorageLike, "removeItem">,
   id: string,
 ): void {

@@ -49,17 +49,21 @@ export default function FormHeader({
             {formName}
           </div>
         ) : (
-          <input
-            id="form-name"
-            type="text"
-            title="Title"
-            className="w-fit max-w-full border-b-1 bg-transparent text-center text-2xl focus:outline-none"
-            value={formName}
-            onChange={(e) => onFormNameChange?.(e.target.value)}
-            placeholder="Title"
-            disabled={readOnly}
-            name="form-name"
-          />
+          <>
+            <label htmlFor="form-name" className="sr-only">
+              Form title
+            </label>
+            <input
+              id="form-name"
+              type="text"
+              className="w-fit max-w-full border-b-1 bg-transparent text-center text-2xl focus:outline-none"
+              value={formName}
+              onChange={(e) => onFormNameChange?.(e.target.value)}
+              placeholder="Title"
+              disabled={readOnly}
+              name="form-name"
+            />
+          </>
         )}
         <EncryptionStatus isEncrypted={isEncrypted} showText={false} />
       </div>
