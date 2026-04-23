@@ -44,3 +44,7 @@ next-env.d.ts
 
 # sqlite database files
 *.db
+
+# chrome testing
+.chrome-logs/
+.chromium-profile/
