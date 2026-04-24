@@ -214,3 +214,16 @@ export function loadRecentSharedForms(
     return [];
   }
 }
+
+export function removeRecentSharedForm(
+  storage: StorageLike,
+  shareId: string,
+): void {
+  const existing = loadRecentSharedForms(storage);
+  const filtered = existing.filter((f) => f.shareId !== shareId);
+  storage.setItem(RECENT_SHARED_FORMS_KEY, JSON.stringify(filtered));
+}
+
+export function clearRecentSharedForms(storage: StorageLike): void {
+  storage.removeItem(RECENT_SHARED_FORMS_KEY);
+}

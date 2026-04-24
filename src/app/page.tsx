@@ -17,10 +17,13 @@ import type { Form } from "../types/Form";
 import { parseImportedJSON, readFileAsText } from "../utils/formActions";
 import { formatRelativeTime } from "../utils/RelativeDates";
 import {
-  clearRecentFormsFromStorage,
+  clearRecentSharedForms,
   loadRecentForms,
+  loadRecentSharedForms,
   type RecentItemMeta,
+  type RecentSharedFormMeta,
   removeRecentFormFromStorage,
+  removeRecentSharedForm,
 } from "../utils/recentForms";
 import {
   canStartFormFromTemplate,
@@ -39,6 +42,9 @@ function HomePageContent() {
   const [selectedTemplate, setSelectedTemplate] = React.useState("empty");
   const [templateName, setTemplateName] = React.useState("");
   const [recentItems, setRecentItems] = React.useState<RecentItemMeta[]>([]);
+  const [recentShared, setRecentShared] = React.useState<
+    RecentSharedFormMeta[]
+  >([]);
   const [importError, setImportError] = React.useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const selectedStarterTemplate =
@@ -48,8 +54,18 @@ function HomePageContent() {
     selectedStarterTemplate.template,
   );
 
+  const recentTemplates = React.useMemo(
+    () => recentItems.filter((item) => item.kind === "template"),
+    [recentItems],
+  );
+  const recentForms = React.useMemo(
+    () => recentItems.filter((item) => item.kind === "form"),
+    [recentItems],
+  );
+
   useEffect(() => {
-    loadRecentFormsFromLocalStorage(setRecentItems);
+    setRecentItems(loadRecentForms(localStorage));
+    setRecentShared(loadRecentSharedForms(localStorage));
   }, []);
 
   return (
@@ -191,13 +207,15 @@ function HomePageContent() {
       </section>
 
       <Box
-        title="Recent Work"
+        title="Recent Templates"
         onTitleChange={() => {}}
         buttons={
-          recentItems.length > 0 ? (
+          recentTemplates.length > 0 ? (
             <IconButton
-              onClick={() => clearRecents(setRecentItems)}
-              title="Clear Recent Work"
+              onClick={() =>
+                clearRecentsByKind("template", recentItems, setRecentItems)
+              }
+              title="Clear Recent Templates"
             >
               <TrashIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-danger-500" />
             </IconButton>
@@ -205,45 +223,96 @@ function HomePageContent() {
         }
       >
         <div className="grid w-full grid-cols-1 gap-2">
-          <p className="px-2 text-sm text-lavender-700">
-            Reopen recent drafts, finalized templates, or published forms from
-            this browser.
-          </p>
-          {recentItems.length > 0 ? (
-            recentItems.map((item) => (
-              <div key={item.id} className="flex items-center gap-2">
-                <button
-                  type="button"
-                  className="flex grow cursor-pointer flex-row items-center px-2 py-1 text-center hover:backdrop-brightness-90"
-                  onClick={() => navigateToRecent(item, router)}
-                >
-                  <span
-                    className="grow font-semibold"
-                    title={item.date.toLocaleString()}
-                  >
-                    {item.name}{" "}
-                    <span className="text-xs text-lavender-700">
-                      ({describeRecentItem(item)} -{" "}
-                      {formatRelativeTime(item.date)})
-                    </span>
-                  </span>
-
-                  <EncryptionStatus isEncrypted={item.encrypted} />
-                </button>
-
-                <IconButton
-                  onClick={() =>
-                    removeRecent(item, setRecentItems, recentItems)
-                  }
-                  title="Delete item from recent work"
-                >
-                  <TrashIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-danger-500" />
-                </IconButton>
-              </div>
+          {recentTemplates.length > 0 ? (
+            recentTemplates.map((item) => (
+              <RecentLocalItem
+                key={item.id}
+                item={item}
+                onNavigate={() => navigateToRecent(item, router)}
+                onRemove={() =>
+                  removeRecent(item, setRecentItems, recentItems)
+                }
+              />
             ))
           ) : (
-            <p className="place-self-center px-2 py-1 text-center italic">
-              No recent work
+            <p className="place-self-center px-2 py-1 text-center text-sm italic text-lavender-500">
+              No recent templates
+            </p>
+          )}
+        </div>
+      </Box>
+
+      <Box
+        title="Recent Forms"
+        onTitleChange={() => {}}
+        buttons={
+          recentForms.length > 0 ? (
+            <IconButton
+              onClick={() =>
+                clearRecentsByKind("form", recentItems, setRecentItems)
+              }
+              title="Clear Recent Forms"
+            >
+              <TrashIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-danger-500" />
+            </IconButton>
+          ) : null
+        }
+      >
+        <div className="grid w-full grid-cols-1 gap-2">
+          {recentForms.length > 0 ? (
+            recentForms.map((item) => (
+              <RecentLocalItem
+                key={item.id}
+                item={item}
+                onNavigate={() => navigateToRecent(item, router)}
+                onRemove={() =>
+                  removeRecent(item, setRecentItems, recentItems)
+                }
+              />
+            ))
+          ) : (
+            <p className="place-self-center px-2 py-1 text-center text-sm italic text-lavender-500">
+              No recent forms
+            </p>
+          )}
+        </div>
+      </Box>
+
+      <Box
+        title="Recently Viewed Shared Forms"
+        onTitleChange={() => {}}
+        buttons={
+          recentShared.length > 0 ? (
+            <IconButton
+              onClick={() => {
+                clearRecentSharedForms(localStorage);
+                setRecentShared([]);
+              }}
+              title="Clear Recently Viewed Shared Forms"
+            >
+              <TrashIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-danger-500" />
+            </IconButton>
+          ) : null
+        }
+      >
+        <div className="grid w-full grid-cols-1 gap-2">
+          {recentShared.length > 0 ? (
+            recentShared.map((item) => (
+              <RecentSharedItem
+                key={item.shareId}
+                item={item}
+                onNavigate={() => router.push(`/share/${item.shareId}`)}
+                onRemove={() => {
+                  removeRecentSharedForm(localStorage, item.shareId);
+                  setRecentShared((prev) =>
+                    prev.filter((f) => f.shareId !== item.shareId),
+                  );
+                }}
+              />
+            ))
+          ) : (
+            <p className="place-self-center px-2 py-1 text-center text-sm italic text-lavender-500">
+              No recently viewed shared forms
             </p>
           )}
         </div>
@@ -259,6 +328,73 @@ const HomePageClientOnly = dynamic(() => Promise.resolve(HomePageContent), {
 
 export default function HomePage() {
   return <HomePageClientOnly />;
+}
+
+function RecentLocalItem({
+  item,
+  onNavigate,
+  onRemove,
+}: {
+  item: RecentItemMeta;
+  onNavigate: () => void;
+  onRemove: () => void;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <button
+        type="button"
+        className="flex grow cursor-pointer flex-row items-center px-2 py-1 text-center hover:backdrop-brightness-90"
+        onClick={onNavigate}
+      >
+        <span
+          className="grow font-semibold"
+          title={item.date.toLocaleString()}
+        >
+          {item.respondentName || item.name}{" "}
+          <span className="text-xs text-lavender-700">
+            ({describeRecentItem(item)} - {formatRelativeTime(item.date)})
+          </span>
+        </span>
+        <EncryptionStatus isEncrypted={item.encrypted} />
+      </button>
+      <IconButton onClick={onRemove} title="Remove from recent list">
+        <TrashIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-danger-500" />
+      </IconButton>
+    </div>
+  );
+}
+
+function RecentSharedItem({
+  item,
+  onNavigate,
+  onRemove,
+}: {
+  item: RecentSharedFormMeta;
+  onNavigate: () => void;
+  onRemove: () => void;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <button
+        type="button"
+        className="flex grow cursor-pointer flex-row items-center px-2 py-1 text-center hover:backdrop-brightness-90"
+        onClick={onNavigate}
+      >
+        <span className="grow font-semibold">
+          {item.respondentName || item.name}{" "}
+          {item.templateName && (
+            <span className="text-xs text-lavender-700">
+              ({item.templateName})
+            </span>
+          )}
+        </span>
+        <EncryptionStatus isEncrypted={item.encrypted} />
+      </button>
+      <IconButton onClick={onRemove} title="Remove from recent list">
+        <TrashIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-danger-500" />
+      </IconButton>
+    </div>
+  );
 }
 
 function WorkflowStep({
@@ -302,10 +438,41 @@ function renderTemplateOption(
   );
 }
 
-function loadRecentFormsFromLocalStorage(
-  setRecentForms: React.Dispatch<React.SetStateAction<RecentItemMeta[]>>,
+function navigateToRecent(
+  item: RecentItemMeta,
+  router: ReturnType<typeof useRouter>,
 ) {
-  setRecentForms(loadRecentForms(localStorage));
+  router.push(`/${item.kind}/${item.id}`);
+}
+
+function removeRecent(
+  item: RecentItemMeta,
+  setRecentForms: React.Dispatch<React.SetStateAction<RecentItemMeta[]>>,
+  recentForms: RecentItemMeta[],
+) {
+  removeRecentFormFromStorage(localStorage, item.id);
+  setRecentForms(recentForms.filter((f) => f.id !== item.id));
+}
+
+function clearRecentsByKind(
+  kind: "template" | "form",
+  recentItems: RecentItemMeta[],
+  setRecentItems: React.Dispatch<React.SetStateAction<RecentItemMeta[]>>,
+) {
+  for (const item of recentItems) {
+    if (item.kind === kind) {
+      removeRecentFormFromStorage(localStorage, item.id);
+    }
+  }
+  setRecentItems((prev) => prev.filter((item) => item.kind !== kind));
+}
+
+function describeRecentItem(item: RecentItemMeta): string {
+  if (item.kind === "template") {
+    return item.phase === "finalized" ? "finalized template" : "template draft";
+  }
+
+  return item.phase === "published" ? "published form" : "form draft";
 }
 
 function createAndNavigateTemplateDraft(
@@ -334,37 +501,6 @@ function createAndNavigateFormDraft(
 
   setPendingFormDraft(draftForm);
   router.push(`/form/${id}`);
-}
-
-function navigateToRecent(
-  item: RecentItemMeta,
-  router: ReturnType<typeof useRouter>,
-) {
-  router.push(`/${item.kind}/${item.id}`);
-}
-
-function removeRecent(
-  item: RecentItemMeta,
-  setRecentForms: React.Dispatch<React.SetStateAction<RecentItemMeta[]>>,
-  recentForms: RecentItemMeta[],
-) {
-  removeRecentFormFromStorage(localStorage, item.id);
-  setRecentForms(recentForms.filter((f) => f.id !== item.id));
-}
-
-function clearRecents(
-  setRecentForms: React.Dispatch<React.SetStateAction<RecentItemMeta[]>>,
-) {
-  clearRecentFormsFromStorage(localStorage);
-  setRecentForms([]);
-}
-
-function describeRecentItem(item: RecentItemMeta): string {
-  if (item.kind === "template") {
-    return item.phase === "finalized" ? "finalized template" : "template draft";
-  }
-
-  return item.phase === "published" ? "published form" : "form draft";
 }
 
 async function handleFileImport(
