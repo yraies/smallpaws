@@ -62,8 +62,8 @@ function SharedFormPageContent() {
 
   const loadFormData = React.useCallback(
     async (data: {
+      compareIdentity?: string;
       form: {
-        id: string;
         name: string;
         data: string;
         encrypted: boolean;
@@ -95,6 +95,7 @@ function SharedFormPageContent() {
         // Save to recently viewed shared forms
         saveRecentSharedForm(localStorage, {
           shareId,
+          compareIdentity: data.compareIdentity,
           name: formData.name,
           respondentName: loadedForm.respondentName,
           templateName: loadedForm.templateName,
@@ -204,6 +205,7 @@ function SharedFormPageContent() {
     // Save to recently viewed shared forms
     saveRecentSharedForm(localStorage, {
       shareId,
+      compareIdentity: data.compareIdentity,
       name: data.form.name,
       respondentName: loadedForm.respondentName,
       templateName: loadedForm.templateName,

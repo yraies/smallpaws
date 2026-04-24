@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { typeid } from "typeid-js";
 import { FormStorage } from "../../../../lib/database";
+import { getCompareIdentity } from "../../../../utils/compareIdentity";
 
 export async function GET(
   _request: NextRequest,
@@ -14,7 +15,10 @@ export async function GET(
       return NextResponse.json({ error: "Form not found" }, { status: 404 });
     }
 
-    return NextResponse.json(form);
+    return NextResponse.json({
+      ...form,
+      compareIdentity: getCompareIdentity(form.id),
+    });
   } catch (error) {
     console.error("Error retrieving form:", error);
     return NextResponse.json(

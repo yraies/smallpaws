@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { verifyPassword } from "../../../../lib/crypto";
 import { FormStorage } from "../../../../lib/database";
+import { getCompareIdentity } from "../../../../utils/compareIdentity";
 
 export async function GET(
   _request: NextRequest,
@@ -42,6 +43,7 @@ export async function GET(
     if (form.encrypted) {
       return NextResponse.json({
         requiresPassword: true,
+        compareIdentity: getCompareIdentity(form.id),
         formName: form.name,
         shareId: shareId,
         isEncrypted: form.encrypted,
@@ -55,8 +57,8 @@ export async function GET(
     return NextResponse.json({
       success: true,
       requiresPassword: false,
+      compareIdentity: getCompareIdentity(form.id),
       form: {
-        id: form.id,
         name: form.name,
         data: form.data,
         encrypted: form.encrypted,
@@ -140,8 +142,8 @@ export async function POST(
     // Return form data
     return NextResponse.json({
       success: true,
+      compareIdentity: getCompareIdentity(form.id),
       form: {
-        id: form.id,
         name: form.name,
         data: form.data,
         encrypted: form.encrypted,

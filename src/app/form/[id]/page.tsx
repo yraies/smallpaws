@@ -24,10 +24,12 @@ import {
 } from "../../../lib/crypto";
 import { Form, type FormPOJO } from "../../../types/Form";
 import {
+  computeStructureFingerprint,
   hasLocalDraft,
   removeLocalDraft,
   saveRecentFormMeta,
 } from "../../../utils/recentForms";
+import { getCompareIdentity } from "../../../utils/compareIdentity";
 
 function FormPageContent() {
   const { form, setForm } = useFormContext();
@@ -204,6 +206,9 @@ function FormPageContent() {
           id: formId,
           name: form.name,
           respondentName: form.respondentName,
+          templateName: form.templateName,
+          structureFingerprint: computeStructureFingerprint(form),
+          compareIdentity: getCompareIdentity(formId),
           encrypted,
           kind: "form",
           phase: "published",

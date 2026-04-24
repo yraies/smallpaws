@@ -28,12 +28,20 @@ import {
 } from "../../utils/compareLogic";
 import { printCurrentView } from "../../utils/formActions";
 import {
+  createCompareSession,
+  loadCompareSession,
+  removeCompareSession,
+  saveCompareSession,
+} from "../../utils/compareSession";
+import {
   computeStructureFingerprint,
   loadRecentForms,
   loadRecentSharedForms,
+  replaceRecentSharedForms,
   type RecentItemMeta,
   type RecentSharedFormMeta,
 } from "../../utils/recentForms";
+import { getCompareIdentity } from "../../utils/compareIdentity";
 
 // ── Types ──
 
@@ -47,8 +55,31 @@ function getFormLabel(form: Form, fallbackName: string): string {
   );
 }
 
+function getSuggestionPrimaryLabel(name: string, respondentName?: string): string {
+  return respondentName?.trim() || name;
+}
+
+function getLocalCompareIdentity(item: RecentItemMeta): string {
+  return item.compareIdentity ?? getCompareIdentity(item.id);
+}
+
+function getSharedCompareIdentity(item: RecentSharedFormMeta): string | undefined {
+  const legacyFormId = (item as RecentSharedFormMeta & { formId?: string }).formId;
+  if (item.compareIdentity) return item.compareIdentity;
+  if (legacyFormId) return getCompareIdentity(legacyFormId);
+  return undefined;
+}
+
+function stripLegacySharedFields(item: RecentSharedFormMeta): RecentSharedFormMeta {
+  const { formId: _legacyFormId, ...rest } = item as RecentSharedFormMeta & {
+    formId?: string;
+  };
+  return rest;
+}
+
 type LoadedForm = {
   id: string;
+  compareIdentity: string;
   label: string;
   templateName?: string;
   form: Form;
@@ -57,15 +88,40 @@ type LoadedForm = {
 
 type PendingPassword = {
   shareId: string;
+  compareIdentity: string;
   formName: string;
   encryptedData?: string;
 };
+
+function upsertLoadedForm(prev: LoadedForm[], next: LoadedForm): LoadedForm[] {
+  const existingIndex = prev.findIndex(
+    (item) => item.compareIdentity === next.compareIdentity,
+  );
+  if (existingIndex === -1) {
+    return [...prev, next];
+  }
+
+  const existing = prev[existingIndex];
+  if (existing.source === "local") {
+    return prev;
+  }
+  if (next.source === "share") {
+    return prev;
+  }
+
+  const updated = [...prev];
+  updated[existingIndex] = next;
+  return updated;
+}
 
 // ── Form loading helpers ──
 
 async function loadLocalPublishedForm(
   formId: string,
-): Promise<{ form: Form; name: string; encrypted: boolean } | string> {
+): Promise<
+  { form: Form; name: string; encrypted: boolean; compareIdentity: string }
+  | string
+> {
   const res = await fetch(`/api/forms/${formId}`);
   if (!res.ok) return `Failed to load form ${formId}`;
   const data = await res.json();
@@ -74,6 +130,7 @@ async function loadLocalPublishedForm(
   return {
     form: Form.fromPOJO(parsed as FormPOJO),
     name: data.name,
+    compareIdentity: data.compareIdentity,
     encrypted: false,
   };
 }
@@ -81,8 +138,13 @@ async function loadLocalPublishedForm(
 async function loadSharedForm(
   shareId: string,
 ): Promise<
-  | { form: Form; name: string; encrypted: false }
-  | { requiresPassword: true; formName: string; shareId: string }
+  | { form: Form; name: string; encrypted: false; compareIdentity: string }
+  | {
+      requiresPassword: true;
+      compareIdentity: string;
+      formName: string;
+      shareId: string;
+    }
   | string
 > {
   const res = await fetch(`/api/share/${shareId}`);
@@ -93,6 +155,7 @@ async function loadSharedForm(
   if (data.requiresPassword) {
     return {
       requiresPassword: true,
+      compareIdentity: data.compareIdentity,
       formName: data.formName ?? "Shared Form",
       shareId,
     };
@@ -104,6 +167,7 @@ async function loadSharedForm(
   if (formData.encrypted) {
     return {
       requiresPassword: true,
+      compareIdentity: data.compareIdentity,
       formName: formData.name ?? "Shared Form",
       shareId,
     };
@@ -111,6 +175,7 @@ async function loadSharedForm(
   const parsed = JSON.parse(formData.data);
   return {
     form: Form.fromPOJO(parsed as FormPOJO),
+    compareIdentity: data.compareIdentity,
     name: formData.name,
     encrypted: false,
   };
@@ -229,12 +294,12 @@ function ComparisonTable({
 function FormSelector({
   onAddLocal,
   onAddShare,
-  existingIds,
+  existingCanonicalIds,
   activeFingerprint,
 }: {
-  onAddLocal: (id: string, name: string) => void;
+  onAddLocal: (id: string) => void;
   onAddShare: (shareId: string) => void;
-  existingIds: Set<string>;
+  existingCanonicalIds: Set<string>;
   activeFingerprint: string | null;
 }) {
   const [recentLocal, setRecentLocal] = React.useState<RecentItemMeta[]>([]);
@@ -246,16 +311,50 @@ function FormSelector({
 
   React.useEffect(() => {
     if (typeof window !== "undefined") {
-      const localItems = loadRecentForms(localStorage);
-      setRecentLocal(
-        localItems.filter(
-          (item) =>
-            item.kind === "form" &&
-            item.phase === "published" &&
-            !item.encrypted,
-        ),
-      );
-      setRecentShared(loadRecentSharedForms(localStorage));
+      setRecentLocal(loadRecentForms(localStorage));
+      const sharedItems = loadRecentSharedForms(localStorage);
+      setRecentShared(sharedItems);
+
+      const staleSharedItems = sharedItems.filter((item) => !item.compareIdentity);
+      if (staleSharedItems.length === 0) return;
+
+      void (async () => {
+        const hydrated = await Promise.all(
+          sharedItems.map(async (item) => {
+            const compareIdentity = getSharedCompareIdentity(item);
+            if (compareIdentity) {
+              return {
+                ...stripLegacySharedFields(item),
+                compareIdentity,
+              };
+            }
+            try {
+              const response = await fetch(`/api/share/${item.shareId}`);
+              if (!response.ok) return item;
+              const data = await response.json();
+              if (!data.compareIdentity) return item;
+              return {
+                ...stripLegacySharedFields(item),
+                compareIdentity: data.compareIdentity,
+              };
+            } catch {
+              return item;
+            }
+          }),
+        );
+
+        if (
+          hydrated.every(
+            (item, index) =>
+              item.compareIdentity === sharedItems[index]?.compareIdentity,
+          )
+        ) {
+          return;
+        }
+
+        replaceRecentSharedForms(localStorage, hydrated);
+        setRecentShared(hydrated);
+      })();
     }
   }, []);
 
@@ -265,25 +364,60 @@ function FormSelector({
       setShareError("Enter a valid share link or share ID");
       return;
     }
-    if (existingIds.has(`share:${shareId}`)) {
-      setShareError("This form is already in the comparison");
-      return;
-    }
     setShareError(null);
     setShareUrl("");
     onAddShare(shareId);
   };
 
-  // Filter local forms: exclude already-added ones
-  const availableLocal = recentLocal.filter(
-    (item) => !existingIds.has(`local:${item.id}`),
+  const localPublishedForms = React.useMemo(
+    () =>
+      recentLocal.filter(
+        (item) =>
+          item.kind === "form" &&
+          item.phase === "published" &&
+          !item.encrypted,
+      ),
+    [recentLocal],
   );
 
-  // Filter shared forms: exclude already-added, optionally filter by structure
-  const availableShared = recentShared.filter((item) => {
-    if (existingIds.has(`share:${item.shareId}`)) return false;
-    if (activeFingerprint && item.structureFingerprint !== activeFingerprint)
+  const localCanonicalIds = React.useMemo(
+    () => new Set(localPublishedForms.map(getLocalCompareIdentity)),
+    [localPublishedForms],
+  );
+
+  const dedupedShared = React.useMemo(() => {
+    const seen = new Set<string>();
+    return recentShared.filter((item) => {
+      const key = getSharedCompareIdentity(item) ?? `share:${item.shareId}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [recentShared]);
+
+  const availableLocal = localPublishedForms.filter((item) => {
+    if (existingCanonicalIds.has(getLocalCompareIdentity(item))) return false;
+    if (
+      activeFingerprint &&
+      item.structureFingerprint &&
+      item.structureFingerprint !== activeFingerprint
+    ) {
       return false;
+    }
+    return true;
+  });
+
+  const availableShared = dedupedShared.filter((item) => {
+    const compareIdentity = getSharedCompareIdentity(item);
+    if (compareIdentity && existingCanonicalIds.has(compareIdentity)) return false;
+    if (compareIdentity && localCanonicalIds.has(compareIdentity)) return false;
+    if (
+      activeFingerprint &&
+      item.structureFingerprint &&
+      item.structureFingerprint !== activeFingerprint
+    ) {
+      return false;
+    }
     return true;
   });
 
@@ -343,22 +477,36 @@ function FormSelector({
               <button
                 key={`local:${item.id}`}
                 type="button"
-                className="flex items-center gap-1 border border-sand-200 bg-sand-50 px-2 py-1 text-xs text-lavender-700 hover:bg-sand-100"
-                onClick={() => onAddLocal(item.id, item.name)}
+                className="flex flex-col items-start gap-0.5 border border-sand-200 bg-sand-50 px-2 py-1 text-left text-xs text-lavender-700 hover:bg-sand-100"
+                onClick={() => onAddLocal(item.id)}
               >
-                <PlusIcon className="h-3 w-3" aria-hidden="true" />
-                {item.respondentName || item.name}
+                <span className="flex items-center gap-1 font-semibold">
+                  <PlusIcon className="h-3 w-3" aria-hidden="true" />
+                  {getSuggestionPrimaryLabel(item.name, item.respondentName)}
+                </span>
+                {(item.templateName || (item.respondentName ? item.name : undefined)) && (
+                  <span className="text-[11px] text-lavender-500">
+                    {item.templateName || item.name}
+                  </span>
+                )}
               </button>
             ))}
             {availableShared.map((item) => (
               <button
                 key={`share:${item.shareId}`}
                 type="button"
-                className="flex items-center gap-1 border border-sand-200 bg-sand-50 px-2 py-1 text-xs text-lavender-700 hover:bg-sand-100"
+                className="flex flex-col items-start gap-0.5 border border-sand-200 bg-sand-50 px-2 py-1 text-left text-xs text-lavender-700 hover:bg-sand-100"
                 onClick={() => onAddShare(item.shareId)}
               >
-                <PlusIcon className="h-3 w-3" aria-hidden="true" />
-                {item.respondentName || item.name}
+                <span className="flex items-center gap-1 font-semibold">
+                  <PlusIcon className="h-3 w-3" aria-hidden="true" />
+                  {getSuggestionPrimaryLabel(item.name, item.respondentName)}
+                </span>
+                {item.templateName && (
+                  <span className="text-[11px] text-lavender-500">
+                    {item.templateName}
+                  </span>
+                )}
               </button>
             ))}
           </div>
@@ -377,22 +525,18 @@ function ComparePageContent() {
   const [loadedForms, setLoadedForms] = React.useState<LoadedForm[]>([]);
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [localSessionId, setLocalSessionId] = React.useState<string | null>(null);
+  const [hasHydratedUrlState, setHasHydratedUrlState] = React.useState(false);
   const [pendingPassword, setPendingPassword] =
     React.useState<PendingPassword | null>(null);
 
-  // Track which IDs are already loaded
-  const existingIds = React.useMemo(
-    () =>
-      new Set(
-        loadedForms.map((f) =>
-          f.source === "share" ? `share:${f.id}` : `local:${f.id}`,
-        ),
-      ),
+  const existingCanonicalIds = React.useMemo(
+    () => new Set(loadedForms.map((f) => f.compareIdentity)),
     [loadedForms],
   );
 
   const handleAddLocal = React.useCallback(
-    async (formId: string, name: string) => {
+    async (formId: string, options?: { silentDuplicate?: boolean }) => {
       setIsLoading(true);
       setError(null);
       try {
@@ -401,19 +545,21 @@ function ComparePageContent() {
           setError(result);
           return;
         }
+        if (loadedForms.some((f) => f.compareIdentity === result.compareIdentity)) {
+          if (!options?.silentDuplicate) {
+            setError("This form is already in the comparison");
+          }
+          return;
+        }
         setLoadedForms((prev) => {
-          if (prev.some((f) => f.source === "local" && f.id === formId))
-            return prev;
-          return [
-            ...prev,
-            {
-              id: formId,
-              label: getFormLabel(result.form, name || result.name),
-              templateName: result.form.templateName,
-              form: result.form,
-              source: "local",
-            },
-          ];
+          return upsertLoadedForm(prev, {
+            id: formId,
+            compareIdentity: result.compareIdentity,
+            label: getFormLabel(result.form, result.name),
+            templateName: result.form.templateName,
+            form: result.form,
+            source: "local",
+          });
         });
       } catch {
         setError(`Failed to load form: ${formId}`);
@@ -421,45 +567,57 @@ function ComparePageContent() {
         setIsLoading(false);
       }
     },
-    [],
+    [loadedForms],
   );
 
-  const handleAddShare = React.useCallback(async (shareId: string) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const result = await loadSharedForm(shareId);
-      if (typeof result === "string") {
-        setError(result);
-        return;
-      }
-      if ("requiresPassword" in result) {
-        setPendingPassword({
-          shareId,
-          formName: result.formName,
-        });
-        return;
-      }
-      setLoadedForms((prev) => {
-        if (prev.some((f) => f.source === "share" && f.id === shareId))
-          return prev;
-        return [
-          ...prev,
-          {
+  const handleAddShare = React.useCallback(
+    async (shareId: string, options?: { silentDuplicate?: boolean }) => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const result = await loadSharedForm(shareId);
+        if (typeof result === "string") {
+          setError(result);
+          return;
+        }
+        if ("requiresPassword" in result) {
+          if (loadedForms.some((f) => f.compareIdentity === result.compareIdentity)) {
+            if (!options?.silentDuplicate) {
+              setError("This form is already in the comparison");
+            }
+            return;
+          }
+          setPendingPassword({
+            shareId,
+            compareIdentity: result.compareIdentity,
+            formName: result.formName,
+          });
+          return;
+        }
+        if (loadedForms.some((f) => f.compareIdentity === result.compareIdentity)) {
+          if (!options?.silentDuplicate) {
+            setError("This form is already in the comparison");
+          }
+          return;
+        }
+        setLoadedForms((prev) => {
+          return upsertLoadedForm(prev, {
             id: shareId,
+            compareIdentity: result.compareIdentity,
             label: getFormLabel(result.form, result.name),
             templateName: result.form.templateName,
             form: result.form,
             source: "share",
-          },
-        ];
-      });
-    } catch {
-      setError(`Failed to load shared form: ${shareId}`);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+          });
+        });
+      } catch {
+        setError(`Failed to load shared form: ${shareId}`);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [loadedForms],
+  );
 
   // Load forms from URL params on mount
   const initialFormsLoaded = React.useRef(false);
@@ -467,22 +625,41 @@ function ComparePageContent() {
     if (initialFormsLoaded.current) return;
     initialFormsLoaded.current = true;
 
-    const formsParam = searchParams.get("forms");
-    if (!formsParam) return;
+    void (async () => {
+      const formsParam = searchParams.get("forms");
+      const localParam = searchParams.get("local");
+      const pendingLoads: Promise<void>[] = [];
 
-    const ids = formsParam.split(",").filter(Boolean);
-    for (const id of ids) {
-      if (id.startsWith("share:")) {
-        handleAddShare(id.slice(6));
-      } else {
-        handleAddLocal(id, "");
+      if (localParam) {
+        setLocalSessionId(localParam);
+        const localIds = loadCompareSession(localStorage, localParam);
+        for (const id of localIds) {
+          pendingLoads.push(handleAddLocal(id, { silentDuplicate: true }));
+        }
       }
-    }
+
+      if (formsParam) {
+        const ids = formsParam.split(",").filter(Boolean);
+        for (const id of ids) {
+          if (id.startsWith("share:")) {
+            pendingLoads.push(
+              handleAddShare(id.slice(6), { silentDuplicate: true }),
+            );
+          } else {
+            // Legacy compare URLs used raw local form ids in the query string.
+            pendingLoads.push(handleAddLocal(id, { silentDuplicate: true }));
+          }
+        }
+      }
+
+      await Promise.all(pendingLoads);
+      setHasHydratedUrlState(true);
+    })();
   }, [searchParams, handleAddShare, handleAddLocal]);
 
   const handlePasswordSubmit = async (password: string) => {
     if (!pendingPassword) return;
-    const { shareId } = pendingPassword;
+    const { shareId, compareIdentity } = pendingPassword;
 
     const res = await fetch(`/api/share/${shareId}`, {
       method: "POST",
@@ -507,16 +684,21 @@ function ComparePageContent() {
       form = Form.fromPOJO(parsedData as FormPOJO);
     }
 
-    setLoadedForms((prev) => [
-      ...prev,
-      {
+    if (loadedForms.some((f) => f.compareIdentity === compareIdentity)) {
+      setError("This form is already in the comparison");
+      setPendingPassword(null);
+      return;
+    }
+    setLoadedForms((prev) => {
+      return upsertLoadedForm(prev, {
         id: shareId,
+        compareIdentity,
         label: getFormLabel(form, data.form.name),
         templateName: form.templateName,
         form,
         source: "share",
-      },
-    ]);
+      });
+    });
     setPendingPassword(null);
   };
 
@@ -526,29 +708,74 @@ function ComparePageContent() {
 
   // Sync loaded forms to URL so the comparison is shareable / bookmarkable
   React.useEffect(() => {
+    if (!hasHydratedUrlState) return;
+
     if (loadedForms.length === 0) {
+      if (localSessionId) {
+        removeCompareSession(localStorage, localSessionId);
+        setLocalSessionId(null);
+      }
       router.replace("/compare", { scroll: false });
     } else {
-      const ids = loadedForms.map((f) =>
-        f.source === "share" ? `share:${f.id}` : f.id,
-      );
-      router.replace(`?forms=${ids.join(",")}`, { scroll: false });
+      const params = new URLSearchParams();
+      const shareIds = loadedForms
+        .filter((f) => f.source === "share")
+        .map((f) => `share:${f.id}`);
+      const localIds = loadedForms
+        .filter((f) => f.source === "local")
+        .map((f) => f.id);
+
+      if (shareIds.length > 0) {
+        params.set("forms", shareIds.join(","));
+      }
+
+      if (localIds.length > 0) {
+        const nextLocalSessionId =
+          localSessionId ?? createCompareSession(localStorage, localIds);
+        if (!localSessionId) {
+          setLocalSessionId(nextLocalSessionId);
+        } else {
+          saveCompareSession(localStorage, nextLocalSessionId, localIds);
+        }
+        params.set("local", nextLocalSessionId);
+      } else if (localSessionId) {
+        removeCompareSession(localStorage, localSessionId);
+        setLocalSessionId(null);
+      }
+
+      const query = params.toString();
+      router.replace(query ? `?${query}` : "/compare", { scroll: false });
     }
-  }, [loadedForms, router]);
+  }, [hasHydratedUrlState, loadedForms, localSessionId, router]);
 
   // Build disambiguated display labels for loaded forms
   const displayLabels = React.useMemo(() => {
     const rawLabels = loadedForms.map((f) => f.label);
-    // Count occurrences of each label
     const counts = new Map<string, number>();
     for (const label of rawLabels) {
       counts.set(label, (counts.get(label) ?? 0) + 1);
     }
-    // For duplicates, disambiguate by source
-    return loadedForms.map((f, i) => {
+
+    const bySource = loadedForms.map((f, i) => {
       if ((counts.get(rawLabels[i]) ?? 0) <= 1) return rawLabels[i];
-      const suffix = f.source === "share" ? "shared" : "local";
-      return `${rawLabels[i]} (${suffix})`;
+      const hasMixedSources = loadedForms.some(
+        (other, j) => j !== i && other.label === rawLabels[i] && other.source !== f.source,
+      );
+      if (!hasMixedSources) return rawLabels[i];
+      return `${rawLabels[i]} (${f.source === "share" ? "shared" : "local"})`;
+    });
+
+    const disambiguatedCounts = new Map<string, number>();
+    for (const label of bySource) {
+      disambiguatedCounts.set(label, (disambiguatedCounts.get(label) ?? 0) + 1);
+    }
+
+    const seen = new Map<string, number>();
+    return bySource.map((label) => {
+      if ((disambiguatedCounts.get(label) ?? 0) <= 1) return label;
+      const index = (seen.get(label) ?? 0) + 1;
+      seen.set(label, index);
+      return `${label} (${index})`;
     });
   }, [loadedForms]);
 
@@ -677,7 +904,7 @@ function ComparePageContent() {
         <FormSelector
           onAddLocal={handleAddLocal}
           onAddShare={handleAddShare}
-          existingIds={existingIds}
+          existingCanonicalIds={existingCanonicalIds}
           activeFingerprint={activeFingerprint}
         />
       </div>

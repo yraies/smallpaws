@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { verifyPassword } from "../../../../../lib/crypto";
 import { FormStorage } from "../../../../../lib/database";
+import { getCompareIdentity } from "../../../../../utils/compareIdentity";
 
 export async function POST(
   request: NextRequest,
@@ -41,6 +42,7 @@ export async function POST(
     // Return form data if password is correct
     return NextResponse.json({
       success: true,
+      compareIdentity: getCompareIdentity(form.id),
       form: {
         id: form.id,
         name: form.name,

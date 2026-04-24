@@ -5,6 +5,9 @@ export type RecentItemMeta = {
   id: string;
   name: string;
   respondentName?: string;
+  templateName?: string;
+  structureFingerprint?: string;
+  compareIdentity?: string;
   date: Date;
   encrypted: boolean;
   kind: RecentItemKind;
@@ -16,6 +19,9 @@ export type RecentFormMeta = RecentItemMeta;
 type RecentFormMetaRecord = {
   name: string;
   respondentName?: string;
+  templateName?: string;
+  structureFingerprint?: string;
+  compareIdentity?: string;
   date: string;
   encrypted?: boolean;
   phase?: RecentItemPhase;
@@ -48,6 +54,9 @@ export function saveRecentFormMeta(
     JSON.stringify({
       name: meta.name,
       respondentName: meta.respondentName,
+      templateName: meta.templateName,
+      structureFingerprint: meta.structureFingerprint,
+      compareIdentity: meta.compareIdentity,
       date: (meta.date ?? new Date()).toISOString(),
       encrypted: meta.encrypted,
       kind: meta.kind,
@@ -114,6 +123,9 @@ export function loadRecentForms(
         id,
         name: parsed.name,
         respondentName: parsed.respondentName,
+        templateName: parsed.templateName,
+        structureFingerprint: parsed.structureFingerprint,
+        compareIdentity: parsed.compareIdentity,
         date: new Date(parsed.date),
         encrypted: parsed.encrypted ?? false,
         kind: parsed.kind ?? "form",
@@ -168,6 +180,7 @@ export type RecentSharedFormMeta = {
   respondentName?: string;
   templateName?: string;
   structureFingerprint: string;
+  compareIdentity?: string;
   date: string;
   encrypted: boolean;
 };
@@ -213,6 +226,13 @@ export function loadRecentSharedForms(
   } catch {
     return [];
   }
+}
+
+export function replaceRecentSharedForms(
+  storage: Pick<StorageLike, "setItem">,
+  items: RecentSharedFormMeta[],
+): void {
+  storage.setItem(RECENT_SHARED_FORMS_KEY, JSON.stringify(items));
 }
 
 export function removeRecentSharedForm(

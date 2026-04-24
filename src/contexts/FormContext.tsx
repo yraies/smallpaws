@@ -10,12 +10,14 @@ import {
 } from "react";
 import { Form } from "../types/Form";
 import {
+  computeStructureFingerprint,
   hasLocalDraft,
   loadLocalDraft,
   removeLocalDraft,
   saveLocalDraft,
   saveRecentFormMeta,
 } from "../utils/recentForms";
+import { getCompareIdentity } from "../utils/compareIdentity";
 import { consumePendingFormDraft } from "../utils/templateLifecycle";
 
 type FormContextType = {
@@ -55,6 +57,9 @@ function FormContextProvider({ children }: { children: React.ReactNode }) {
         id,
         name: form.name,
         respondentName: form.respondentName,
+        templateName: form.templateName,
+        structureFingerprint: computeStructureFingerprint(form),
+        compareIdentity: getCompareIdentity(id),
         encrypted: false,
         kind: "form",
         phase: "draft",
@@ -128,6 +133,7 @@ async function checkIfEncrypted(
           encrypted: true,
           kind: "form",
           phase: "published",
+          compareIdentity: getCompareIdentity(id),
         });
         removeLocalDraft(localStorage, id);
         setIsEncrypted(true);
@@ -144,6 +150,9 @@ async function checkIfEncrypted(
           id,
           name: storedForm.name,
           respondentName: form.respondentName,
+          templateName: form.templateName,
+          structureFingerprint: computeStructureFingerprint(form),
+          compareIdentity: getCompareIdentity(id),
           encrypted: false,
           kind: "form",
           phase: "published",

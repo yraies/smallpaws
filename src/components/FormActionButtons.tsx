@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import type React from "react";
 import { useDisplayPreferences } from "../contexts/DisplayPreferencesContext";
 import { useFormActions } from "../contexts/FormActionsContext";
+import { createCompareSession } from "../utils/compareSession";
 import { printCurrentView } from "../utils/formActions";
 import PageActionRails from "./PageActionRails";
 
@@ -58,8 +59,14 @@ export default function FormActionButtons() {
     leftActions.push({
       key: "compare",
       label: "Compare",
-      onClick: () =>
-        router.push(`/compare?forms=${encodeURIComponent(formId ?? "")}`),
+      onClick: () => {
+        if (!formId) return;
+        router.push(
+          `/compare?local=${encodeURIComponent(
+            createCompareSession(localStorage, [formId]),
+          )}`,
+        );
+      },
       title: "Compare with other forms",
       variant: "info",
       icon: <ScaleIcon className="h-5 w-5" />,

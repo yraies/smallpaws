@@ -4,7 +4,12 @@ import {
   getEffectiveAnswerOptions,
   getUnsetKey,
 } from "../types/Form";
-import { saveLocalDraft, saveRecentFormMeta } from "./recentForms";
+import {
+  computeStructureFingerprint,
+  saveLocalDraft,
+  saveRecentFormMeta,
+} from "./recentForms";
+import { getCompareIdentity } from "./compareIdentity";
 import { setPendingFormDraft } from "./templateLifecycle";
 
 /**
@@ -21,6 +26,10 @@ export function prepareFormClone(form: Form): string {
   saveRecentFormMeta(localStorage, {
     id: newFormId,
     name: clonedForm.name,
+    respondentName: clonedForm.respondentName,
+    templateName: clonedForm.templateName,
+    structureFingerprint: computeStructureFingerprint(clonedForm),
+    compareIdentity: getCompareIdentity(newFormId),
     encrypted: false,
     kind: "form",
     phase: "draft",

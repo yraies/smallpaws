@@ -1,13 +1,17 @@
 import {
   clearRecentFormsFromStorage,
+  clearRecentSharedForms,
   getRecentFormDataKey,
   getRecentFormMetaKey,
   hasLocalDraft,
   loadLocalDraft,
   loadRecentForms,
+  loadRecentSharedForms,
   removeRecentFormFromStorage,
+  removeRecentSharedForm,
   saveLocalDraft,
   saveRecentFormMeta,
+  saveRecentSharedForm,
 } from "../recentForms";
 
 class MockStorage {
@@ -42,6 +46,8 @@ describe("recent forms storage", () => {
     saveRecentFormMeta(storage, {
       id,
       name: "Draft Form",
+      templateName: "Template Name",
+      structureFingerprint: "fp-1",
       encrypted: false,
       kind: "form",
       phase: "draft",
@@ -54,6 +60,8 @@ describe("recent forms storage", () => {
     expect(recentForms[0]).toMatchObject({
       id,
       name: "Draft Form",
+      templateName: "Template Name",
+      structureFingerprint: "fp-1",
       encrypted: false,
       kind: "form",
       phase: "draft",
@@ -165,5 +173,73 @@ describe("recent forms storage", () => {
       kind: "template",
       phase: "finalized",
     });
+  });
+
+  test("stores shared-form metadata with compare identity", () => {
+    const storage = new MockStorage();
+
+    saveRecentSharedForm(storage, {
+      shareId: "share_123",
+      compareIdentity: "compare_123",
+      name: "Published Form",
+      respondentName: "Alex",
+      templateName: "Template Name",
+      structureFingerprint: "fp-1",
+      date: new Date("2026-04-03T10:00:00.000Z").toISOString(),
+      encrypted: false,
+    });
+
+    expect(loadRecentSharedForms(storage)).toEqual([
+      expect.objectContaining({
+        shareId: "share_123",
+        compareIdentity: "compare_123",
+        respondentName: "Alex",
+        templateName: "Template Name",
+      }),
+    ]);
+  });
+
+  test("removes one shared-form entry without clearing others", () => {
+    const storage = new MockStorage();
+
+    saveRecentSharedForm(storage, {
+      shareId: "share_123",
+      compareIdentity: "compare_123",
+      name: "First",
+      structureFingerprint: "fp-1",
+      date: new Date("2026-04-03T10:00:00.000Z").toISOString(),
+      encrypted: false,
+    });
+    saveRecentSharedForm(storage, {
+      shareId: "share_456",
+      compareIdentity: "compare_456",
+      name: "Second",
+      structureFingerprint: "fp-2",
+      date: new Date("2026-04-03T11:00:00.000Z").toISOString(),
+      encrypted: false,
+    });
+
+    removeRecentSharedForm(storage, "share_123");
+
+    expect(loadRecentSharedForms(storage)).toEqual([
+      expect.objectContaining({ shareId: "share_456" }),
+    ]);
+  });
+
+  test("clears shared-form storage independently", () => {
+    const storage = new MockStorage();
+
+    saveRecentSharedForm(storage, {
+      shareId: "share_123",
+      compareIdentity: "compare_123",
+      name: "First",
+      structureFingerprint: "fp-1",
+      date: new Date("2026-04-03T10:00:00.000Z").toISOString(),
+      encrypted: false,
+    });
+
+    clearRecentSharedForms(storage);
+
+    expect(loadRecentSharedForms(storage)).toEqual([]);
   });
 });
