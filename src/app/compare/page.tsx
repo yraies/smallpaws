@@ -536,15 +536,31 @@ function ComparePageContent() {
     }
   }, [loadedForms, router]);
 
+  // Build disambiguated display labels for loaded forms
+  const displayLabels = React.useMemo(() => {
+    const rawLabels = loadedForms.map((f) => f.label);
+    // Count occurrences of each label
+    const counts = new Map<string, number>();
+    for (const label of rawLabels) {
+      counts.set(label, (counts.get(label) ?? 0) + 1);
+    }
+    // For duplicates, disambiguate by source
+    return loadedForms.map((f, i) => {
+      if ((counts.get(rawLabels[i]) ?? 0) <= 1) return rawLabels[i];
+      const suffix = f.source === "share" ? "shared" : "local";
+      return `${rawLabels[i]} (${suffix})`;
+    });
+  }, [loadedForms]);
+
   // Build comparison when 2+ forms loaded
   const comparison: ComparisonResult | null = React.useMemo(() => {
     if (loadedForms.length < 2) return null;
-    const entries: ComparisonEntry[] = loadedForms.map((f) => ({
-      label: f.label,
+    const entries: ComparisonEntry[] = loadedForms.map((f, i) => ({
+      label: displayLabels[i],
       form: f.form,
     }));
     return buildComparison(entries);
-  }, [loadedForms]);
+  }, [loadedForms, displayLabels]);
 
   // Compute active fingerprint from the first loaded form for filtering suggestions
   const activeFingerprint = React.useMemo(() => {
@@ -640,13 +656,13 @@ function ComparePageContent() {
                 key={f.id}
                 className="inline-flex items-center gap-1 border border-sand-200 bg-sand-50 px-2 py-1 text-sm"
               >
-                {f.label}
+                {displayLabels[i]}
                 <button
                   type="button"
                   onClick={() => removeForm(i)}
                   className="ml-1 text-danger-500 hover:text-danger-700"
-                  title={`Remove ${f.label}`}
-                  aria-label={`Remove ${f.label} from comparison`}
+                  title={`Remove ${displayLabels[i]}`}
+                  aria-label={`Remove ${displayLabels[i]} from comparison`}
                 >
                   <XMarkIcon className="h-3 w-3" />
                 </button>
@@ -734,7 +750,7 @@ function ComparePageContent() {
       {comparison?.isCompatible && (
         <ComparisonTable
           result={comparison}
-          labels={loadedForms.map((f) => f.label)}
+          labels={displayLabels}
         />
       )}
     </>
