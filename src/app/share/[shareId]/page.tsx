@@ -4,6 +4,7 @@ import {
   ArrowDownTrayIcon,
   DocumentDuplicateIcon,
   PrinterIcon,
+  ScaleIcon,
 } from "@heroicons/react/16/solid";
 import dynamic from "next/dynamic";
 import { useParams, useRouter } from "next/navigation";
@@ -32,6 +33,10 @@ import {
   prepareFormClone,
   printCurrentView,
 } from "../../../utils/formActions";
+import {
+  computeStructureFingerprint,
+  saveRecentSharedForm,
+} from "../../../utils/recentForms";
 
 interface ShareInfo {
   shareId: string;
@@ -84,13 +89,25 @@ function SharedFormPageContent() {
         }
 
         const parsedData = JSON.parse(formData.data);
-        setForm(Form.fromPOJO(parsedData as FormPOJO));
+        const loadedForm = Form.fromPOJO(parsedData as FormPOJO);
+        setForm(loadedForm);
+
+        // Save to recently viewed shared forms
+        saveRecentSharedForm(localStorage, {
+          shareId,
+          name: formData.name,
+          respondentName: loadedForm.respondentName,
+          templateName: loadedForm.templateName,
+          structureFingerprint: computeStructureFingerprint(loadedForm),
+          date: new Date().toISOString(),
+          encrypted: false,
+        });
       } catch (loadError) {
         console.error("Error loading form data:", loadError);
         setError("Failed to parse form data");
       }
     },
-    [setForm],
+    [setForm, shareId],
   );
 
   const loadSharedForm = React.useCallback(async () => {
@@ -163,24 +180,37 @@ function SharedFormPageContent() {
     }
 
     const data = await response.json();
+    let loadedForm: Form;
 
     if (data.form.encrypted) {
       try {
         const encryptedData = JSON.parse(data.form.data);
         const decryptedData = decryptFormData(encryptedData, password);
-        setForm(Form.fromPOJO(decryptedData as FormPOJO));
+        loadedForm = Form.fromPOJO(decryptedData as FormPOJO);
       } catch (decryptError) {
         console.error("Failed to decrypt form:", decryptError);
         throw new Error("Failed to decrypt form data");
       }
     } else {
       const parsedData = JSON.parse(data.form.data);
-      setForm(Form.fromPOJO(parsedData as FormPOJO));
+      loadedForm = Form.fromPOJO(parsedData as FormPOJO);
     }
 
+    setForm(loadedForm);
     setNeedsPasswordVerification(false);
     setFormName(data.form.name);
     setShareInfo(data.shareInfo);
+
+    // Save to recently viewed shared forms
+    saveRecentSharedForm(localStorage, {
+      shareId,
+      name: data.form.name,
+      respondentName: loadedForm.respondentName,
+      templateName: loadedForm.templateName,
+      structureFingerprint: computeStructureFingerprint(loadedForm),
+      date: new Date().toISOString(),
+      encrypted: data.form.encrypted,
+    });
   };
 
   const startLocalDraft = () => {
@@ -243,10 +273,13 @@ function SharedFormPageContent() {
 
   return (
     <DocumentPageShell
-      formName={formName}
+      formName={form.templateName || formName}
       isEncrypted={isFormEncrypted}
       onHomeClick={() => router.push("/")}
       readOnly={true}
+      respondentName={
+        form.templateName ? (form.respondentName ?? undefined) : undefined
+      }
       actions={
         <PageActionRails
           leftActions={
@@ -258,6 +291,17 @@ function SharedFormPageContent() {
                 title: "Create New Draft",
                 variant: "default",
                 icon: <DocumentDuplicateIcon className="h-5 w-5" />,
+              },
+              {
+                key: "compare",
+                label: "Compare",
+                onClick: () =>
+                  router.push(
+                    `/compare?forms=${encodeURIComponent(`share:${shareId}`)}`,
+                  ),
+                title: "Compare with other forms",
+                variant: "info",
+                icon: <ScaleIcon className="h-5 w-5" />,
               },
               {
                 key: "csv",

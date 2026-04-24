@@ -54,6 +54,7 @@ function FormContextProvider({ children }: { children: React.ReactNode }) {
       saveRecentFormMeta(localStorage, {
         id,
         name: form.name,
+        respondentName: form.respondentName,
         encrypted: false,
         kind: "form",
         phase: "draft",
@@ -117,18 +118,18 @@ async function checkIfEncrypted(
 
       // Form exists in database = it's published
       setIsPublished(true);
-      saveRecentFormMeta(localStorage, {
-        id,
-        name: storedForm.name,
-        encrypted: Boolean(storedForm.encrypted),
-        kind: "form",
-        phase: "published",
-      });
-      removeLocalDraft(localStorage, id);
 
       if (storedForm.encrypted) {
         // Form is encrypted - do NOT load from localStorage or anywhere
         // The form page will handle password verification
+        saveRecentFormMeta(localStorage, {
+          id,
+          name: storedForm.name,
+          encrypted: true,
+          kind: "form",
+          phase: "published",
+        });
+        removeLocalDraft(localStorage, id);
         setIsEncrypted(true);
         console.log("Form is encrypted, password verification required");
         return;
@@ -139,6 +140,15 @@ async function checkIfEncrypted(
         // Always load from API/database - never use localStorage
         // This ensures published forms are never modified from stale cache
         const form = Form.fromPOJO(JSON.parse(storedForm.data));
+        saveRecentFormMeta(localStorage, {
+          id,
+          name: storedForm.name,
+          respondentName: form.respondentName,
+          encrypted: false,
+          kind: "form",
+          phase: "published",
+        });
+        removeLocalDraft(localStorage, id);
         setForm(form);
       }
     } else {

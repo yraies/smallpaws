@@ -4,6 +4,10 @@ This file stores completed, cancelled, and superseded backlog items.
 
 ## done
 
+### Standalone Features (Apr 2026)
+
+- **B-033** — Multi-form comparison view (REQ-28). Users can compare 2 or more published forms side by side on `/compare`. Forms from the same template are aligned by matching category/question TypeIDs. Shows agreement/disagreement/partial/unanswered summary and per-question comparison with color-coded indicators. Supports adding forms via share links (with password handling for encrypted forms) or from recent published forms. Entry points: "Compare" button on published form pages, shared form pages, and home page. Client-side only; no server-side parent-template tracking.
+
 ### Phase 4.6: UI/UX Polish & Accessibility (Apr 2026)
 
 - **B-017** — Add onboarding/help copy that explains the product purpose, privacy model, and the three workflow phases. Home page now has a "What Garden Walk helps with" section with workflow steps and privacy note.

@@ -17,9 +17,7 @@ Status buckets: `todo`, `in_progress`, `blocked`, `postponed`
 
 ## todo
 
-### Phase 5: Public Templates (Optional)
-
-- **B-033** — Multi-form comparison view: compare 2 or more published forms that share the same parent template side by side, showing agreements/disagreements across responses. (REQ-28)
+- None.
 
 ## in_progress
 

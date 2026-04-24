@@ -1,6 +1,10 @@
 "use client";
 
-import { ArrowUpTrayIcon, TrashIcon } from "@heroicons/react/16/solid";
+import {
+  ArrowUpTrayIcon,
+  ScaleIcon,
+  TrashIcon,
+} from "@heroicons/react/16/solid";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef } from "react";
@@ -167,6 +171,14 @@ function HomePageContent() {
         >
           <ArrowUpTrayIcon className="h-4 w-4" aria-hidden="true" />
           Import JSON
+        </button>
+        <button
+          type="button"
+          className="flex cursor-pointer items-center gap-1.5 border border-sand-200 bg-sand-50 px-3 py-2 text-sm font-semibold text-lavender-700 hover:backdrop-brightness-95"
+          onClick={() => router.push("/compare")}
+        >
+          <ScaleIcon className="h-4 w-4" aria-hidden="true" />
+          Compare Forms
         </button>
         <p className="text-sm text-lavender-700">
           Import a previously exported JSON file as a new local draft.

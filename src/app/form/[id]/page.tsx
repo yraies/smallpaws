@@ -203,6 +203,7 @@ function FormPageContent() {
         saveRecentFormMeta(localStorage, {
           id: formId,
           name: form.name,
+          respondentName: form.respondentName,
           encrypted,
           kind: "form",
           phase: "published",
@@ -242,9 +243,21 @@ function FormPageContent() {
       onShare={() => setShowShareModal(true)}
     >
       <DocumentPageShell
-        formName={form?.name || ""}
+        formName={form?.templateName || form?.name || ""}
         isEncrypted={isEncrypted}
-        onFormNameChange={(name) => setForm((prev) => prev.withName(name))}
+        onFormNameChange={
+          form?.templateName
+            ? undefined
+            : (name) => setForm((prev) => prev.withName(name))
+        }
+        respondentName={
+          form?.templateName ? (form.respondentName ?? "") : undefined
+        }
+        onRespondentNameChange={
+          form?.templateName && !isPublished
+            ? (name) => setForm((prev) => prev.withRespondentName(name))
+            : undefined
+        }
         onHomeClick={() => router.push("/")}
         readOnly={isPublished}
         actions={<FormActionButtons />}

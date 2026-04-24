@@ -5,9 +5,11 @@ import {
   FaceSmileIcon,
   NewspaperIcon,
   PrinterIcon,
+  ScaleIcon,
   ShareIcon,
   TrashIcon,
 } from "@heroicons/react/16/solid";
+import { useRouter } from "next/navigation";
 import type React from "react";
 import { useDisplayPreferences } from "../contexts/DisplayPreferencesContext";
 import { useFormActions } from "../contexts/FormActionsContext";
@@ -26,6 +28,7 @@ type ActionConfig = {
 
 export default function FormActionButtons() {
   const {
+    formId,
     isPublished,
     isPublishing,
     isCloning,
@@ -39,6 +42,7 @@ export default function FormActionButtons() {
   } = useFormActions();
 
   const { showIcon, setShowIcon } = useDisplayPreferences();
+  const router = useRouter();
 
   const leftActions: ActionConfig[] = [];
   if (isPublished) {
@@ -50,6 +54,15 @@ export default function FormActionButtons() {
       disabled: isCloning,
       variant: "default",
       icon: <DocumentDuplicateIcon className="h-5 w-5" />,
+    });
+    leftActions.push({
+      key: "compare",
+      label: "Compare",
+      onClick: () =>
+        router.push(`/compare?forms=${encodeURIComponent(formId ?? "")}`),
+      title: "Compare with other forms",
+      variant: "info",
+      icon: <ScaleIcon className="h-5 w-5" />,
     });
   }
 

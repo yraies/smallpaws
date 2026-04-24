@@ -81,7 +81,7 @@ Pre-release (~75% complete). No compatibility obligations.
 - **REQ-8: Share Filled Forms** — Filled forms can be shared via unique read-only links that show answers/results without permitting mutation. Status: ✅ implemented.
 - **REQ-18: Phase Backtracking via New Local Copies** — Users can move back to an earlier workflow phase by creating a new local draft/copy rather than editing the finalized/shared artifact directly. Status: ✅ implemented.
 - **REQ-5: Convert a Form into a Derived Template** — Users can create a template from a form's structure, preserving structural ancestry where useful for later reuse or comparison. Status: ❌ not implemented.
-- **REQ-28: Multi-Form Comparison View** — Users can compare 2 or more published forms that share the same parent template in a single view, showing agreements and disagreements across responses. Status: ❌ not implemented.
+- **REQ-28: Multi-Form Comparison View** — Users can compare 2 or more published forms that share the same parent template in a single view, showing agreements and disagreements across responses. Status: ✅ implemented.
 
 ### 2) Important Constraints
 

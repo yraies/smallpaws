@@ -4,6 +4,7 @@ export type RecentItemPhase = "draft" | "finalized" | "published";
 export type RecentItemMeta = {
   id: string;
   name: string;
+  respondentName?: string;
   date: Date;
   encrypted: boolean;
   kind: RecentItemKind;
@@ -14,6 +15,7 @@ export type RecentFormMeta = RecentItemMeta;
 
 type RecentFormMetaRecord = {
   name: string;
+  respondentName?: string;
   date: string;
   encrypted?: boolean;
   phase?: RecentItemPhase;
@@ -45,6 +47,7 @@ export function saveRecentFormMeta(
     getRecentFormMetaKey(meta.id),
     JSON.stringify({
       name: meta.name,
+      respondentName: meta.respondentName,
       date: (meta.date ?? new Date()).toISOString(),
       encrypted: meta.encrypted,
       kind: meta.kind,
@@ -110,6 +113,7 @@ export function loadRecentForms(
       forms.push({
         id,
         name: parsed.name,
+        respondentName: parsed.respondentName,
         date: new Date(parsed.date),
         encrypted: parsed.encrypted ?? false,
         kind: parsed.kind ?? "form",
@@ -151,4 +155,62 @@ function getRecentFormIds(
   }
 
   return ids;
+}
+
+// ── Recently viewed shared forms ──
+
+const RECENT_SHARED_FORMS_KEY = "recent-shared-forms";
+const MAX_RECENT_SHARED = 50;
+
+export type RecentSharedFormMeta = {
+  shareId: string;
+  name: string;
+  respondentName?: string;
+  templateName?: string;
+  structureFingerprint: string;
+  date: string;
+  encrypted: boolean;
+};
+
+/**
+ * Computes a structure fingerprint from sorted category and question TypeIDs.
+ * Forms from the same template share identical fingerprints.
+ */
+export function computeStructureFingerprint(form: {
+  categories: {
+    id: { toString(): string };
+    questions: { id: { toString(): string } }[];
+  }[];
+}): string {
+  const ids: string[] = [];
+  for (const cat of form.categories) {
+    ids.push(`c:${cat.id.toString()}`);
+    for (const q of cat.questions) {
+      ids.push(`q:${q.id.toString()}`);
+    }
+  }
+  ids.sort();
+  return ids.join("|");
+}
+
+export function saveRecentSharedForm(
+  storage: StorageLike,
+  meta: RecentSharedFormMeta,
+): void {
+  const existing = loadRecentSharedForms(storage);
+  const filtered = existing.filter((f) => f.shareId !== meta.shareId);
+  const updated = [meta, ...filtered].slice(0, MAX_RECENT_SHARED);
+  storage.setItem(RECENT_SHARED_FORMS_KEY, JSON.stringify(updated));
+}
+
+export function loadRecentSharedForms(
+  storage: Pick<StorageLike, "getItem">,
+): RecentSharedFormMeta[] {
+  const raw = storage.getItem(RECENT_SHARED_FORMS_KEY);
+  if (!raw) return [];
+  try {
+    return JSON.parse(raw) as RecentSharedFormMeta[];
+  } catch {
+    return [];
+  }
 }

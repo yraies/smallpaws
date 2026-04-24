@@ -139,6 +139,15 @@ class Question {
     return new Question(typeid(QuestionIDLiteral), unsetKey, value);
   }
 
+  /** Create a Question with a deterministic ID suffix (for stable starter templates). */
+  static withStableId(
+    suffix: string,
+    value: string,
+    unsetKey = Selection.UNSET as string,
+  ): Question {
+    return new Question(new TypeID(QuestionIDLiteral, suffix), unsetKey, value);
+  }
+
   static fromPOJO(obj: QuestionPOJO, answerOptions?: AnswerOption[]): Question {
     if (obj.id.prefix !== QuestionIDLiteral) {
       throw new Error("Invalid Question ID");
@@ -211,6 +220,15 @@ class Category {
 
   static new(name: string, questions: Question[]): Category {
     return new Category(typeid(CategoryIDLiteral), name, questions);
+  }
+
+  /** Create a Category with a deterministic ID suffix (for stable starter templates). */
+  static withStableId(
+    suffix: string,
+    name: string,
+    questions: Question[],
+  ): Category {
+    return new Category(new TypeID(CategoryIDLiteral, suffix), name, questions);
   }
 
   static fromPOJO(obj: CategoryPOJO, answerOptions?: AnswerOption[]): Category {
@@ -289,21 +307,29 @@ export type FormPOJO = {
   name: string;
   categories: CategoryPOJO[];
   answerOptions?: AnswerOption[];
+  templateName?: string;
+  respondentName?: string;
 };
 
 class Form {
   readonly name: string;
   readonly categories: Category[];
   readonly answerOptions?: AnswerOption[];
+  readonly templateName?: string;
+  readonly respondentName?: string;
 
   private constructor(
     name: string,
     categories: Category[],
     answerOptions?: AnswerOption[],
+    templateName?: string,
+    respondentName?: string,
   ) {
     this.name = name;
     this.categories = categories;
     this.answerOptions = answerOptions;
+    this.templateName = templateName;
+    this.respondentName = respondentName;
   }
 
   static new(
@@ -319,6 +345,8 @@ class Form {
       obj.name,
       obj.categories.map((c) => Category.fromPOJO(c, obj.answerOptions)),
       obj.answerOptions,
+      obj.templateName,
+      obj.respondentName,
     );
   }
 
@@ -327,15 +355,53 @@ class Form {
   }
 
   withName(name: string): Form {
-    return new Form(name, this.categories, this.answerOptions);
+    return new Form(
+      name,
+      this.categories,
+      this.answerOptions,
+      this.templateName,
+      this.respondentName,
+    );
   }
 
   withCategories(categories: Category[]): Form {
-    return new Form(this.name, categories, this.answerOptions);
+    return new Form(
+      this.name,
+      categories,
+      this.answerOptions,
+      this.templateName,
+      this.respondentName,
+    );
   }
 
   withAnswerOptions(answerOptions: AnswerOption[] | undefined): Form {
-    return new Form(this.name, this.categories, answerOptions);
+    return new Form(
+      this.name,
+      this.categories,
+      answerOptions,
+      this.templateName,
+      this.respondentName,
+    );
+  }
+
+  withTemplateName(templateName: string): Form {
+    return new Form(
+      this.name,
+      this.categories,
+      this.answerOptions,
+      templateName,
+      this.respondentName,
+    );
+  }
+
+  withRespondentName(respondentName: string): Form {
+    return new Form(
+      this.name,
+      this.categories,
+      this.answerOptions,
+      this.templateName,
+      respondentName,
+    );
   }
 
   withCategory(
@@ -345,7 +411,13 @@ class Form {
     const updatedCategories = this.categories.map((c) =>
       c.id === categoryID ? modifier(c) : c,
     );
-    return new Form(this.name, updatedCategories, this.answerOptions);
+    return new Form(
+      this.name,
+      updatedCategories,
+      this.answerOptions,
+      this.templateName,
+      this.respondentName,
+    );
   }
 
   withMovedCategory(categoryID: CategoryID, direction: "up" | "down"): Form {
@@ -360,7 +432,13 @@ class Form {
     const newCategories = [...this.categories];
     newCategories[index] = newCategories[newIndex];
     newCategories[newIndex] = this.categories[index];
-    return new Form(this.name, newCategories, this.answerOptions);
+    return new Form(
+      this.name,
+      newCategories,
+      this.answerOptions,
+      this.templateName,
+      this.respondentName,
+    );
   }
 
   addCategory(category: Category): Form {
@@ -368,6 +446,8 @@ class Form {
       this.name,
       [...this.categories, category],
       this.answerOptions,
+      this.templateName,
+      this.respondentName,
     );
   }
 
@@ -376,6 +456,8 @@ class Form {
       this.name,
       this.categories.filter((c) => c.id !== categoryID),
       this.answerOptions,
+      this.templateName,
+      this.respondentName,
     );
   }
 
@@ -385,6 +467,8 @@ class Form {
       this.name,
       this.categories.map((category) => category.withoutAnswers(unsetKey)),
       this.answerOptions,
+      this.templateName,
+      this.respondentName,
     );
   }
 

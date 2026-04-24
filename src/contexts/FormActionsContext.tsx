@@ -16,6 +16,9 @@ import { removeRecentFormFromStorage } from "../utils/recentForms";
 import { useFormContext } from "./FormContext";
 
 interface FormActionsContextType {
+  // Identity
+  formId?: string;
+
   // State
   isPublished: boolean;
   isEncrypted: boolean;
@@ -150,6 +153,7 @@ export function FormActionsProvider({
   return (
     <FormActionsContext.Provider
       value={{
+        formId,
         isPublished,
         isEncrypted,
         isPublishing,

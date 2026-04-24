@@ -36,6 +36,24 @@ Required fields for new entries:
 
 ## Entries
 
+### F-023 (2026-04-24) - Form identity: respondent name, template name, comparison UX, recently viewed shared forms
+
+- **Date**: 2026-04-24
+- **Source**: Stakeholder chat
+- **Exact Quote**: "I think we might want to persist the template name in the form and then not give the form a title but instead have it record the name of the person filling it in. When we have that we should be able to fill out our form, share it and on the share page see a 'compare' button which already fills in the first comparison element. We should persist 'recently viewed shared forms' somewhere, so we can then query those for their parent id to only show compatible shared forms in the suggestion. ('recently published forms' makes it sound like that is side-wide and somehow accessing all published forms on the server. I certainly hope its not!)"
+- **Normalized Intent**: (1) Forms should store the originating template name as a frozen field. (2) Forms should not have an editable title; instead the editable field is the respondent's name (who is filling it out). (3) Comparison columns should show respondent names, not form titles. (4) The share page compare button should pre-fill the current shared form. (5) Recently viewed shared forms should be persisted in browser storage with template identity for filtering compatible suggestions. (6) The "recently published forms" label is misleading — must make clear this is browser-local data.
+- **Feedback**: Forms should carry two new identity fields: `templateName` (inherited from source template, immutable) and `respondentName` (the person filling it). The form's display title should be the template name, not a user-defined form title. Comparison view should use respondent names as column headers. Recently viewed shared forms should be tracked locally to enable filtered, template-compatible suggestions on the compare page. Labels must not imply server-side data exposure.
+- **Action taken**: Implementing data model changes, form UI updates, comparison column headers, recently viewed shared forms storage, and compare page suggestion filtering.
+
+### F-022 (2026-04-24) - Compare feature next, defer UI/color polish
+
+- **Date**: 2026-04-24
+- **Source**: Stakeholder chat
+- **Exact Quote**: "I think the compare feature should be next, right? making sure customized forms are harmoneous from a ui/color perspective, and making sure everything is legible at all times can be done in the final UI pass when all features are present."
+- **Normalized Intent**: Multi-form comparison view (B-033/REQ-28) should be the next feature implemented. Visual polish, color harmony, and legibility should be deferred to a final UI pass after all features are present.
+- **Feedback**: Stakeholder confirms B-033 as next priority and explicitly defers UI/color polish to a final pass.
+- **Action taken**: Starting B-033 implementation.
+
 ### F-021 (2026-04-24) - Rename to "Garden Walk" and future theming direction
 
 - **Date**: 2026-04-24

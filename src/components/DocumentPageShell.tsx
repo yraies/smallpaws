@@ -7,6 +7,8 @@ interface DocumentPageShellProps {
   onHomeClick: () => void;
   readOnly?: boolean;
   onFormNameChange?: (name: string) => void;
+  respondentName?: string;
+  onRespondentNameChange?: (name: string) => void;
   actions?: React.ReactNode;
   notice?: React.ReactNode;
   overlay?: React.ReactNode;
@@ -19,6 +21,8 @@ export default function DocumentPageShell({
   onHomeClick,
   readOnly = false,
   onFormNameChange,
+  respondentName,
+  onRespondentNameChange,
   actions,
   notice,
   overlay,
@@ -32,6 +36,8 @@ export default function DocumentPageShell({
         onFormNameChange={onFormNameChange}
         onHomeClick={onHomeClick}
         readOnly={readOnly}
+        respondentName={respondentName}
+        onRespondentNameChange={onRespondentNameChange}
       />
 
       {actions}

@@ -18,7 +18,8 @@ export function createTemplateDraftFromStructure(
 }
 
 export function createFormDraftFromTemplate(template: Form, name = ""): Form {
-  return applyOptionalName(template.withoutAnswers(), name);
+  const draft = applyOptionalName(template.withoutAnswers(), name);
+  return draft.withTemplateName(template.name);
 }
 
 // ---------------------------------------------------------------------------

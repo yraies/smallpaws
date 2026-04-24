@@ -19,6 +19,7 @@ Detailed historical notes are preserved in `CHANGELOG_ARCHIVE.md`.
 - Template creators can now define custom answer options (label, short label, color) that apply to all questions in a template. Custom options carry into forms and exports. Built-in defaults are used when no custom options are set.
 - Users can now import a previously exported JSON file from the home page to create a new local draft. If the JSON has filled answers, it imports as a form draft; otherwise it imports as a template draft. Custom answer options are preserved through the export-import roundtrip.
 - Answer option editor now offers 12 preset color swatches (lavender, sky, pistachio, sand, raspberry, sepia, limoncello, rose, coral, peach, mint, grey) alongside the free color picker, and a clickable icon picker with 9 icons (exclamation, check, question, minus, cross, heart, star, thumbs-up, empty circle).
+- Users can now compare 2 or more published forms that share the same parent template in a side-by-side view, showing per-question agreement, disagreement, partial agreement, and unanswered states with visual indicators. Entry points from published form pages, shared form pages, and the home page.
 
 ### Changed
 

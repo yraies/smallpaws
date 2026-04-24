@@ -9,6 +9,8 @@ interface FormHeaderProps {
   onFormNameChange?: (name: string) => void;
   onHomeClick: () => void;
   readOnly?: boolean;
+  respondentName?: string;
+  onRespondentNameChange?: (name: string) => void;
 }
 
 export default function FormHeader({
@@ -17,7 +19,12 @@ export default function FormHeader({
   onFormNameChange,
   onHomeClick,
   readOnly = false,
+  respondentName,
+  onRespondentNameChange,
 }: FormHeaderProps) {
+  const hasRespondentField =
+    onRespondentNameChange !== undefined || respondentName !== undefined;
+
   return (
     <div className="document-sheet relative mb-4">
       <IconButton
@@ -40,8 +47,9 @@ export default function FormHeader({
         </EdgeActionButton>
       </div>
 
+      {/* Title: always read-only when respondent field is shown */}
       <div className="mb-4 flex items-center justify-center gap-2 text-center">
-        {readOnly ? (
+        {readOnly || hasRespondentField ? (
           <div
             id="form-name"
             className="max-w-full border-b-1 bg-transparent text-center text-2xl"
@@ -67,6 +75,34 @@ export default function FormHeader({
         )}
         <EncryptionStatus isEncrypted={isEncrypted} showText={false} />
       </div>
+
+      {/* Respondent name input for forms */}
+      {onRespondentNameChange && !readOnly && (
+        <div className="flex items-center justify-center gap-2 text-center">
+          <label
+            htmlFor="respondent-name"
+            className="text-sm text-lavender-500"
+          >
+            Your Name
+          </label>
+          <input
+            id="respondent-name"
+            type="text"
+            className="w-48 max-w-full border-b-1 bg-transparent text-center text-base focus:outline-none"
+            value={respondentName ?? ""}
+            onChange={(e) => onRespondentNameChange(e.target.value)}
+            placeholder="Enter your name"
+            name="respondent-name"
+          />
+        </div>
+      )}
+
+      {/* Respondent name display for read-only forms */}
+      {hasRespondentField && readOnly && respondentName && (
+        <div className="flex items-center justify-center gap-1 text-center text-sm text-lavender-500">
+          Filled by {respondentName}
+        </div>
+      )}
     </div>
   );
 }
