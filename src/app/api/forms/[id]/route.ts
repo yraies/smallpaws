@@ -58,6 +58,12 @@ export async function POST(
 
     try {
       FormStorage.saveForm(formData);
+      FormStorage.upsertSharedForm({
+        shareId: typeid("share").toString(),
+        formId: id,
+        passwordHash: null,
+        expiresAt: null,
+      });
     } catch (error) {
       // Check if it's the published form protection error
       if (

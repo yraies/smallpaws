@@ -156,7 +156,23 @@ export interface SharedTemplate {
 
 // biome-ignore lint/complexity/noStaticOnlyClass: used as a namespace for DB operations
 export class FormStorage {
+  static autoDeleteIfExpired(id: string): void {
+    const sharedForm = FormStorage.getCanonicalSharedFormForForm(id);
+    if (!sharedForm?.expires_at) {
+      return;
+    }
+
+    const expiry = new Date(sharedForm.expires_at);
+    if (Number.isNaN(expiry.getTime()) || new Date() <= expiry) {
+      return;
+    }
+
+    FormStorage.deleteForm(id);
+  }
+
   static getForm(id: string): StoredForm | null {
+    FormStorage.autoDeleteIfExpired(id);
+
     const stmt = db.prepare("SELECT * FROM forms WHERE id = ?");
     const result = stmt.get(id) as
       | (Omit<StoredForm, "encrypted"> & { encrypted: number })
@@ -406,6 +422,16 @@ export class FormStorage {
     }
 
     FormStorage.deleteSharedForm(share.share_id);
+  }
+
+  static regenerateCanonicalSharedFormForForm(shareData: {
+    shareId: string;
+    formId: string;
+    passwordHash: string | null;
+    expiresAt: string | null;
+  }): SharedForm {
+    FormStorage.deleteCanonicalSharedFormForForm(shareData.formId);
+    return FormStorage.createSharedForm(shareData);
   }
 }
 

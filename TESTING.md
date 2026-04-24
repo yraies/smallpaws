@@ -62,9 +62,11 @@ For backlog-control and small-command turns with no code changes:
 - Template/form type system invariants (to be added): templates carry no answers; forms carry fixed structure plus answers.
 - API route request/response contracts (to be added).
 - Recent-forms storage semantics (to be added): browser-local metadata/drafts only; no server-side recent-forms listing.
-- Template finalization invariants (to be added): forms can only be created from finalized templates; finalized/shared artifacts are immutable.
+- Template/fill lifecycle invariants (to be added): forms can only be created from finalized templates or readable artifacts where explicitly allowed; finalized/shared artifacts are immutable in place.
 - Starter-template entry behavior (to be added): non-empty built-in starters can open either a template draft or a fillable form; the empty starter remains template-draft-only.
 - Unified access-control coverage (to be added): protected shared links use the same password model as the protected artifact.
+- Compare identity and dedupe semantics (to be added): shared links and admin/local access paths to the same published form deduplicate in compare flows without exposing admin artifact ids.
+- Artifact conversion coverage (to be added): any readable form/template can create a derived template draft, and any readable form/template can create a fresh fillable copy.
 
 ## Failure Handling
 

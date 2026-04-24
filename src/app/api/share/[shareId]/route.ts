@@ -19,22 +19,17 @@ export async function GET(
       );
     }
 
-    // Check if form has expired
-    if (sharedForm.expires_at) {
-      const expiry = new Date(sharedForm.expires_at);
-      const now = new Date();
-      if (now > expiry) {
-        return NextResponse.json(
-          { error: "Shared form has expired" },
-          { status: 410 },
-        );
-      }
-    }
-
     // Get the actual form
     const form = FormStorage.getForm(sharedForm.form_id);
     if (!form) {
       return NextResponse.json({ error: "Form not found" }, { status: 404 });
+    }
+
+    if (form.name === "[Deleted]" || form.data === "{}") {
+      return NextResponse.json(
+        { error: "This shared form is no longer available" },
+        { status: 410 },
+      );
     }
 
     // Increment view count
@@ -49,7 +44,7 @@ export async function GET(
         isEncrypted: form.encrypted,
         viewCount: sharedForm.view_count + 1,
         createdAt: sharedForm.created_at,
-        expiresAt: sharedForm.expires_at,
+        autoDeleteAt: sharedForm.expires_at,
       });
     }
 
@@ -70,7 +65,7 @@ export async function GET(
         shareId: shareId,
         viewCount: sharedForm.view_count + 1,
         createdAt: sharedForm.created_at,
-        expiresAt: sharedForm.expires_at,
+        autoDeleteAt: sharedForm.expires_at,
       },
     });
   } catch (error) {
@@ -107,22 +102,17 @@ export async function POST(
       );
     }
 
-    // Check if form has expired
-    if (sharedForm.expires_at) {
-      const expiry = new Date(sharedForm.expires_at);
-      const now = new Date();
-      if (now > expiry) {
-        return NextResponse.json(
-          { error: "Shared form has expired" },
-          { status: 410 },
-        );
-      }
-    }
-
     // Get the actual form
     const form = FormStorage.getForm(sharedForm.form_id);
     if (!form) {
       return NextResponse.json({ error: "Form not found" }, { status: 404 });
+    }
+
+    if (form.name === "[Deleted]" || form.data === "{}") {
+      return NextResponse.json(
+        { error: "This shared form is no longer available" },
+        { status: 410 },
+      );
     }
 
     if (!form.encrypted || !form.password_hash) {
@@ -155,7 +145,7 @@ export async function POST(
         shareId: shareId,
         viewCount: sharedForm.view_count + 1,
         createdAt: sharedForm.created_at,
-        expiresAt: sharedForm.expires_at,
+        autoDeleteAt: sharedForm.expires_at,
       },
     });
   } catch (error) {

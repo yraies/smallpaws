@@ -8,9 +8,11 @@ export async function POST(
 ) {
   try {
     const { id } = await context.params;
-    const body = await request.json();
-
-    const { expiresInDays } = body;
+    const body = await request.json().catch(() => ({}));
+    const { regenerate = false, autoDeleteInDays } = body as {
+      regenerate?: boolean;
+      autoDeleteInDays?: number;
+    };
 
     // Check if form exists
     const form = FormStorage.getForm(id);
@@ -20,20 +22,26 @@ export async function POST(
 
     const requiresPassword = form.encrypted;
 
-    // Calculate expiry date if provided
-    let expiresAt: string | null = null;
-    if (expiresInDays && expiresInDays > 0) {
+    let autoDeleteAt: string | null = null;
+    if (autoDeleteInDays && autoDeleteInDays > 0) {
       const expiry = new Date();
-      expiry.setDate(expiry.getDate() + expiresInDays);
-      expiresAt = expiry.toISOString();
+      expiry.setDate(expiry.getDate() + autoDeleteInDays);
+      autoDeleteAt = expiry.toISOString();
     }
 
-    const sharedForm = FormStorage.upsertSharedForm({
-      shareId: typeid("share").toString(),
-      formId: id,
-      passwordHash: null,
-      expiresAt,
-    });
+    const sharedForm = regenerate
+      ? FormStorage.regenerateCanonicalSharedFormForForm({
+          shareId: typeid("share").toString(),
+          formId: id,
+          passwordHash: null,
+          expiresAt: autoDeleteAt,
+        })
+      : FormStorage.upsertSharedForm({
+          shareId: typeid("share").toString(),
+          formId: id,
+          passwordHash: null,
+          expiresAt: autoDeleteAt,
+        });
 
     // Build share URL
     const host = request.headers.get("host") || "localhost:3001";
@@ -45,7 +53,7 @@ export async function POST(
       shareId: sharedForm.share_id,
       shareUrl,
       requiresPassword,
-      expiresAt: sharedForm.expires_at,
+      autoDeleteAt: sharedForm.expires_at,
       viewCount: sharedForm.view_count,
       createdAt: sharedForm.created_at,
     });
@@ -65,24 +73,33 @@ export async function GET(
   try {
     const { id } = await context.params;
 
-    const share = FormStorage.getCanonicalSharedFormForForm(id);
     const form = FormStorage.getForm(id);
-    const requiresPassword = !!form?.encrypted;
+    if (!form) {
+      return NextResponse.json({ error: "Form not found" }, { status: 404 });
+    }
+
+    const share =
+      FormStorage.getCanonicalSharedFormForForm(id) ??
+      FormStorage.upsertSharedForm({
+        shareId: typeid("share").toString(),
+        formId: id,
+        passwordHash: null,
+        expiresAt: null,
+      });
+    const requiresPassword = !!form.encrypted;
     const host = _request.headers.get("host") || "localhost:3001";
     const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
 
     return NextResponse.json({
       success: true,
-      share: share
-        ? {
-            shareId: share.share_id,
-            shareUrl: `${protocol}://${host}/share/${share.share_id}`,
-            requiresPassword,
-            expiresAt: share.expires_at,
-            viewCount: share.view_count,
-            createdAt: share.created_at,
-          }
-        : null,
+      share: {
+        shareId: share.share_id,
+        shareUrl: `${protocol}://${host}/share/${share.share_id}`,
+        requiresPassword,
+        autoDeleteAt: share.expires_at,
+        viewCount: share.view_count,
+        createdAt: share.created_at,
+      },
     });
   } catch (error) {
     console.error("Error retrieving shared forms:", error);
@@ -97,22 +114,9 @@ export async function DELETE(
   _request: NextRequest,
   context: { params: Promise<{ id: string }> },
 ) {
-  try {
-    const { id } = await context.params;
-    const form = FormStorage.getForm(id);
-
-    if (!form) {
-      return NextResponse.json({ error: "Form not found" }, { status: 404 });
-    }
-
-    FormStorage.deleteCanonicalSharedFormForForm(id);
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Error deleting shared form:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
-  }
+  void context;
+  return NextResponse.json(
+    { error: "Removing the shared view is no longer supported for forms" },
+    { status: 405 },
+  );
 }

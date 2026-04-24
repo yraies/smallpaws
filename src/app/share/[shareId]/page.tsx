@@ -42,7 +42,7 @@ interface ShareInfo {
   shareId: string;
   viewCount: number;
   createdAt: string;
-  expiresAt: string | null;
+  autoDeleteAt: string | null;
 }
 
 function SharedFormPageContent() {
@@ -124,7 +124,7 @@ function SharedFormPageContent() {
       }
 
       if (response.status === 410) {
-        setError("This shared form has expired");
+        setIsDeleted(true);
         return;
       }
 
@@ -143,7 +143,7 @@ function SharedFormPageContent() {
           shareId: data.shareId,
           viewCount: data.viewCount,
           createdAt: data.createdAt,
-          expiresAt: data.expiresAt,
+          autoDeleteAt: data.autoDeleteAt,
         });
         return;
       }
@@ -175,6 +175,12 @@ function SharedFormPageContent() {
     if (!response.ok) {
       if (response.status === 401) {
         throw new Error("Invalid password");
+      }
+
+      if (response.status === 410) {
+        setNeedsPasswordVerification(false);
+        setIsDeleted(true);
+        return;
       }
 
       throw new Error("Failed to verify password");

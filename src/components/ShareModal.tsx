@@ -2,8 +2,8 @@ import {
   CalendarIcon,
   CheckIcon,
   DocumentDuplicateIcon,
+  ArrowPathIcon,
   ShareIcon,
-  TrashIcon,
   XMarkIcon,
 } from "@heroicons/react/16/solid";
 import React, { useState } from "react";
@@ -20,25 +20,25 @@ interface ShareInfo {
   shareId: string;
   shareUrl: string;
   requiresPassword: boolean;
-  expiresAt: string | null;
+  autoDeleteAt: string | null;
   viewCount: number;
   createdAt: string;
 }
 
-const EXPIRY_OPTIONS = [1, 7, 30, 90] as const;
+const AUTO_DELETE_OPTIONS = [1, 7, 30, 90] as const;
 
-function getExpirySelection(expiresAt: string | null): number | "" {
-  if (!expiresAt) {
+function getAutoDeleteSelection(autoDeleteAt: string | null): number | "" {
+  if (!autoDeleteAt) {
     return "";
   }
 
-  const diffMs = new Date(expiresAt).getTime() - Date.now();
+  const diffMs = new Date(autoDeleteAt).getTime() - Date.now();
   if (diffMs <= 0) {
     return "";
   }
 
   const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
-  return EXPIRY_OPTIONS.find((days) => days === diffDays) ?? "";
+  return AUTO_DELETE_OPTIONS.find((days) => days === diffDays) ?? "";
 }
 
 const ShareModal: React.FC<ShareModalProps> = ({
@@ -48,10 +48,10 @@ const ShareModal: React.FC<ShareModalProps> = ({
   formName,
   requiresPassword,
 }) => {
-  const [expiresInDays, setExpiresInDays] = useState<number | "">("");
+  const [autoDeleteInDays, setAutoDeleteInDays] = useState<number | "">("");
   const [shareInfo, setShareInfo] = useState<ShareInfo | null>(null);
-  const [isCreating, setIsCreating] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isRegenerating, setIsRegenerating] = useState(false);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
 
@@ -64,7 +64,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
       if (!data.success) return;
 
       setShareInfo(data.share);
-      setExpiresInDays(getExpirySelection(data.share?.expiresAt ?? null));
+      setAutoDeleteInDays(getAutoDeleteSelection(data.share?.autoDeleteAt ?? null));
     } catch (fetchError) {
       console.error("Error fetching share link:", fetchError);
     }
@@ -76,8 +76,8 @@ const ShareModal: React.FC<ShareModalProps> = ({
     }
   }, [fetchShare, isOpen]);
 
-  const createShare = async () => {
-    setIsCreating(true);
+  const saveShareSettings = async () => {
+    setIsSaving(true);
     setError("");
 
     try {
@@ -86,7 +86,48 @@ const ShareModal: React.FC<ShareModalProps> = ({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ expiresInDays: expiresInDays || undefined }),
+        body: JSON.stringify({
+          autoDeleteInDays: autoDeleteInDays || undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        setError(data.error || "Failed to save share settings");
+        return;
+      }
+
+      const data = await response.json();
+      setShareInfo({
+        shareId: data.shareId,
+        shareUrl: data.shareUrl,
+        requiresPassword: data.requiresPassword,
+        autoDeleteAt: data.autoDeleteAt,
+        viewCount: data.viewCount,
+        createdAt: data.createdAt,
+      });
+      setAutoDeleteInDays(getAutoDeleteSelection(data.autoDeleteAt));
+    } catch {
+      setError("Network error occurred");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const regenerateShare = async () => {
+    setIsRegenerating(true);
+    setError("");
+
+    try {
+      const response = await fetch(`/api/forms/${formId}/share`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          regenerate: true,
+          autoDeleteInDays: autoDeleteInDays || undefined,
+        }),
       });
 
       if (!response.ok) {
@@ -100,40 +141,15 @@ const ShareModal: React.FC<ShareModalProps> = ({
         shareId: data.shareId,
         shareUrl: data.shareUrl,
         requiresPassword: data.requiresPassword,
-        expiresAt: data.expiresAt,
+        autoDeleteAt: data.autoDeleteAt,
         viewCount: data.viewCount,
         createdAt: data.createdAt,
       });
-      setExpiresInDays(getExpirySelection(data.expiresAt));
+      setAutoDeleteInDays(getAutoDeleteSelection(data.autoDeleteAt));
     } catch {
       setError("Network error occurred");
     } finally {
-      setIsCreating(false);
-    }
-  };
-
-  const deleteShare = async () => {
-    setIsDeleting(true);
-    setError("");
-
-    try {
-      const response = await fetch(`/api/forms/${formId}/share`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        setError(data.error || "Failed to remove share link");
-        return;
-      }
-
-      setShareInfo(null);
-      setExpiresInDays("");
-      setCopied(false);
-    } catch {
-      setError("Network error occurred");
-    } finally {
-      setIsDeleting(false);
+      setIsRegenerating(false);
     }
   };
 
@@ -163,7 +179,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
   };
 
   const resetForm = () => {
-    setExpiresInDays("");
+    setAutoDeleteInDays("");
     setShareInfo(null);
     setError("");
     setCopied(false);
@@ -234,9 +250,11 @@ const ShareModal: React.FC<ShareModalProps> = ({
           {shareInfo ? (
             <div className="space-y-3 border border-sand-200 bg-sand-100 px-3 py-3">
               <div>
-                <p className="text-sm font-semibold">Active share link</p>
+                <p className="text-sm font-semibold">Shared view URL</p>
                 <p className="mt-1 text-sm text-lavender-700">
-                  You can copy this link, change its expiry, or remove it.
+                  This published form always has a read-only shared view. You can
+                  copy the current URL, configure auto-delete, or regenerate a
+                  new one.
                 </p>
               </div>
 
@@ -271,70 +289,44 @@ const ShareModal: React.FC<ShareModalProps> = ({
 
               <div>
                 <label
-                  htmlFor="share-expiry-active"
+                  htmlFor="share-auto-delete"
                   className="mb-2 flex items-center gap-2 text-sm font-medium text-lavender-700"
                 >
                   <CalendarIcon className="h-4 w-4" aria-hidden="true" />
-                  Change expiry
+                  Auto-delete underlying published form
                 </label>
                 <select
-                  id="share-expiry-active"
-                  value={expiresInDays}
+                  id="share-auto-delete"
+                  value={autoDeleteInDays}
                   onChange={(e) =>
-                    setExpiresInDays(
+                    setAutoDeleteInDays(
                       e.target.value ? Number(e.target.value) : "",
                     )
                   }
                   className="w-full border border-sand-200 bg-sand-50 px-3 py-2 text-sm"
                 >
-                  <option value="">Never expires</option>
-                  <option value={1}>1 day</option>
-                  <option value={7}>7 days</option>
-                  <option value={30}>30 days</option>
-                  <option value={90}>90 days</option>
+                  <option value="">Never auto-delete</option>
+                  <option value={1}>After 1 day</option>
+                  <option value={7}>After 7 days</option>
+                  <option value={30}>After 30 days</option>
+                  <option value={90}>After 90 days</option>
                 </select>
               </div>
 
               <p className="text-xs text-lavender-700">
                 Created {formatDate(shareInfo.createdAt)}
-                {shareInfo.expiresAt
-                  ? ` • Expires ${formatDate(shareInfo.expiresAt)}`
-                  : " • No expiry"}
+                {shareInfo.autoDeleteAt
+                  ? ` • Auto-deletes ${formatDate(shareInfo.autoDeleteAt)}`
+                  : " • No auto-delete"}
               </p>
             </div>
           ) : (
             <div className="space-y-3 border border-sand-200 bg-sand-50 px-3 py-3">
-              <h3 className="text-base font-semibold">Create a share link</h3>
+              <h3 className="text-base font-semibold">Loading shared view…</h3>
 
               <p className="text-sm text-lavender-700">
-                Create a link people can open to read this published form.
+                Loading the canonical shared view for this published form.
               </p>
-
-              <div>
-                <label
-                  htmlFor="share-expiry-new"
-                  className="mb-2 flex items-center gap-2 text-sm font-medium text-lavender-700"
-                >
-                  <CalendarIcon className="h-4 w-4" aria-hidden="true" />
-                  Expiry (optional)
-                </label>
-                <select
-                  id="share-expiry-new"
-                  value={expiresInDays}
-                  onChange={(e) =>
-                    setExpiresInDays(
-                      e.target.value ? Number(e.target.value) : "",
-                    )
-                  }
-                  className="w-full border border-sand-200 bg-sand-50 px-3 py-2 text-sm"
-                >
-                  <option value="">Never expires</option>
-                  <option value={1}>1 day</option>
-                  <option value={7}>7 days</option>
-                  <option value={30}>30 days</option>
-                  <option value={90}>90 days</option>
-                </select>
-              </div>
             </div>
           )}
 
@@ -346,33 +338,24 @@ const ShareModal: React.FC<ShareModalProps> = ({
             )}
           </div>
 
-          <div className="flex justify-between gap-3">
-            {shareInfo ? (
-              <button
-                type="button"
-                onClick={deleteShare}
-                disabled={isDeleting}
-                className="flex items-center justify-center gap-2 border border-danger-300 bg-sand-50 px-4 py-2 text-sm font-medium text-danger-700 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <TrashIcon className="h-4 w-4" />
-                {isDeleting ? "Removing..." : "Remove share link"}
-              </button>
-            ) : (
-              <span />
-            )}
-
+          <div className="flex justify-end gap-3">
             <button
               type="button"
-              onClick={createShare}
-              disabled={isCreating}
-              className="flex items-center justify-center gap-2 bg-complement-700 px-4 py-2 text-white disabled:cursor-not-allowed disabled:opacity-50"
+              onClick={saveShareSettings}
+              disabled={isSaving || !shareInfo}
+              className="flex items-center justify-center gap-2 border border-sand-200 bg-sand-50 px-4 py-2 text-sm font-medium text-lavender-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <ShareIcon className="h-4 w-4" />
-              {isCreating
-                ? "Saving..."
-                : shareInfo
-                  ? "Save share settings"
-                  : "Create share link"}
+              {isSaving ? "Saving..." : "Save auto-delete"}
+            </button>
+            <button
+              type="button"
+              onClick={regenerateShare}
+              disabled={isRegenerating || isSaving || !shareInfo}
+              className="flex items-center justify-center gap-2 bg-complement-700 px-4 py-2 text-white disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <ArrowPathIcon className="h-4 w-4" />
+              {isRegenerating ? "Regenerating..." : "Regenerate URL"}
             </button>
           </div>
 

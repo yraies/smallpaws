@@ -5,7 +5,7 @@ interface ShareInfo {
   shareId: string;
   viewCount: number;
   createdAt: string;
-  expiresAt: string | null;
+  autoDeleteAt: string | null;
 }
 
 interface ShareInfoOverlayProps {
@@ -26,9 +26,9 @@ export default function ShareInfoOverlay({ shareInfo }: ShareInfoOverlayProps) {
       <div className="flex items-center">
         <ClockIcon className="mr-1 h-3 w-3" aria-hidden="true" />
         <span>
-          {shareInfo.expiresAt
-            ? `Expires ${formatRelativeTime(new Date(shareInfo.expiresAt))}`
-            : "No expiry"}
+          {shareInfo.autoDeleteAt
+            ? `Auto-deletes ${formatRelativeTime(new Date(shareInfo.autoDeleteAt))}`
+            : "No auto-delete"}
         </span>
       </div>
     </div>

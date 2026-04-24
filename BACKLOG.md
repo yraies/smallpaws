@@ -17,7 +17,12 @@ Status buckets: `todo`, `in_progress`, `blocked`, `postponed`
 
 ## todo
 
-- None.
+- **B-046** — Encrypt all stored template/form data before database storage without requiring a user-managed password by default (REQ-13, REQ-9). Database storage should not contain plaintext artifact data; exact key-management details remain an implementation decision.
+- **B-049** — Allow creating a new local fillable form from any readable form or template (REQ-30). The new form should reuse structure and answer schema but start with fresh answers.
+- **B-042** — Complete template draft structure editing (REQ-3). Ensure template drafts support editing titles, categories, questions, ordering, and the template-wide answer schema end to end.
+- **B-043** — Enforce immutable shared forms fully (REQ-17). Prevent any path that can mutate answers on shared/published forms; changes must go through a new local copy/draft.
+- **B-044** — Tighten draft recovery boundaries (REQ-24). Draft recovery should remain browser-local for mutable drafts, while finalized/shared artifacts must not depend on mutable local state.
+- **B-045** — Create a derived template draft from any readable form or template (REQ-5). Allow creating a new local template draft from a readable artifact's structure, preserving structural ancestry where useful.
 
 ## in_progress
 
@@ -37,7 +42,7 @@ Status buckets: `todo`, `in_progress`, `blocked`, `postponed`
 
 ### Phase 5: Public Templates (Optional, deferred until after standalone items)
 
-- **B-030** — Public template designation (REQ-7, REQ-5). "Make Public Template" option on finalized templates.
+- **B-030** — Public template designation (REQ-7). "Make Public Template" option on finalized templates.
 - **B-031** — Public template browsing. Browse/search interface for community templates.
 - **B-032** — Template attribution. Templates maintain creator attribution.
 

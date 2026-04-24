@@ -55,6 +55,35 @@ describe("database share links", () => {
     ).toBeNull();
   });
 
+  test("expired auto-delete share marks underlying form deleted", async () => {
+    process.env.DATA_DIR = `/tmp/garden-walk-test-form-autodelete-${Date.now()}-${Math.random()}`;
+
+    const { FormStorage } = await import("../database");
+
+    FormStorage.saveForm({
+      id: "form_test_autodelete",
+      modification_key: "mod-key",
+      encrypted: false,
+      name: "Form",
+      data: JSON.stringify({ name: "Form" }),
+    });
+
+    FormStorage.upsertSharedForm({
+      shareId: "share_autodelete",
+      formId: "form_test_autodelete",
+      passwordHash: null,
+      expiresAt: new Date(Date.now() - 60_000).toISOString(),
+    });
+
+    const deletedForm = FormStorage.getForm("form_test_autodelete");
+
+    expect(deletedForm).toMatchObject({
+      id: "form_test_autodelete",
+      name: "[Deleted]",
+      data: "{}",
+    });
+  });
+
   test("templates keep one canonical share link", async () => {
     process.env.DATA_DIR = `/tmp/garden-walk-test-template-share-${Date.now()}-${Math.random()}`;
 

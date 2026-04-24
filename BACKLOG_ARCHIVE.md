@@ -6,7 +6,9 @@ This file stores completed, cancelled, and superseded backlog items.
 
 ### Standalone Features (Apr 2026)
 
-- **B-033** — Multi-form comparison view (REQ-28). Users can compare 2 or more published forms side by side on `/compare`. Forms from the same template are aligned by matching category/question TypeIDs. Shows agreement/disagreement/partial/unanswered summary and per-question comparison with color-coded indicators. Supports adding forms via share links (with password handling for encrypted forms) or from recent published forms. Entry points: "Compare" button on published form pages, shared form pages, and home page. Client-side only; no server-side parent-template tracking.
+- **B-033** — Multi-form comparison view (REQ-28). Users can compare 2 or more published forms side by side on `/compare`. Forms from the same template are aligned by matching category/question TypeIDs. The comparison shows raw answers side by side without automated agreement scoring. Supports adding forms via share links (with password handling for encrypted forms) or from recent published/shared forms. Entry points: "Compare" button on published form pages, shared form pages, and home page. Client-side only; no server-side parent-template tracking.
+- **B-047** — Always-available shared view for published forms (REQ-8). Publishing a form now creates its canonical shared read-only view automatically. The form share modal always shows the current shared URL and can regenerate a new URL that invalidates the old one. Publishing/admin and shared/read-only access remain distinct capabilities.
+- **B-048** — Auto-delete published forms (REQ-29). Form sharing now configures auto-delete of the underlying published form artifact rather than share-link expiry. When the configured time passes, both the admin URL and shared URL transition to deleted/unavailable states.
 
 ### Phase 4.6: UI/UX Polish & Accessibility (Apr 2026)
 

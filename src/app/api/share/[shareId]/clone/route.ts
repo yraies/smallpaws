@@ -18,24 +18,19 @@ export async function POST(
       );
     }
 
-    // Check if form has expired
-    if (sharedForm.expires_at) {
-      const expiry = new Date(sharedForm.expires_at);
-      const now = new Date();
-      if (now > expiry) {
-        return NextResponse.json(
-          { error: "Shared form has expired" },
-          { status: 410 },
-        );
-      }
-    }
-
     // Get the actual form
     const originalForm = FormStorage.getForm(sharedForm.form_id);
     if (!originalForm) {
       return NextResponse.json(
         { error: "Original form not found" },
         { status: 404 },
+      );
+    }
+
+    if (originalForm.name === "[Deleted]" || originalForm.data === "{}") {
+      return NextResponse.json(
+        { error: "Shared form is no longer available" },
+        { status: 410 },
       );
     }
 

@@ -149,7 +149,7 @@ async function loadSharedForm(
 > {
   const res = await fetch(`/api/share/${shareId}`);
   if (res.status === 404) return "Shared form not found";
-  if (res.status === 410) return "Shared form has expired";
+  if (res.status === 410) return "Shared form is no longer available";
   if (!res.ok) return "Failed to load shared form";
   const data = await res.json();
   if (data.requiresPassword) {
