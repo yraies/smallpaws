@@ -25,7 +25,6 @@ import {
 import { Form, type FormPOJO } from "../../../types/Form";
 import {
   computeStructureFingerprint,
-  hasLocalDraft,
   removeLocalDraft,
   saveRecentFormMeta,
 } from "../../../utils/recentForms";
@@ -48,12 +47,6 @@ function FormPageContent() {
 
   const checkFormStatus = React.useCallback(async (id: string) => {
     try {
-      if (hasLocalDraft(localStorage, id)) {
-        setIsPublished(false);
-        setIsLoadingForm(false);
-        return;
-      }
-
       const response = await fetch(`/api/forms/${id}`);
       if (response.ok) {
         const storedForm = await response.json();

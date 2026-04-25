@@ -56,7 +56,7 @@ Pre-release (~75% complete). No compatibility obligations.
 - **REQ-10: Predefined Answer Options** — Questions support: "must", "would like", "maybe", "off limits", and "unset" by default. Unset is the default state. Status: ✅ implemented.
 - **REQ-11: Template-Wide Custom Answer Enumerations** — Template creators can define custom answer options for all questions in a template. These answer options carry into forms created from that template. Status: ✅ implemented.
 - **REQ-12: Visual Answer Indication** — Visual indicators for different answer states help users compare responses and notice patterns manually. Indicators must be clear and distinguishable. Status: ✅ implemented.
-- **REQ-17: Immutable Shared Forms** — Once a form is published, its answers cannot be modified in place from either the published/admin URL or the shared/read-only URL. Changes require creating a new local form/copy. This protects recipients from silent changes. Status: ✅ partially implemented.
+- **REQ-17: Immutable Shared Forms** — Once a form is published, its answers cannot be modified in place from either the published/admin URL or the shared/read-only URL. Changes require creating a new local form/copy. This protects recipients from silent changes. Status: ✅ implemented.
 - **REQ-23: Forms Only Edit Answers** — In the form-filling phase, users can edit answers/content but not the form structure. Status: ✅ implemented.
 
 #### Privacy and Data Security

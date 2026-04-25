@@ -36,7 +36,7 @@ export function prepareFormClone(form: Form): string {
   });
   saveLocalDraft(localStorage, newFormId, JSON.stringify(clonedForm));
 
-  setPendingFormDraft(clonedForm);
+  setPendingFormDraft(clonedForm, newFormId);
 
   return newFormId;
 }

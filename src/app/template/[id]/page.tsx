@@ -154,7 +154,7 @@ function TemplatePageContent() {
     });
     saveLocalDraft(localStorage, formId, JSON.stringify(draftForm));
 
-    setPendingFormDraft(draftForm);
+    setPendingFormDraft(draftForm, formId);
     router.push(`/form/${formId}`);
   };
 

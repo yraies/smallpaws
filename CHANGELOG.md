@@ -52,6 +52,7 @@ Detailed historical notes are preserved in `CHANGELOG_ARCHIVE.md`.
 - Fixed the published/shared form toolbar so it tracks live form state correctly instead of showing stale actions after publication.
 - Direct admin URLs now expose deletion consistently for templates and draft forms, so users can remove the data they entered without going through shared views.
 - Fixed share-link copy buttons so they work reliably in the live UI, including environments where the standard Clipboard API is unavailable.
+- Fixed published form routes so conflicting same-ID local draft state and stale pending-draft handoff can no longer make a published form editable in place.
 
 ## [v0.1.0] — 2025-11 (Post-Phase 3)
 

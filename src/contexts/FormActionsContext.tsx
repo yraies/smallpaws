@@ -122,7 +122,7 @@ export function FormActionsProvider({
     });
     saveLocalDraft(localStorage, newFormId, JSON.stringify(draftForm));
 
-    setPendingFormDraft(draftForm);
+    setPendingFormDraft(draftForm, newFormId);
     router.push(`/form/${newFormId}`);
   }, [form, router]);
 

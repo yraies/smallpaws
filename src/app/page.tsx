@@ -499,7 +499,7 @@ function createAndNavigateFormDraft(
   const id = typeid("form");
   const draftForm = createFormDraftFromTemplate(template, templateName);
 
-  setPendingFormDraft(draftForm);
+  setPendingFormDraft(draftForm, id.toString());
   router.push(`/form/${id}`);
 }
 
@@ -521,7 +521,7 @@ async function handleFileImport(
     if (hasAnswers) {
       // Import as form draft (preserving answers)
       const id = typeid("form");
-      setPendingFormDraft(form);
+      setPendingFormDraft(form, id.toString());
       router.push(`/form/${id}`);
     } else {
       // Import as template draft (no answers to preserve)

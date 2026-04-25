@@ -256,7 +256,7 @@ function SharedFormPageContent() {
     });
     saveLocalDraft(localStorage, newFormId, JSON.stringify(draftForm));
 
-    setPendingFormDraft(draftForm);
+    setPendingFormDraft(draftForm, newFormId);
     router.push(`/form/${newFormId}`);
   };
 

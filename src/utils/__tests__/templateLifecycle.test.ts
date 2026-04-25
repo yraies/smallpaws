@@ -85,31 +85,38 @@ describe("pending-draft session handoff", () => {
 
   test("setPendingFormDraft + consumePendingFormDraft round-trips a form", () => {
     const form = Form.example();
-    setPendingFormDraft(form);
+    setPendingFormDraft(form, "form_target");
 
-    const consumed = consumePendingFormDraft();
+    const consumed = consumePendingFormDraft("form_target");
     expect(consumed).not.toBeNull();
     expect(consumed?.name).toBe(form.name);
   });
 
   test("consumePendingFormDraft returns null when nothing is pending", () => {
-    expect(consumePendingFormDraft()).toBeNull();
+    expect(consumePendingFormDraft("form_target")).toBeNull();
   });
 
   test("consumePendingFormDraft removes the item after first read", () => {
-    setPendingFormDraft(Form.example());
+    setPendingFormDraft(Form.example(), "form_target");
 
-    expect(consumePendingFormDraft()).not.toBeNull();
-    expect(consumePendingFormDraft()).toBeNull();
+    expect(consumePendingFormDraft("form_target")).not.toBeNull();
+    expect(consumePendingFormDraft("form_target")).toBeNull();
+  });
+
+  test("consumePendingFormDraft ignores drafts for a different route id", () => {
+    setPendingFormDraft(Form.example(), "form_target");
+
+    expect(consumePendingFormDraft("form_other")).toBeNull();
+    expect(consumePendingFormDraft("form_target")).not.toBeNull();
   });
 
   test("template and form pending drafts are independent", () => {
     setPendingTemplateDraft(Form.example());
-    setPendingFormDraft(Form.example());
+    setPendingFormDraft(Form.example(), "form_target");
 
     expect(consumePendingTemplateDraft()).not.toBeNull();
-    expect(consumePendingFormDraft()).not.toBeNull();
+    expect(consumePendingFormDraft("form_target")).not.toBeNull();
     expect(consumePendingTemplateDraft()).toBeNull();
-    expect(consumePendingFormDraft()).toBeNull();
+    expect(consumePendingFormDraft("form_target")).toBeNull();
   });
 });

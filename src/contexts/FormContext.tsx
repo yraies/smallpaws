@@ -38,13 +38,7 @@ function FormContextProvider({ children }: { children: React.ReactNode }) {
   const [isPublished, setIsPublished] = useState<boolean>(false);
 
   useEffect(() => {
-    // Check if this is a new form creation from a pending draft
-    const pendingForm = consumePendingFormDraft();
-    if (pendingForm) {
-      setForm(pendingForm);
-      setIsPublished(false);
-    } else if (id) {
-      // First check if the form is encrypted via API
+    if (id) {
       checkIfEncrypted(id, setIsEncrypted, setForm, setIsPublished);
     }
   }, [id]);
@@ -91,24 +85,6 @@ async function checkIfEncrypted(
   setIsPublished: (published: boolean) => void,
 ) {
   try {
-    if (hasLocalDraft(localStorage, id)) {
-      setIsPublished(false);
-      const storedData = loadLocalDraft(localStorage, id);
-      if (!storedData) {
-        return;
-      }
-
-      try {
-        const form = Form.fromPOJO(JSON.parse(storedData));
-        setForm(form);
-        setIsEncrypted(false);
-        console.log("Loaded draft form from localStorage");
-        return;
-      } catch (error) {
-        console.error("Error loading form from localStorage:", error);
-      }
-    }
-
     const response = await fetch(`/api/forms/${id}`);
     if (response.ok) {
       const storedForm = await response.json();
@@ -160,11 +136,43 @@ async function checkIfEncrypted(
         removeLocalDraft(localStorage, id);
         setForm(form);
       }
-    } else {
-      // Form not found in database and no draft was recovered locally.
-      setIsPublished(false);
-      console.log("No draft form found in localStorage or database");
+      return;
     }
+
+    if (response.status !== 404) {
+      setIsPublished(false);
+      console.log("Form lookup failed before draft recovery");
+      return;
+    }
+
+    const pendingForm = consumePendingFormDraft(id);
+    if (pendingForm) {
+      setForm(pendingForm);
+      setIsEncrypted(false);
+      setIsPublished(false);
+      return;
+    }
+
+    if (hasLocalDraft(localStorage, id)) {
+      setIsPublished(false);
+      const storedData = loadLocalDraft(localStorage, id);
+      if (!storedData) {
+        return;
+      }
+
+      try {
+        const form = Form.fromPOJO(JSON.parse(storedData));
+        setForm(form);
+        setIsEncrypted(false);
+        console.log("Loaded draft form from localStorage");
+        return;
+      } catch (error) {
+        console.error("Error loading form from localStorage:", error);
+      }
+    }
+
+    setIsPublished(false);
+    console.log("No draft form found in localStorage or database");
   } catch (error) {
     console.error("Error checking form encryption status:", error);
     setIsPublished(false);
