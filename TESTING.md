@@ -59,6 +59,7 @@ For backlog-control and small-command turns with no code changes:
 ## Required Automated Coverage Areas
 
 - Encryption/decryption round-trip (crypto.test.ts — exists).
+- Storage encryption-at-rest coverage (`storage-encryption.test.ts` — exists): raw SQLite rows for forms/templates should not store plaintext names or artifact payloads, while legacy plaintext rows remain readable during migration.
 - Template/form type system invariants (to be added): templates carry no answers; forms carry fixed structure plus answers.
 - API route request/response contracts (to be added).
 - Recent-forms storage semantics (to be added): browser-local metadata/drafts only; no server-side recent-forms listing.

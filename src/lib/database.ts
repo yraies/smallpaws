@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import Database from "better-sqlite3";
+import { decryptStoredString, encryptStoredString } from "./serverCrypto";
 
 // Use DATA_DIR env var if set, otherwise fall back to cwd for local dev
 const dataDir = process.env.DATA_DIR ?? process.cwd();
@@ -154,6 +155,44 @@ export interface SharedTemplate {
   created_at: string;
 }
 
+function decodeStoredForm(
+  result: Omit<StoredForm, "encrypted" | "name" | "data"> & {
+    encrypted: number;
+    name: string;
+    data: string;
+  },
+): StoredForm {
+  return {
+    id: result.id,
+    modification_key: result.modification_key,
+    encrypted: Boolean(result.encrypted),
+    password_hash: result.password_hash,
+    name: decryptStoredString(result.name),
+    data: decryptStoredString(result.data),
+    cloned_from: result.cloned_from,
+    created_at: result.created_at,
+    updated_at: result.updated_at,
+  };
+}
+
+function decodeStoredTemplate(
+  result: Omit<StoredTemplate, "encrypted" | "name" | "data"> & {
+    encrypted: number;
+    name: string;
+    data: string;
+  },
+): StoredTemplate {
+  return {
+    id: result.id,
+    encrypted: Boolean(result.encrypted),
+    password_hash: result.password_hash,
+    name: decryptStoredString(result.name),
+    data: decryptStoredString(result.data),
+    created_at: result.created_at,
+    updated_at: result.updated_at,
+  };
+}
+
 // biome-ignore lint/complexity/noStaticOnlyClass: used as a namespace for DB operations
 export class FormStorage {
   static autoDeleteIfExpired(id: string): void {
@@ -179,18 +218,7 @@ export class FormStorage {
       | null;
     if (!result) return null;
 
-    // Convert integer back to boolean for the encrypted field
-    return {
-      id: result.id,
-      modification_key: result.modification_key,
-      encrypted: Boolean(result.encrypted),
-      password_hash: result.password_hash,
-      name: result.name,
-      data: result.data,
-      cloned_from: result.cloned_from,
-      created_at: result.created_at,
-      updated_at: result.updated_at,
-    };
+    return decodeStoredForm(result);
   }
 
   static saveForm(form: Omit<StoredForm, "created_at" | "updated_at">): void {
@@ -212,8 +240,8 @@ export class FormStorage {
       form.modification_key,
       form.encrypted ? 1 : 0,
       form.password_hash || null,
-      form.name,
-      form.data,
+      encryptStoredString(form.name),
+      encryptStoredString(form.data),
       form.cloned_from || null,
     );
 
@@ -222,7 +250,11 @@ export class FormStorage {
       INSERT INTO form_meta (id, name, date, encrypted)
       VALUES (?, ?, datetime('now'), ?)
     `);
-    metaStmt.run(form.id, form.name, form.encrypted ? 1 : 0);
+    metaStmt.run(
+      form.id,
+      encryptStoredString(form.name),
+      form.encrypted ? 1 : 0,
+    );
   }
 
   static deleteForm(id: string): void {
@@ -230,20 +262,24 @@ export class FormStorage {
     // This preserves cloned_from references and allows for usage analytics
     const stmt = db.prepare(`
       UPDATE forms 
-      SET data = '{}', 
-          name = '[Deleted]',
+      SET data = ?, 
+          name = ?,
           updated_at = datetime('now')
       WHERE id = ?
     `);
-    stmt.run(id);
+    stmt.run(
+      encryptStoredString("{}"),
+      encryptStoredString("[Deleted]"),
+      id,
+    );
 
     // Also update form_meta to mark as deleted
     const metaStmt = db.prepare(`
       UPDATE form_meta 
-      SET name = '[Deleted]'
+      SET name = ?
       WHERE id = ?
     `);
-    metaStmt.run(id);
+    metaStmt.run(encryptStoredString("[Deleted]"), id);
   }
 
   static getRecentForms(): FormMeta[] {
@@ -258,6 +294,7 @@ export class FormStorage {
     }>;
     return rows.map((row) => ({
       ...row,
+      name: decryptStoredString(row.name),
       encrypted: Boolean(row.encrypted),
     })) as FormMeta[];
   }
@@ -444,15 +481,7 @@ export class TemplateStorage {
       | undefined;
     if (!result) return null;
 
-    return {
-      id: result.id,
-      encrypted: Boolean(result.encrypted),
-      password_hash: result.password_hash,
-      name: result.name,
-      data: result.data,
-      created_at: result.created_at,
-      updated_at: result.updated_at,
-    };
+    return decodeStoredTemplate(result);
   }
 
   static saveTemplate(
@@ -474,8 +503,8 @@ export class TemplateStorage {
       template.id,
       template.encrypted ? 1 : 0,
       template.password_hash || null,
-      template.name,
-      template.data,
+      encryptStoredString(template.name),
+      encryptStoredString(template.data),
     );
   }
 

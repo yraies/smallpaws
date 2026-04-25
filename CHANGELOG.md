@@ -24,6 +24,8 @@ Detailed historical notes are preserved in `CHANGELOG_ARCHIVE.md`.
 
 ### Changed
 
+- Stored form and template names plus payloads are now encrypted at rest by default before reaching SQLite, while optional user-password protection remains available as an additional inner layer.
+
 - App renamed from "Small Paws" to "Garden Walk" across all user-facing surfaces, documentation, and technical identifiers.
 - Root-level docs now reflect the current Biome-based toolchain and shipped JSON export support.
 - Recent forms now remain browser-local only; the server no longer exposes a recent-forms listing endpoint.

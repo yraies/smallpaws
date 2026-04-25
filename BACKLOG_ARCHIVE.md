@@ -14,6 +14,7 @@ This file stores completed, cancelled, and superseded backlog items.
 - **B-043** — Immutable published/shared forms enforced end to end (REQ-17). Published `/form/[id]` routes now trust server state before any local draft state, and pending local draft handoff is bound to its target route id so stale drafts cannot make a published form editable in place.
 - **B-044** — Draft recovery boundaries tightened (REQ-24). Finalized `/template/[id]` routes now trust canonical server state before any local draft state, and pending template draft handoff is bound to its target route id so finalized templates never depend on mutable browser-local drafts.
 - **B-042** — Template draft structure editing completed end to end (REQ-3). Draft templates now support editing titles, categories, questions, ordering, and template-wide answer schema together, and newly added questions/categories inherit the current template unset/default answer key.
+- **B-046** — Stored artifact encryption at rest shipped by default (REQ-13, REQ-9). Form and template names plus payloads are now wrapped in server-held storage encryption before hitting SQLite, while optional user-password encryption remains available as an inner layer.
 
 ### Phase 4.6: UI/UX Polish & Accessibility (Apr 2026)
 

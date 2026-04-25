@@ -34,7 +34,7 @@ Garden Walk is a privacy-first conversation starter tool for complex personal to
 
 - **Primary frontend stack**: React 19 + TypeScript + Tailwind CSS 4
 - **Primary backend/runtime stack**: Next.js 16 (App Router) + better-sqlite3 (SQLite)
-- **Encryption**: crypto-js (artifact encryption at rest with optional user-managed password protection; exact key management remains implementation-defined)
+- **Encryption**: server-held artifact encryption at rest with optional user-managed password protection layered on top; exact key management remains implementation-defined.
 - **Canonical state container**: `src/contexts/FormContext.tsx` + `src/contexts/FormActionsContext.tsx`
 - **Database module**: `src/lib/database.ts`
 - **Canonical runtime requirement source**: `SPEC.md`
@@ -42,7 +42,7 @@ Garden Walk is a privacy-first conversation starter tool for complex personal to
 ## Current Delivery Scope
 
 1. Template/form lifecycle refactor: explicit template creation, template finalization, fixed-structure form filling, and artifact-state rules — **partial**.
-2. Client-side encryption at rest and one coherent access-control model — **partial**.
+2. Artifact encryption at rest shipped; unified access-control model still **partial**.
 3. Shareable template and form links with distinct published/admin vs shared/read-only access paths — **partial**.
 4. Multi-form comparison as a communication aid, without automated agreement scoring — **implemented**.
 5. UI/UX polish, onboarding clarity, and accessibility improvements — **partial**.

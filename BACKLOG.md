@@ -17,7 +17,7 @@ Status buckets: `todo`, `in_progress`, `blocked`, `postponed`
 
 ## todo
 
-- **B-046** — Encrypt all stored template/form data before database storage without requiring a user-managed password by default (REQ-13, REQ-9). Database storage should not contain plaintext artifact data; exact key-management details remain an implementation decision.
+- None.
 
 ## in_progress
 

@@ -57,7 +57,6 @@ export async function GET(
         name: form.name,
         data: form.data,
         encrypted: form.encrypted,
-        password_hash: form.password_hash, // Include form's password hash for client-side decryption
         created_at: form.created_at,
         updated_at: form.updated_at,
       },
@@ -137,7 +136,6 @@ export async function POST(
         name: form.name,
         data: form.data,
         encrypted: form.encrypted,
-        password_hash: form.password_hash, // Include form's password hash for client-side decryption
         created_at: form.created_at,
         updated_at: form.updated_at,
       },
