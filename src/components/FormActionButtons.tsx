@@ -4,6 +4,8 @@ import {
   DocumentDuplicateIcon,
   FaceSmileIcon,
   NewspaperIcon,
+  PencilSquareIcon,
+  PlayIcon,
   PrinterIcon,
   ScaleIcon,
   ShareIcon,
@@ -35,6 +37,8 @@ export default function FormActionButtons() {
     isCloning,
     isDeleting,
     handleClone,
+    handleStartFresh,
+    handleCreateTemplateDraft,
     handleExportCSV,
     handleExportJSON,
     handleDelete,
@@ -51,10 +55,26 @@ export default function FormActionButtons() {
       key: "clone",
       label: "New Draft",
       onClick: handleClone,
-      title: "Create New Draft",
+      title: "Create a copy with your current answers",
       disabled: isCloning,
       variant: "default",
       icon: <DocumentDuplicateIcon className="h-5 w-5" />,
+    });
+    leftActions.push({
+      key: "start-fresh",
+      label: "Start Fresh",
+      onClick: handleStartFresh,
+      title: "Start a new form with fresh answers",
+      variant: "success",
+      icon: <PlayIcon className="h-5 w-5" />,
+    });
+    leftActions.push({
+      key: "new-template",
+      label: "New Template",
+      onClick: handleCreateTemplateDraft,
+      title: "Create a template draft from this structure",
+      variant: "default",
+      icon: <PencilSquareIcon className="h-5 w-5" />,
     });
     leftActions.push({
       key: "compare",

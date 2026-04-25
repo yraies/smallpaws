@@ -2,6 +2,7 @@
 
 import {
   ArrowDownTrayIcon,
+  PencilSquareIcon,
   PlayIcon,
   PrinterIcon,
 } from "@heroicons/react/16/solid";
@@ -30,7 +31,9 @@ import {
 } from "../../../../utils/recentForms";
 import {
   createFormDraftFromTemplate,
+  createTemplateDraftFromStructure,
   setPendingFormDraft,
+  setPendingTemplateDraft,
 } from "../../../../utils/templateLifecycle";
 
 function SharedTemplatePageContent() {
@@ -163,6 +166,12 @@ function SharedTemplatePageContent() {
     router.push(`/form/${formId}`);
   };
 
+  const createTemplateDraft = () => {
+    const newTemplateId = typeid("template").toString();
+    setPendingTemplateDraft(createTemplateDraftFromStructure(template));
+    router.push(`/template/${newTemplateId}`);
+  };
+
   return (
     <DocumentPageShell
       formName={template.name}
@@ -197,9 +206,17 @@ function SharedTemplatePageContent() {
                 key: "create-my-form",
                 label: "Create My Form",
                 onClick: startLocalForm,
-                title: "Create My Form",
+                title: "Create a new form from this template",
                 variant: "success",
                 icon: <PlayIcon className="h-5 w-5" />,
+              },
+              {
+                key: "new-template",
+                label: "New Template",
+                onClick: createTemplateDraft,
+                title: "Create a template draft from this structure",
+                variant: "default",
+                icon: <PencilSquareIcon className="h-5 w-5" />,
               },
             ] satisfies RailAction[]
           }

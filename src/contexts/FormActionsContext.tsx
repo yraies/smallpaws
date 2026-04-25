@@ -7,12 +7,23 @@ import {
   useEffect,
   useState,
 } from "react";
+import { typeid } from "typeid-js";
 import {
   exportFormAsCSV,
   exportFormAsJSON,
   prepareFormClone,
 } from "../utils/formActions";
-import { removeRecentFormFromStorage } from "../utils/recentForms";
+import {
+  removeRecentFormFromStorage,
+  saveLocalDraft,
+  saveRecentFormMeta,
+} from "../utils/recentForms";
+import {
+  createFormDraftFromTemplate,
+  createTemplateDraftFromStructure,
+  setPendingFormDraft,
+  setPendingTemplateDraft,
+} from "../utils/templateLifecycle";
 import { useFormContext } from "./FormContext";
 
 interface FormActionsContextType {
@@ -32,6 +43,8 @@ interface FormActionsContextType {
 
   // Actions
   handleClone: () => void;
+  handleStartFresh: () => void;
+  handleCreateTemplateDraft: () => void;
   handleExportCSV: () => void;
   handleExportJSON: () => void;
   handleDelete?: () => Promise<void>;
@@ -93,6 +106,33 @@ export function FormActionsProvider({
       setIsCloning(false);
     }
   }, [form, formId, router]);
+
+  const handleStartFresh = useCallback(() => {
+    if (!form) return;
+
+    const newFormId = typeid("form").toString();
+    const draftForm = createFormDraftFromTemplate(form);
+
+    saveRecentFormMeta(localStorage, {
+      id: newFormId,
+      name: draftForm.name,
+      encrypted: false,
+      kind: "form",
+      phase: "draft",
+    });
+    saveLocalDraft(localStorage, newFormId, JSON.stringify(draftForm));
+
+    setPendingFormDraft(draftForm);
+    router.push(`/form/${newFormId}`);
+  }, [form, router]);
+
+  const handleCreateTemplateDraft = useCallback(() => {
+    if (!form) return;
+
+    const newTemplateId = typeid("template").toString();
+    setPendingTemplateDraft(createTemplateDraftFromStructure(form));
+    router.push(`/template/${newTemplateId}`);
+  }, [form, router]);
 
   const handleExportCSV = useCallback(() => {
     if (!form) return;
@@ -162,6 +202,8 @@ export function FormActionsProvider({
         setIsPublished,
         setIsEncrypted,
         handleClone,
+        handleStartFresh,
+        handleCreateTemplateDraft,
         handleExportCSV,
         handleExportJSON,
         handleDelete: formId && allowDelete ? handleDelete : undefined,

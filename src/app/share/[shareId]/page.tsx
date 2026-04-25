@@ -3,12 +3,15 @@
 import {
   ArrowDownTrayIcon,
   DocumentDuplicateIcon,
+  PencilSquareIcon,
+  PlayIcon,
   PrinterIcon,
   ScaleIcon,
 } from "@heroicons/react/16/solid";
 import dynamic from "next/dynamic";
 import { useParams, useRouter } from "next/navigation";
 import React from "react";
+import { typeid } from "typeid-js";
 import DeletedFormMessage from "../../../components/DeletedFormMessage";
 import DocumentPageShell from "../../../components/DocumentPageShell";
 import ErrorMessage from "../../../components/ErrorMessage";
@@ -35,8 +38,16 @@ import {
 } from "../../../utils/formActions";
 import {
   computeStructureFingerprint,
+  saveLocalDraft,
+  saveRecentFormMeta,
   saveRecentSharedForm,
 } from "../../../utils/recentForms";
+import {
+  createFormDraftFromTemplate,
+  createTemplateDraftFromStructure,
+  setPendingFormDraft,
+  setPendingTemplateDraft,
+} from "../../../utils/templateLifecycle";
 
 interface ShareInfo {
   shareId: string;
@@ -230,6 +241,33 @@ function SharedFormPageContent() {
     router.push(`/form/${newFormId}`);
   };
 
+  const startFreshForm = () => {
+    if (!form) return;
+
+    const newFormId = typeid("form").toString();
+    const draftForm = createFormDraftFromTemplate(form);
+
+    saveRecentFormMeta(localStorage, {
+      id: newFormId,
+      name: draftForm.name,
+      encrypted: false,
+      kind: "form",
+      phase: "draft",
+    });
+    saveLocalDraft(localStorage, newFormId, JSON.stringify(draftForm));
+
+    setPendingFormDraft(draftForm);
+    router.push(`/form/${newFormId}`);
+  };
+
+  const createTemplateDraft = () => {
+    if (!form) return;
+
+    const newTemplateId = typeid("template").toString();
+    setPendingTemplateDraft(createTemplateDraftFromStructure(form));
+    router.push(`/template/${newTemplateId}`);
+  };
+
   if (isLoading) {
     return <LoadingState message="Loading shared form..." />;
   }
@@ -296,9 +334,25 @@ function SharedFormPageContent() {
                 key: "new-draft",
                 label: "New Draft",
                 onClick: startLocalDraft,
-                title: "Create New Draft",
+                title: "Create a copy with current answers",
                 variant: "default",
                 icon: <DocumentDuplicateIcon className="h-5 w-5" />,
+              },
+              {
+                key: "start-fresh",
+                label: "Start Fresh",
+                onClick: startFreshForm,
+                title: "Start a new form with fresh answers",
+                variant: "success",
+                icon: <PlayIcon className="h-5 w-5" />,
+              },
+              {
+                key: "new-template",
+                label: "New Template",
+                onClick: createTemplateDraft,
+                title: "Create a template draft from this structure",
+                variant: "default",
+                icon: <PencilSquareIcon className="h-5 w-5" />,
               },
               {
                 key: "compare",

@@ -20,6 +20,7 @@ Detailed historical notes are preserved in `CHANGELOG_ARCHIVE.md`.
 - Users can now import a previously exported JSON file from the home page to create a new local draft. If the JSON has filled answers, it imports as a form draft; otherwise it imports as a template draft. Custom answer options are preserved through the export-import roundtrip.
 - Answer option editor now offers 12 preset color swatches (lavender, sky, pistachio, sand, raspberry, sepia, limoncello, rose, coral, peach, mint, grey) alongside the free color picker, and a clickable icon picker with 9 icons (exclamation, check, question, minus, cross, heart, star, thumbs-up, empty circle).
 - Users can now compare 2 or more published forms that share the same template structure in a side-by-side view, showing raw responses question by question without automated agreement scoring. Entry points from published form pages, shared form pages, and the home page.
+- Any readable artifact (published form, shared form, shared template, finalized template) now offers "New Template" to create a local template draft from its structure, and form artifacts additionally offer "Start Fresh" to create a new fillable form with fresh answers. The existing "New Draft" clone-with-answers action remains available for phase backtracking.
 
 ### Changed
 
