@@ -483,6 +483,7 @@ function createAndNavigateTemplateDraft(
   const id = typeid("template");
   setPendingTemplateDraft(
     createTemplateDraftFromStructure(template, templateName),
+    id.toString(),
   );
   router.push(`/template/${id}`);
 }
@@ -526,7 +527,7 @@ async function handleFileImport(
     } else {
       // Import as template draft (no answers to preserve)
       const id = typeid("template");
-      setPendingTemplateDraft(form);
+      setPendingTemplateDraft(form, id.toString());
       router.push(`/template/${id}`);
     }
   } catch (e) {

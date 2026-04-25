@@ -19,7 +19,6 @@ Status buckets: `todo`, `in_progress`, `blocked`, `postponed`
 
 - **B-046** — Encrypt all stored template/form data before database storage without requiring a user-managed password by default (REQ-13, REQ-9). Database storage should not contain plaintext artifact data; exact key-management details remain an implementation decision.
 - **B-042** — Complete template draft structure editing (REQ-3). Ensure template drafts support editing titles, categories, questions, ordering, and the template-wide answer schema end to end.
-- **B-044** — Tighten draft recovery boundaries (REQ-24). Draft recovery should remain browser-local for mutable drafts, while finalized/shared artifacts must not depend on mutable local state.
 
 ## in_progress
 

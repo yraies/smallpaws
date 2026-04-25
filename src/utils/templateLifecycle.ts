@@ -34,20 +34,46 @@ export function createFormDraftFromTemplate(template: Form, name = ""): Form {
 const PENDING_TEMPLATE_DRAFT_KEY = "pending_template_draft";
 const PENDING_FORM_DRAFT_KEY = "pending_form_draft";
 
+type PendingTemplateDraftPayload = {
+  targetId: string;
+  template: FormPOJO;
+};
+
 type PendingFormDraftPayload = {
   targetId: string;
   form: FormPOJO;
 };
 
-export function setPendingTemplateDraft(template: Form): void {
-  sessionStorage.setItem(PENDING_TEMPLATE_DRAFT_KEY, JSON.stringify(template));
+export function setPendingTemplateDraft(template: Form, targetId: string): void {
+  const payload: PendingTemplateDraftPayload = {
+    targetId,
+    template: JSON.parse(JSON.stringify(template)) as FormPOJO,
+  };
+
+  sessionStorage.setItem(PENDING_TEMPLATE_DRAFT_KEY, JSON.stringify(payload));
 }
 
-export function consumePendingTemplateDraft(): Form | null {
+export function consumePendingTemplateDraft(targetId: string): Form | null {
   const raw = sessionStorage.getItem(PENDING_TEMPLATE_DRAFT_KEY);
   if (!raw) return null;
-  sessionStorage.removeItem(PENDING_TEMPLATE_DRAFT_KEY);
-  return Form.fromPOJO(JSON.parse(raw) as FormPOJO);
+
+  try {
+    const parsed = JSON.parse(raw) as Partial<PendingTemplateDraftPayload>;
+
+    if (parsed.targetId !== targetId || !parsed.template) {
+      if (!parsed.targetId || !parsed.template) {
+        sessionStorage.removeItem(PENDING_TEMPLATE_DRAFT_KEY);
+      }
+
+      return null;
+    }
+
+    sessionStorage.removeItem(PENDING_TEMPLATE_DRAFT_KEY);
+    return Form.fromPOJO(parsed.template);
+  } catch {
+    sessionStorage.removeItem(PENDING_TEMPLATE_DRAFT_KEY);
+    return null;
+  }
 }
 
 export function setPendingFormDraft(form: Form, targetId: string): void {

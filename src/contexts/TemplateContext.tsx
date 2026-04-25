@@ -105,17 +105,6 @@ function TemplateContextProvider({ children }: { children: React.ReactNode }) {
   );
 
   useEffect(() => {
-    const pendingDraft = consumePendingTemplateDraft();
-    if (pendingDraft) {
-      setTemplate(pendingDraft);
-      setTemplateName(pendingDraft.name);
-      setIsFinalized(false);
-      setIsEncrypted(false);
-      setNeedsPasswordVerification(false);
-      setIsLoading(false);
-      return;
-    }
-
     if (!id) {
       setIsLoading(false);
       return;
@@ -221,6 +210,27 @@ async function loadTemplate(
         phase: "finalized",
       });
       removeLocalDraft(localStorage, id);
+      setIsLoading(false);
+      return;
+    }
+
+    if (response.status !== 404) {
+      setTemplate(undefined);
+      setTemplateName("");
+      setIsFinalized(false);
+      setIsEncrypted(false);
+      setNeedsPasswordVerification(false);
+      setIsLoading(false);
+      return;
+    }
+
+    const pendingDraft = consumePendingTemplateDraft(id);
+    if (pendingDraft) {
+      setTemplate(pendingDraft);
+      setTemplateName(pendingDraft.name);
+      setIsFinalized(false);
+      setIsEncrypted(false);
+      setNeedsPasswordVerification(false);
       setIsLoading(false);
       return;
     }

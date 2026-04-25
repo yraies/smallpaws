@@ -168,7 +168,10 @@ function SharedTemplatePageContent() {
 
   const createTemplateDraft = () => {
     const newTemplateId = typeid("template").toString();
-    setPendingTemplateDraft(createTemplateDraftFromStructure(template));
+    setPendingTemplateDraft(
+      createTemplateDraftFromStructure(template),
+      newTemplateId,
+    );
     router.push(`/template/${newTemplateId}`);
   };
 

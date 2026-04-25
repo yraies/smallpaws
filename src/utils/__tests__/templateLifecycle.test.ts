@@ -64,23 +64,30 @@ describe("pending-draft session handoff", () => {
 
   test("setPendingTemplateDraft + consumePendingTemplateDraft round-trips a template", () => {
     const template = Form.example();
-    setPendingTemplateDraft(template);
+    setPendingTemplateDraft(template, "template_target");
 
-    const consumed = consumePendingTemplateDraft();
+    const consumed = consumePendingTemplateDraft("template_target");
     expect(consumed).not.toBeNull();
     expect(consumed?.name).toBe(template.name);
     expect(consumed?.categories.length).toBe(template.categories.length);
   });
 
   test("consumePendingTemplateDraft returns null when nothing is pending", () => {
-    expect(consumePendingTemplateDraft()).toBeNull();
+    expect(consumePendingTemplateDraft("template_target")).toBeNull();
   });
 
   test("consumePendingTemplateDraft removes the item after first read", () => {
-    setPendingTemplateDraft(Form.example());
+    setPendingTemplateDraft(Form.example(), "template_target");
 
-    expect(consumePendingTemplateDraft()).not.toBeNull();
-    expect(consumePendingTemplateDraft()).toBeNull();
+    expect(consumePendingTemplateDraft("template_target")).not.toBeNull();
+    expect(consumePendingTemplateDraft("template_target")).toBeNull();
+  });
+
+  test("consumePendingTemplateDraft ignores drafts for a different route id", () => {
+    setPendingTemplateDraft(Form.example(), "template_target");
+
+    expect(consumePendingTemplateDraft("template_other")).toBeNull();
+    expect(consumePendingTemplateDraft("template_target")).not.toBeNull();
   });
 
   test("setPendingFormDraft + consumePendingFormDraft round-trips a form", () => {
@@ -111,12 +118,12 @@ describe("pending-draft session handoff", () => {
   });
 
   test("template and form pending drafts are independent", () => {
-    setPendingTemplateDraft(Form.example());
+    setPendingTemplateDraft(Form.example(), "template_target");
     setPendingFormDraft(Form.example(), "form_target");
 
-    expect(consumePendingTemplateDraft()).not.toBeNull();
+    expect(consumePendingTemplateDraft("template_target")).not.toBeNull();
     expect(consumePendingFormDraft("form_target")).not.toBeNull();
-    expect(consumePendingTemplateDraft()).toBeNull();
+    expect(consumePendingTemplateDraft("template_target")).toBeNull();
     expect(consumePendingFormDraft("form_target")).toBeNull();
   });
 });

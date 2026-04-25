@@ -160,7 +160,10 @@ function TemplatePageContent() {
 
   const createNewDraft = () => {
     const newTemplateId = typeid("template");
-    setPendingTemplateDraft(createTemplateDraftFromStructure(template));
+    setPendingTemplateDraft(
+      createTemplateDraftFromStructure(template),
+      newTemplateId.toString(),
+    );
     router.push(`/template/${newTemplateId}`);
   };
 

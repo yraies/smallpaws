@@ -65,7 +65,7 @@ Pre-release (~75% complete). No compatibility obligations.
 - **REQ-14: No User Accounts Required** — System operates without user account creation or login. All data access relies on form links and optional encryption keys. Status: ✅ implemented.
 - **REQ-9: Unified Access Control** — Artifact access should use one coherent model built around possession of the correct access URL plus optional password protection, rather than separate share-password and form-password systems. Status: ✅ partially implemented.
 - **REQ-15: Local Storage for Recent Forms** — Recently accessed forms stored only in browser local storage for quick access and draft recovery. Recent-form metadata must not be uploaded or exposed as a server-side list. Local storage respects privacy settings. Status: ✅ implemented.
-- **REQ-24: Draft Recovery** — Local browser storage may keep draft templates/forms for quick recovery, but finalized/shared artifacts must remain retrievable and readable from their canonical URLs without depending on mutable local browser state. Status: ✅ partially implemented.
+- **REQ-24: Draft Recovery** — Local browser storage may keep draft templates/forms for quick recovery, but finalized/shared artifacts must remain retrievable and readable from their canonical URLs without depending on mutable local browser state. Status: ✅ implemented.
 - **REQ-25: Direct Artifact Deletion** — Users can delete templates and forms from their direct non-shared admin URLs. Status: ✅ implemented.
 
 #### Data Portability
