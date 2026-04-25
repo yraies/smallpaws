@@ -28,7 +28,7 @@ import {
   useTemplateContext,
 } from "../../../contexts/TemplateContext";
 import { encryptFormData, hashPassword } from "../../../lib/crypto";
-import { Category, Question } from "../../../types/Form";
+import { Category, getUnsetKey, Question } from "../../../types/Form";
 import { hasValidStructure } from "../../../utils/documentStructure";
 import { exportFormAsJSON, printCurrentView } from "../../../utils/formActions";
 import {
@@ -311,7 +311,9 @@ function TemplatePageContent() {
         showAddButton={!isFinalized}
         onAddCategory={() =>
           setTemplate((prev) =>
-            prev.addCategory(Category.new("", [Question.new("")])),
+            prev.addCategory(
+              Category.new("", [Question.new("", getUnsetKey(prev.answerOptions))]),
+            ),
           )
         }
         answerOptions={template.answerOptions}

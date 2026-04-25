@@ -54,6 +54,7 @@ Detailed historical notes are preserved in `CHANGELOG_ARCHIVE.md`.
 - Fixed share-link copy buttons so they work reliably in the live UI, including environments where the standard Clipboard API is unavailable.
 - Fixed published form routes so conflicting same-ID local draft state and stale pending-draft handoff can no longer make a published form editable in place.
 - Fixed finalized template routes so conflicting same-ID local draft state and stale pending-template handoff can no longer override canonical template loads.
+- Fixed template draft editing so newly added categories and questions stay aligned with the current template-wide answer schema default/unset option.
 
 ## [v0.1.0] — 2025-11 (Post-Phase 3)
 

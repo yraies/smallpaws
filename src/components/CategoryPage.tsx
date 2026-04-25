@@ -6,7 +6,7 @@ import {
 } from "@heroicons/react/16/solid";
 import type { Dispatch, SetStateAction } from "react";
 import type { AnswerOption } from "../types/Form";
-import { type Category, type Form, Question } from "../types/Form";
+import { getUnsetKey, type Category, type Form, Question } from "../types/Form";
 import Box from "./Box";
 import IconButton from "./IconButton";
 import QuestionLine from "./QuestionsLine";
@@ -51,7 +51,9 @@ function CategoryBox({
           if (!structureEditable) return;
           setDocument?.((prev) =>
             prev.withCategory(category.id, (currentCategory) =>
-              currentCategory.addQuestion(Question.new("")),
+              currentCategory.addQuestion(
+                Question.new("", getUnsetKey(prev.answerOptions)),
+              ),
             ),
           );
         }}

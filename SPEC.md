@@ -44,7 +44,7 @@ Pre-release (~75% complete). No compatibility obligations.
 
 - **REQ-1: Create Template Draft** — Users create editable template drafts from scratch or by starting from an existing template structure. Templates are the structural source of truth for later forms. Status: ✅ implemented.
 - **REQ-2: Finalize Template Before Filling** — Users finalize template drafts into frozen template versions before creating forms. Only finalized templates, or built-in starter templates with valid structure, can be used to start fillable forms. Status: ✅ implemented.
-- **REQ-3: Edit Template Structure** — Template drafts allow editing titles, categories, questions, ordering, and the template-wide answer schema. Finalized templates are read-only. Status: ✅ partially implemented.
+- **REQ-3: Edit Template Structure** — Template drafts allow editing titles, categories, questions, ordering, and the template-wide answer schema. Finalized templates are read-only. Status: ✅ implemented.
 - **REQ-4: Template vs Fillable Form Distinction** — System distinguishes clearly between templates and forms. Templates contain structure and answer schema only; forms contain the same fixed structure plus filled answers. Status: ✅ implemented.
 - **REQ-20: Category-Based Organization** — Templates and forms are organized into categories, each containing related questions. Categories clearly separate different topic areas. Status: ✅ implemented.
 - **REQ-6: Template Structure Validation** — Templates must have at least one category and one question before they can be finalized or shared. Status: ✅ implemented.
