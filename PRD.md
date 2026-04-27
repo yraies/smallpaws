@@ -42,7 +42,7 @@ Garden Walk is a privacy-first conversation starter tool for complex personal to
 ## Current Delivery Scope
 
 1. Template/form lifecycle refactor: explicit template creation, template finalization, fixed-structure form filling, and artifact-state rules — **partial**.
-2. Artifact encryption at rest shipped; unified access-control model still **partial**.
+2. Artifact encryption at rest and unified access-control model — **implemented**.
 3. Shareable template and form links with distinct published/admin vs shared/read-only access paths — **partial**.
 4. Multi-form comparison as a communication aid, without automated agreement scoring — **implemented**.
 5. UI/UX polish, onboarding clarity, and accessibility improvements — **partial**.

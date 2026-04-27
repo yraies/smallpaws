@@ -92,7 +92,6 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS shared_forms (
     share_id TEXT PRIMARY KEY,
     form_id TEXT NOT NULL,
-    password_hash TEXT,
     expires_at DATETIME,
     view_count INTEGER DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -142,7 +141,6 @@ export interface FormMeta {
 export interface SharedForm {
   share_id: string;
   form_id: string;
-  password_hash: string | null;
   expires_at: string | null;
   view_count: number;
   created_at: string;
@@ -311,26 +309,19 @@ export class FormStorage {
   static createSharedForm(shareData: {
     shareId: string;
     formId: string;
-    passwordHash: string | null;
     expiresAt: string | null;
   }): SharedForm {
     const stmt = db.prepare(`
-      INSERT INTO shared_forms (share_id, form_id, password_hash, expires_at)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO shared_forms (share_id, form_id, expires_at)
+      VALUES (?, ?, ?)
     `);
-    stmt.run(
-      shareData.shareId,
-      shareData.formId,
-      shareData.passwordHash,
-      shareData.expiresAt,
-    );
+    stmt.run(shareData.shareId, shareData.formId, shareData.expiresAt);
 
     const result = db
       .prepare("SELECT * FROM shared_forms WHERE share_id = ?")
       .get(shareData.shareId) as {
       share_id: string;
       form_id: string;
-      password_hash: string | null;
       expires_at: string | null;
       view_count: number;
       created_at: string;
@@ -338,7 +329,6 @@ export class FormStorage {
     return {
       share_id: result.share_id,
       form_id: result.form_id,
-      password_hash: result.password_hash,
       expires_at: result.expires_at,
       view_count: result.view_count,
       created_at: result.created_at,
@@ -348,7 +338,6 @@ export class FormStorage {
   static upsertSharedForm(shareData: {
     shareId: string;
     formId: string;
-    passwordHash: string | null;
     expiresAt: string | null;
   }): SharedForm {
     const existingShare = FormStorage.getCanonicalSharedFormForForm(
@@ -361,15 +350,11 @@ export class FormStorage {
 
     const stmt = db.prepare(`
       UPDATE shared_forms
-      SET password_hash = ?, expires_at = ?
+      SET expires_at = ?
       WHERE share_id = ?
     `);
 
-    stmt.run(
-      shareData.passwordHash,
-      shareData.expiresAt,
-      existingShare.share_id,
-    );
+    stmt.run(shareData.expiresAt, existingShare.share_id);
 
     return FormStorage.getSharedForm(existingShare.share_id) as SharedForm;
   }
@@ -380,7 +365,6 @@ export class FormStorage {
       | {
           share_id: string;
           form_id: string;
-          password_hash: string | null;
           expires_at: string | null;
           view_count: number;
           created_at: string;
@@ -394,7 +378,6 @@ export class FormStorage {
     return {
       share_id: result.share_id,
       form_id: result.form_id,
-      password_hash: result.password_hash,
       expires_at: result.expires_at,
       view_count: result.view_count,
       created_at: result.created_at,
@@ -420,7 +403,6 @@ export class FormStorage {
     const rows = stmt.all(formId) as Array<{
       share_id: string;
       form_id: string;
-      password_hash: string | null;
       expires_at: string | null;
       view_count: number;
       created_at: string;
@@ -428,7 +410,6 @@ export class FormStorage {
     return rows.map((row) => ({
       share_id: row.share_id,
       form_id: row.form_id,
-      password_hash: row.password_hash,
       expires_at: row.expires_at,
       view_count: row.view_count,
       created_at: row.created_at,
@@ -464,7 +445,6 @@ export class FormStorage {
   static regenerateCanonicalSharedFormForForm(shareData: {
     shareId: string;
     formId: string;
-    passwordHash: string | null;
     expiresAt: string | null;
   }): SharedForm {
     FormStorage.deleteCanonicalSharedFormForForm(shareData.formId);

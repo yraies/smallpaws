@@ -61,7 +61,6 @@ export async function POST(
       FormStorage.upsertSharedForm({
         shareId: typeid("share").toString(),
         formId: id,
-        passwordHash: null,
         expiresAt: null,
       });
     } catch (error) {

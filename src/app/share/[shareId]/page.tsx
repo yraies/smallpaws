@@ -78,7 +78,6 @@ function SharedFormPageContent() {
         name: string;
         data: string;
         encrypted: boolean;
-        password_hash?: string;
       };
       shareInfo: ShareInfo;
     }) => {

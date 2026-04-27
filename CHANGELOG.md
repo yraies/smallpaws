@@ -47,6 +47,7 @@ Detailed historical notes are preserved in `CHANGELOG_ARCHIVE.md`.
 
 ### Fixed
 
+- Fixed the remaining form-share plumbing so shared form access no longer carries a vestigial separate share-password field; shared access now consistently derives from the form's own optional password state.
 - Fixed recent-form draft IDs so hyphenated form IDs round-trip correctly through local storage.
 - Fixed recent-form navigation to read draft payloads from the correct storage key.
 - Fixed "Clear Recent Forms" so it clears only recent-form browser entries instead of wiping unrelated local storage or deleting server data.

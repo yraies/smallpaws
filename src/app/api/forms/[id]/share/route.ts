@@ -33,13 +33,11 @@ export async function POST(
       ? FormStorage.regenerateCanonicalSharedFormForForm({
           shareId: typeid("share").toString(),
           formId: id,
-          passwordHash: null,
           expiresAt: autoDeleteAt,
         })
       : FormStorage.upsertSharedForm({
           shareId: typeid("share").toString(),
           formId: id,
-          passwordHash: null,
           expiresAt: autoDeleteAt,
         });
 
@@ -83,7 +81,6 @@ export async function GET(
       FormStorage.upsertSharedForm({
         shareId: typeid("share").toString(),
         formId: id,
-        passwordHash: null,
         expiresAt: null,
       });
     const requiresPassword = !!form.encrypted;

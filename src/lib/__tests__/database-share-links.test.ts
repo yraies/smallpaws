@@ -27,14 +27,12 @@ describe("database share links", () => {
     const firstShare = FormStorage.upsertSharedForm({
       shareId: "share_first",
       formId: "form_test_single_share",
-      passwordHash: null,
       expiresAt: null,
     });
 
     const secondShare = FormStorage.upsertSharedForm({
       shareId: "share_second",
       formId: "form_test_single_share",
-      passwordHash: null,
       expiresAt: "2030-01-01T00:00:00.000Z",
     });
 
@@ -71,7 +69,6 @@ describe("database share links", () => {
     FormStorage.upsertSharedForm({
       shareId: "share_autodelete",
       formId: "form_test_autodelete",
-      passwordHash: null,
       expiresAt: new Date(Date.now() - 60_000).toISOString(),
     });
 
