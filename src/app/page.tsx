@@ -70,9 +70,9 @@ function HomePageContent() {
 
   return (
     <main id="main-content" className="flex w-full flex-col items-center gap-4">
-      <section className="w-full border border-sand-200 bg-sand-50 px-4 py-3 text-left">
+      <section className="w-full border border-th-line bg-th-paper px-4 py-3 text-left">
         <h2 className="text-base font-semibold">What Garden Walk helps with</h2>
-        <p className="mt-2 text-sm leading-6 text-lavender-700">
+        <p className="mt-2 text-sm leading-6 text-th-ink-muted">
           Garden Walk helps people talk through sensitive topics by turning them
           into a shared list of prompts. You can set up the questions first,
           fill them in later, and then review the answers without needing user
@@ -94,7 +94,7 @@ function HomePageContent() {
           />
         </div>
 
-        <p className="mt-3 border-l-4 border-lavender-300 px-3 py-1 text-sm text-lavender-700">
+        <p className="mt-3 border-l-4 border-th-line px-3 py-1 text-sm text-th-ink-muted">
           Recent work stays in this browser for convenience. If you use
           encryption, the decryption password stays client-side.
         </p>
@@ -102,7 +102,7 @@ function HomePageContent() {
 
       <Box title="New Template" onTitleChange={() => {}} buttons={null}>
         <div className="grid w-full grid-cols-1 md:grid-cols-2">
-          <p className="col-span-full px-2 text-sm text-lavender-700">
+          <p className="col-span-full px-2 text-sm text-th-ink-muted">
             Choose a starting point and an optional title. You can create a
             template draft to edit the structure, and non-empty starter
             templates can also open directly as fillable forms.
@@ -135,7 +135,7 @@ function HomePageContent() {
           <div className="col-span-full flex flex-wrap justify-end gap-2 px-2">
             <button
               type="button"
-              className="cursor-pointer border border-sand-200 bg-sand-50 px-3 py-2 text-sm font-semibold text-lavender-700 hover:backdrop-brightness-95"
+              className="cursor-pointer border border-th-line bg-th-paper px-3 py-2 text-sm font-semibold text-th-ink-muted hover:backdrop-brightness-95"
               onClick={() =>
                 createAndNavigateTemplateDraft(
                   selectedStarterTemplate.template,
@@ -149,7 +149,7 @@ function HomePageContent() {
             {canFillFormFromStarter && (
               <button
                 type="button"
-                className="cursor-pointer bg-lavender-700 px-3 py-2 text-sm font-semibold text-white hover:backdrop-brightness-95"
+                className="cursor-pointer bg-th-primary px-3 py-2 text-sm font-semibold text-white hover:backdrop-brightness-95"
                 onClick={() =>
                   createAndNavigateFormDraft(
                     selectedStarterTemplate.template,
@@ -165,7 +165,7 @@ function HomePageContent() {
         </div>
       </Box>
 
-      <section className="flex w-full items-center gap-3 border border-sand-200 bg-sand-50 px-4 py-3">
+      <section className="flex w-full items-center gap-3 border border-th-line bg-th-paper px-4 py-3">
         <input
           ref={fileInputRef}
           type="file"
@@ -182,7 +182,7 @@ function HomePageContent() {
         />
         <button
           type="button"
-          className="flex cursor-pointer items-center gap-1.5 border border-sand-200 bg-sand-50 px-3 py-2 text-sm font-semibold text-lavender-700 hover:backdrop-brightness-95"
+          className="flex cursor-pointer items-center gap-1.5 border border-th-line bg-th-paper px-3 py-2 text-sm font-semibold text-th-ink-muted hover:backdrop-brightness-95"
           onClick={() => fileInputRef.current?.click()}
         >
           <ArrowUpTrayIcon className="h-4 w-4" aria-hidden="true" />
@@ -190,17 +190,17 @@ function HomePageContent() {
         </button>
         <button
           type="button"
-          className="flex cursor-pointer items-center gap-1.5 border border-sand-200 bg-sand-50 px-3 py-2 text-sm font-semibold text-lavender-700 hover:backdrop-brightness-95"
+          className="flex cursor-pointer items-center gap-1.5 border border-th-line bg-th-paper px-3 py-2 text-sm font-semibold text-th-ink-muted hover:backdrop-brightness-95"
           onClick={() => router.push("/compare")}
         >
           <ScaleIcon className="h-4 w-4" aria-hidden="true" />
           Compare Forms
         </button>
-        <p className="text-sm text-lavender-700">
+        <p className="text-sm text-th-ink-muted">
           Import a previously exported JSON file as a new local draft.
         </p>
         {importError && (
-          <p className="text-sm text-danger-700" role="alert">
+          <p className="text-sm text-th-danger" role="alert">
             {importError}
           </p>
         )}
@@ -217,7 +217,7 @@ function HomePageContent() {
               }
               title="Clear Recent Templates"
             >
-              <TrashIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-danger-500" />
+              <TrashIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-th-danger" />
             </IconButton>
           ) : null
         }
@@ -229,13 +229,11 @@ function HomePageContent() {
                 key={item.id}
                 item={item}
                 onNavigate={() => navigateToRecent(item, router)}
-                onRemove={() =>
-                  removeRecent(item, setRecentItems, recentItems)
-                }
+                onRemove={() => removeRecent(item, setRecentItems, recentItems)}
               />
             ))
           ) : (
-            <p className="place-self-center px-2 py-1 text-center text-sm italic text-lavender-500">
+            <p className="place-self-center px-2 py-1 text-center text-sm italic text-th-ink-muted">
               No recent templates
             </p>
           )}
@@ -253,7 +251,7 @@ function HomePageContent() {
               }
               title="Clear Recent Forms"
             >
-              <TrashIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-danger-500" />
+              <TrashIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-th-danger" />
             </IconButton>
           ) : null
         }
@@ -265,13 +263,11 @@ function HomePageContent() {
                 key={item.id}
                 item={item}
                 onNavigate={() => navigateToRecent(item, router)}
-                onRemove={() =>
-                  removeRecent(item, setRecentItems, recentItems)
-                }
+                onRemove={() => removeRecent(item, setRecentItems, recentItems)}
               />
             ))
           ) : (
-            <p className="place-self-center px-2 py-1 text-center text-sm italic text-lavender-500">
+            <p className="place-self-center px-2 py-1 text-center text-sm italic text-th-ink-muted">
               No recent forms
             </p>
           )}
@@ -290,7 +286,7 @@ function HomePageContent() {
               }}
               title="Clear Recently Viewed Shared Forms"
             >
-              <TrashIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-danger-500" />
+              <TrashIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-th-danger" />
             </IconButton>
           ) : null
         }
@@ -311,7 +307,7 @@ function HomePageContent() {
               />
             ))
           ) : (
-            <p className="place-self-center px-2 py-1 text-center text-sm italic text-lavender-500">
+            <p className="place-self-center px-2 py-1 text-center text-sm italic text-th-ink-muted">
               No recently viewed shared forms
             </p>
           )}
@@ -346,19 +342,16 @@ function RecentLocalItem({
         className="flex grow cursor-pointer flex-row items-center px-2 py-1 text-center hover:backdrop-brightness-90"
         onClick={onNavigate}
       >
-        <span
-          className="grow font-semibold"
-          title={item.date.toLocaleString()}
-        >
+        <span className="grow font-semibold" title={item.date.toLocaleString()}>
           {item.respondentName || item.name}{" "}
-          <span className="text-xs text-lavender-700">
+          <span className="text-xs text-th-ink-muted">
             ({describeRecentItem(item)} - {formatRelativeTime(item.date)})
           </span>
         </span>
         <EncryptionStatus isEncrypted={item.encrypted} />
       </button>
       <IconButton onClick={onRemove} title="Remove from recent list">
-        <TrashIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-danger-500" />
+        <TrashIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-th-danger" />
       </IconButton>
     </div>
   );
@@ -383,7 +376,7 @@ function RecentSharedItem({
         <span className="grow font-semibold">
           {item.respondentName || item.name}{" "}
           {item.templateName && (
-            <span className="text-xs text-lavender-700">
+            <span className="text-xs text-th-ink-muted">
               ({item.templateName})
             </span>
           )}
@@ -391,7 +384,7 @@ function RecentSharedItem({
         <EncryptionStatus isEncrypted={item.encrypted} />
       </button>
       <IconButton onClick={onRemove} title="Remove from recent list">
-        <TrashIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-danger-500" />
+        <TrashIcon className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-th-danger" />
       </IconButton>
     </div>
   );
@@ -405,9 +398,9 @@ function WorkflowStep({
   description: string;
 }) {
   return (
-    <div className="border-l-2 border-lavender-300 px-3 py-1">
+    <div className="border-l-2 border-th-line px-3 py-1">
       <p className="font-semibold">{title}</p>
-      <p className="text-sm text-lavender-700">{description}</p>
+      <p className="text-sm text-th-ink-muted">{description}</p>
     </div>
   );
 }

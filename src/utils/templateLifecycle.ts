@@ -44,7 +44,10 @@ type PendingFormDraftPayload = {
   form: FormPOJO;
 };
 
-export function setPendingTemplateDraft(template: Form, targetId: string): void {
+export function setPendingTemplateDraft(
+  template: Form,
+  targetId: string,
+): void {
   const payload: PendingTemplateDraftPayload = {
     targetId,
     template: JSON.parse(JSON.stringify(template)) as FormPOJO,

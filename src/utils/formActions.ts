@@ -4,12 +4,12 @@ import {
   getEffectiveAnswerOptions,
   getUnsetKey,
 } from "../types/Form";
+import { getCompareIdentity } from "./compareIdentity";
 import {
   computeStructureFingerprint,
   saveLocalDraft,
   saveRecentFormMeta,
 } from "./recentForms";
-import { getCompareIdentity } from "./compareIdentity";
 import { setPendingFormDraft } from "./templateLifecycle";
 
 /**

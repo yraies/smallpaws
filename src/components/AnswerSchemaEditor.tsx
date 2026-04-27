@@ -5,8 +5,10 @@ import {
   TrashIcon,
 } from "@heroicons/react/16/solid";
 import { useState } from "react";
+import { useTheme } from "../contexts/ThemeContext";
 import {
   type AnswerOption,
+  type AnswerSemantic,
   DEFAULT_ANSWER_OPTIONS,
   getEffectiveAnswerOptions,
   PRESET_COLORS,
@@ -14,66 +16,131 @@ import {
 import IconButton from "./IconButton";
 import { AVAILABLE_ICONS } from "./SelectionButton";
 
+const SEMANTIC_TIERS: { key: AnswerSemantic; label: string }[] = [
+  { key: "must", label: "Must" },
+  { key: "like", label: "Like" },
+  { key: "neutral", label: "Neutral" },
+  { key: "maybe", label: "Maybe" },
+  { key: "dislike", label: "Dislike" },
+  { key: "misc", label: "Misc" },
+];
+
 interface AnswerSchemaEditorProps {
   answerOptions: AnswerOption[] | undefined;
   onChange: (options: AnswerOption[] | undefined) => void;
   disabled?: boolean;
 }
 
-/** Inline picker for color presets + free color + icon selection. */
+/** Inline picker for semantic tier / color presets + free color + icon selection. */
 function ColorIconPicker({
   option,
   onColorChange,
   onIconChange,
+  onSemanticChange,
 }: {
   option: AnswerOption;
   onColorChange: (color: string) => void;
   onIconChange: (icon: string) => void;
+  onSemanticChange: (semantic: AnswerSemantic | undefined) => void;
 }) {
+  const { getChipColor } = useTheme();
+  const hasSemantic = !!option.semantic;
+
+  // Resolve the displayed color: theme-derived when semantic is set, raw color otherwise
+  const displayColor = hasSemantic
+    ? getChipColor(option.semantic).bg
+    : option.color;
+
   return (
-    <div className="flex flex-col gap-2 border-t border-sand-200 bg-sand-50 px-2 pt-2 pb-2">
-      {/* Color presets */}
+    <div className="flex flex-col gap-2 border-t border-th-line bg-th-paper px-2 pt-2 pb-2">
+      {/* Semantic tier picker */}
       <div className="flex flex-wrap items-center gap-1">
-        <span className="mr-1 text-xs text-lavender-500">Color:</span>
-        {PRESET_COLORS.map((preset) => (
-          <button
-            key={preset.hex}
-            type="button"
-            className={`h-5 w-5 rounded-sm border ${
-              option.color.toLowerCase() === preset.hex.toLowerCase()
-                ? "border-lavender-700 ring-1 ring-lavender-500"
-                : "border-sand-300"
-            }`}
-            style={{ backgroundColor: preset.hex }}
-            onClick={() => onColorChange(preset.hex)}
-            title={preset.name}
-            aria-label={`Set color to ${preset.name}`}
-          />
-        ))}
-        <label
-          className="flex items-center gap-1 text-xs text-lavender-500"
-          title="Custom color"
+        <span className="mr-1 text-xs text-th-ink-muted">Tier:</span>
+        {SEMANTIC_TIERS.map((tier) => {
+          const tierColor = getChipColor(tier.key);
+          const isActive = option.semantic === tier.key;
+          return (
+            <button
+              key={tier.key}
+              type="button"
+              className={`flex items-center gap-1 rounded-sm border px-1.5 py-0.5 text-xs ${
+                isActive
+                  ? "border-th-primary ring-1 ring-th-primary"
+                  : "border-th-line hover:bg-th-paper-soft"
+              }`}
+              onClick={() => onSemanticChange(tier.key)}
+              title={`Theme-aware "${tier.label}" color`}
+              aria-label={`Set tier to ${tier.label}`}
+              aria-pressed={isActive}
+            >
+              <span
+                className="inline-block h-3 w-3 rounded-sm"
+                style={{ backgroundColor: tierColor.bg }}
+                aria-hidden="true"
+              />
+              {tier.label}
+            </button>
+          );
+        })}
+        <button
+          type="button"
+          className={`rounded-sm border px-1.5 py-0.5 text-xs ${
+            !hasSemantic
+              ? "border-th-primary ring-1 ring-th-primary"
+              : "border-th-line hover:bg-th-paper-soft"
+          }`}
+          onClick={() => onSemanticChange(undefined)}
+          title="Use a fixed custom color instead of a theme tier"
+          aria-label="Set to custom color"
+          aria-pressed={!hasSemantic}
         >
-          <input
-            type="color"
-            value={option.color}
-            onChange={(e) => onColorChange(e.target.value)}
-            className="h-5 w-5 cursor-pointer border-none bg-transparent p-0"
-            aria-label="Custom color"
-          />
-        </label>
+          Custom
+        </button>
       </div>
+      {/* Color presets — only shown when no semantic tier is selected */}
+      {!hasSemantic && (
+        <div className="flex flex-wrap items-center gap-1">
+          <span className="mr-1 text-xs text-th-ink-muted">Color:</span>
+          {PRESET_COLORS.map((preset) => (
+            <button
+              key={preset.hex}
+              type="button"
+              className={`h-5 w-5 rounded-sm border ${
+                option.color.toLowerCase() === preset.hex.toLowerCase()
+                  ? "border-th-primary ring-1 ring-th-primary"
+                  : "border-th-line"
+              }`}
+              style={{ backgroundColor: preset.hex }}
+              onClick={() => onColorChange(preset.hex)}
+              title={preset.name}
+              aria-label={`Set color to ${preset.name}`}
+            />
+          ))}
+          <label
+            className="flex items-center gap-1 text-xs text-th-ink-muted"
+            title="Custom color"
+          >
+            <input
+              type="color"
+              value={option.color}
+              onChange={(e) => onColorChange(e.target.value)}
+              className="h-5 w-5 cursor-pointer border-none bg-transparent p-0"
+              aria-label="Custom color"
+            />
+          </label>
+        </div>
+      )}
       {/* Icon picker */}
       <div className="flex flex-wrap items-center gap-1">
-        <span className="mr-1 text-xs text-lavender-500">Icon:</span>
+        <span className="mr-1 text-xs text-th-ink-muted">Icon:</span>
         {AVAILABLE_ICONS.map(({ key, label, Icon }) => (
           <button
             key={key}
             type="button"
             className={`flex h-6 w-6 items-center justify-center rounded-sm border ${
               (option.icon ?? "") === key || (!option.icon && key === "empty")
-                ? "border-lavender-700 bg-lavender-100 ring-1 ring-lavender-500"
-                : "border-sand-300 hover:bg-sand-100"
+                ? "border-th-primary bg-th-paper-soft ring-1 ring-th-primary"
+                : "border-th-line hover:bg-th-paper-soft"
             }`}
             onClick={() => onIconChange(key)}
             title={label}
@@ -81,7 +148,7 @@ function ColorIconPicker({
           >
             <Icon
               className="h-4 w-4"
-              style={{ color: option.color }}
+              style={{ color: displayColor }}
               aria-hidden="true"
             />
           </button>
@@ -96,6 +163,7 @@ export default function AnswerSchemaEditor({
   onChange,
   disabled = false,
 }: AnswerSchemaEditorProps) {
+  const { getChipColor } = useTheme();
   const [isExpanded, setIsExpanded] = useState(false);
   /** Index of the option row whose color/icon picker is open, or null. */
   const [pickerOpenIndex, setPickerOpenIndex] = useState<number | null>(null);
@@ -115,7 +183,7 @@ export default function AnswerSchemaEditor({
   const updateOption = (
     index: number,
     field: keyof AnswerOption,
-    value: string,
+    value: string | undefined,
   ) => {
     const updated = effectiveOptions.map((o, i) =>
       i === index ? { ...o, [field]: value } : o,
@@ -123,6 +191,7 @@ export default function AnswerSchemaEditor({
     // Auto-sync key from label when adding new options (only for non-default keys)
     if (
       field === "label" &&
+      typeof value === "string" &&
       !DEFAULT_ANSWER_OPTIONS.some(
         (d) => d.key === updated[index].key && d.label !== value,
       )
@@ -146,6 +215,7 @@ export default function AnswerSchemaEditor({
       shortLabel: "",
       color: "#888888",
       icon: "empty",
+      semantic: "misc",
     };
     const updated = [...effectiveOptions];
     updated.splice(updated.length - 1, 0, newOption);
@@ -174,29 +244,39 @@ export default function AnswerSchemaEditor({
     onChange(updated);
   };
 
+  /** Resolves the displayed swatch color for an option row. */
+  const getSwatchColor = (option: AnswerOption, isLast: boolean): string => {
+    if (option.semantic) return getChipColor(option.semantic).bg;
+    if (isLast) return getChipColor(undefined).bg;
+    return option.color;
+  };
+
   if (disabled) {
     return (
-      <div className="document-sheet mb-2 border border-sand-200 bg-sand-50 px-4 py-3">
-        <p className="text-sm font-semibold text-lavender-700">
+      <div className="document-sheet mb-2 border border-th-line bg-th-paper px-4 py-3">
+        <p className="text-sm font-semibold text-th-ink-muted">
           Answer Options
         </p>
         <div className="mt-2 flex flex-wrap gap-2">
-          {effectiveOptions.map((option) => (
-            <span
-              key={option.key}
-              className="inline-flex items-center gap-1 border border-sand-200 px-2 py-1 text-sm"
-            >
+          {effectiveOptions.map((option, index) => {
+            const isLast = index === effectiveOptions.length - 1;
+            return (
               <span
-                className="inline-block h-3 w-3 rounded-sm"
-                style={{ backgroundColor: option.color }}
-                aria-hidden="true"
-              />
-              {option.label}
-            </span>
-          ))}
+                key={option.key}
+                className="inline-flex items-center gap-1 border border-th-line px-2 py-1 text-sm"
+              >
+                <span
+                  className="inline-block h-3 w-3 rounded-sm"
+                  style={{ backgroundColor: getSwatchColor(option, isLast) }}
+                  aria-hidden="true"
+                />
+                {option.label}
+              </span>
+            );
+          })}
         </div>
         {isCustom && (
-          <p className="mt-1 text-xs text-lavender-500">
+          <p className="mt-1 text-xs text-th-ink-muted">
             Custom answer options are in use.
           </p>
         )}
@@ -205,11 +285,11 @@ export default function AnswerSchemaEditor({
   }
 
   return (
-    <div className="document-sheet mb-2 border border-sand-200 bg-sand-50 px-4 py-3">
+    <div className="document-sheet mb-2 border border-th-line bg-th-paper px-4 py-3">
       <div className="flex items-center justify-between">
         <button
           type="button"
-          className="text-sm font-semibold text-lavender-700 hover:text-lavender-900"
+          className="text-sm font-semibold text-th-ink-muted hover:text-th-ink"
           onClick={() => setIsExpanded(!isExpanded)}
         >
           Answer Options {isCustom ? "(custom)" : "(default)"}{" "}
@@ -218,7 +298,7 @@ export default function AnswerSchemaEditor({
         {!isCustom && !isExpanded && (
           <button
             type="button"
-            className="text-xs text-complement-700 hover:text-complement-900"
+            className="text-xs text-th-info hover:text-th-info"
             onClick={enableCustom}
           >
             Customize
@@ -230,13 +310,13 @@ export default function AnswerSchemaEditor({
         <div className="mt-3 space-y-2">
           {isCustom && (
             <div className="flex items-center justify-between">
-              <p className="text-xs text-lavender-500">
+              <p className="text-xs text-th-ink-muted">
                 The last option is always the default (unset) state. Drag or
                 reorder the rest.
               </p>
               <button
                 type="button"
-                className="text-xs text-danger-700 hover:text-danger-900"
+                className="text-xs text-th-danger hover:text-th-danger"
                 onClick={resetToDefaults}
               >
                 Reset to defaults
@@ -246,12 +326,12 @@ export default function AnswerSchemaEditor({
 
           {!isCustom && (
             <div className="flex items-center justify-between">
-              <p className="text-xs text-lavender-500">
+              <p className="text-xs text-th-ink-muted">
                 Currently using the built-in answer options.
               </p>
               <button
                 type="button"
-                className="text-xs text-complement-700 hover:text-complement-900"
+                className="text-xs text-th-info hover:text-th-info"
                 onClick={enableCustom}
               >
                 Customize
@@ -266,17 +346,19 @@ export default function AnswerSchemaEditor({
               return (
                 <div key={index} className="flex flex-col">
                   <div
-                    className={`flex items-center gap-2 border border-sand-200 px-2 py-1 ${isLast ? "bg-sand-100" : "bg-sand-50"}`}
+                    className={`flex items-center gap-2 border border-th-line px-2 py-1 ${isLast ? "bg-th-paper-soft" : "bg-th-paper"}`}
                   >
                     {/* Color swatch — click to toggle picker */}
                     <button
                       type="button"
                       className={`h-6 w-6 shrink-0 rounded-sm border ${
                         isPickerOpen
-                          ? "border-lavender-700 ring-1 ring-lavender-500"
-                          : "border-sand-300"
+                          ? "border-th-primary ring-1 ring-th-primary"
+                          : "border-th-line"
                       }`}
-                      style={{ backgroundColor: option.color }}
+                      style={{
+                        backgroundColor: getSwatchColor(option, isLast),
+                      }}
                       onClick={() =>
                         isCustom &&
                         setPickerOpenIndex(isPickerOpen ? null : index)
@@ -292,7 +374,7 @@ export default function AnswerSchemaEditor({
                         updateOption(index, "label", e.target.value)
                       }
                       placeholder="Label"
-                      className="min-w-0 flex-1 border-b border-sand-200 bg-transparent px-1 py-0.5 text-sm focus:outline-none"
+                      className="min-w-0 flex-1 border-b border-th-line bg-transparent px-1 py-0.5 text-sm focus:outline-none"
                       disabled={!isCustom}
                       aria-label="Answer label"
                     />
@@ -303,7 +385,7 @@ export default function AnswerSchemaEditor({
                         updateOption(index, "shortLabel", e.target.value)
                       }
                       placeholder="Short"
-                      className="w-16 border-b border-sand-200 bg-transparent px-1 py-0.5 text-sm focus:outline-none"
+                      className="w-16 border-b border-th-line bg-transparent px-1 py-0.5 text-sm focus:outline-none"
                       disabled={!isCustom}
                       aria-label="Short label"
                     />
@@ -345,13 +427,13 @@ export default function AnswerSchemaEditor({
                     )}
 
                     {isLast && (
-                      <span className="text-xs italic text-lavender-500">
+                      <span className="text-xs italic text-th-ink-muted">
                         default
                       </span>
                     )}
                   </div>
 
-                  {/* Inline color preset + icon picker */}
+                  {/* Inline semantic tier / color preset + icon picker */}
                   {isCustom && isPickerOpen && (
                     <ColorIconPicker
                       option={option}
@@ -359,6 +441,9 @@ export default function AnswerSchemaEditor({
                         updateOption(index, "color", color)
                       }
                       onIconChange={(icon) => updateOption(index, "icon", icon)}
+                      onSemanticChange={(semantic) =>
+                        updateOption(index, "semantic", semantic)
+                      }
                     />
                   )}
                 </div>
@@ -369,7 +454,7 @@ export default function AnswerSchemaEditor({
           {isCustom && (
             <button
               type="button"
-              className="flex items-center gap-1 text-xs text-complement-700 hover:text-complement-900"
+              className="flex items-center gap-1 text-xs text-th-info hover:text-th-info"
               onClick={addOption}
             >
               <PlusIcon className="h-3 w-3" aria-hidden="true" />

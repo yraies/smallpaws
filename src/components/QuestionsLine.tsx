@@ -95,7 +95,7 @@ function QuestionLine({
           title="Move question up"
         >
           <ArrowUpIcon
-            className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-lavender-500"
+            className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-th-ink-muted"
             aria-hidden="true"
           />
         </IconButton>
@@ -109,7 +109,7 @@ function QuestionLine({
           title="Move question down"
         >
           <ArrowDownIcon
-            className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-lavender-500"
+            className="h-4 w-4 transition-transform group-hover:scale-90 group-hover:text-th-ink-muted"
             aria-hidden="true"
           />
         </IconButton>
@@ -123,7 +123,7 @@ function QuestionLine({
           title="Delete question"
         >
           <TrashIcon
-            className="h-4 w-4 transition-transform group-hover:scale-75 group-hover:text-danger-500"
+            className="h-4 w-4 transition-transform group-hover:scale-75 group-hover:text-th-danger"
             aria-hidden="true"
           />
         </IconButton>

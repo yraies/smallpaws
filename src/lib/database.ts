@@ -265,11 +265,7 @@ export class FormStorage {
           updated_at = datetime('now')
       WHERE id = ?
     `);
-    stmt.run(
-      encryptStoredString("{}"),
-      encryptStoredString("[Deleted]"),
-      id,
-    );
+    stmt.run(encryptStoredString("{}"), encryptStoredString("[Deleted]"), id);
 
     // Also update form_meta to mark as deleted
     const metaStmt = db.prepare(`

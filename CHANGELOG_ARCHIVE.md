@@ -11,6 +11,21 @@ Normalization policy:
 
 ## Historical Rollup
 
+### Seasonal Theme System (Apr 2026)
+
+Replaced the hardcoded 5-family Tailwind palette with a semantic CSS custom property system enabling runtime theme switching across all components.
+
+- Defined 16 semantic `@theme` tokens (`th-paper`, `th-paper-soft`, `th-block`, `th-ink`, `th-ink-muted`, `th-line`, `th-primary`, `th-primary-hover`, `th-success`, `th-info`, `th-danger`, `th-danger-soft`) referencing CSS variables that change per theme.
+- Created four seasonal themes (Spring, Summer, Autumn, Winter) as `[data-theme]` CSS variable blocks, each with distinct visual character: Spring is warm botanical, Summer is sunlit citrus/coastal, Autumn is earthy harvest, Winter is luminous pastel.
+- Added `ThemeContext` with `themeId`/`setThemeId` and chip color helpers (`getChipColor(semantic)`) for future semantic answer option coloring.
+- Added `ThemeSelector` component: four colored swatch radio buttons placed below the "Garden Walk" brand in the global layout.
+- Flash-of-wrong-theme prevention via inline `<script>` in `<head>` that reads `localStorage` and sets `data-theme` on `<html>` synchronously before React hydrates.
+- Migrated all 18 UI components from hardcoded palette classes (`sand-*`, `lavender-*`, `pistachio-*`, `complement-*`, `danger-*`) to semantic `th-*` tokens.
+- Added `AnswerSemantic` type (`like`/`neutral`/`dislike`/`misc`) and `semantic` field to `AnswerOption` for future theme-aware answer chip coloring. Full custom-option rendering via theme colors is deferred.
+- Updated print CSS to use `th-*` class patterns instead of old palette selectors.
+- Removed unused `:root` CSS variables (`--paper`, `--paper-line`, `--plum`, `--paper-accent`, `--warning`, `--success`, `--info`).
+- Source feedback: F-021, F-024.
+
 ### Phase 0: Next.js Migration (Nov 2025)
 
 Migrated the entire React frontend to a fullstack Next.js 15 application with App Router.

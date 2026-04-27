@@ -73,12 +73,12 @@ const PasswordModal: React.FC<PasswordModalProps> = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby="password-modal-title"
-        className="w-full max-w-md bg-sand-50 p-6 border border-sand-200"
+        className="w-full max-w-md bg-th-paper p-6 border border-th-line"
       >
         {/* Header */}
         <div className="mb-4 flex items-center gap-3">
           <LockClosedIcon
-            className="h-6 w-6 text-lavender-500"
+            className="h-6 w-6 text-th-ink-muted"
             aria-hidden="true"
           />
           <div>
@@ -86,7 +86,7 @@ const PasswordModal: React.FC<PasswordModalProps> = ({
               {title ||
                 (mode === "set" ? "Password Protection" : "Enter Password")}
             </h2>
-            <p className="text-sm text-lavender-700">
+            <p className="text-sm text-th-ink-muted">
               {description ||
                 (mode === "set"
                   ? "Protect your form with a password"
@@ -103,7 +103,7 @@ const PasswordModal: React.FC<PasswordModalProps> = ({
                   type="checkbox"
                   checked={shouldEncrypt}
                   onChange={(e) => setShouldEncrypt(e.target.checked)}
-                  className="h-4 w-4 text-lavender-700"
+                  className="h-4 w-4"
                 />
                 <span className="text-sm font-medium">
                   {toggleLabel || "Enable password protection"}
@@ -118,7 +118,7 @@ const PasswordModal: React.FC<PasswordModalProps> = ({
               <div className="mb-4">
                 <label
                   htmlFor="modal-password"
-                  className="mb-2 block text-sm font-medium text-lavender-700"
+                  className="mb-2 block text-sm font-medium text-th-ink-muted"
                 >
                   Password
                 </label>
@@ -128,14 +128,14 @@ const PasswordModal: React.FC<PasswordModalProps> = ({
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full border border-sand-200 bg-sand-50 px-3 py-2 pr-10 focus:border-lavender-500 focus:outline-none focus:ring-1 focus:ring-lavender-500"
+                    className="w-full border border-th-line bg-th-paper px-3 py-2 pr-10 focus:border-th-primary focus:outline-none focus:ring-1 focus:ring-th-primary"
                     placeholder="Enter password"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-lavender-300 hover:text-lavender-700"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-th-line hover:text-th-ink"
                     aria-label={
                       showPassword ? "Hide password" : "Show password"
                     }
@@ -156,7 +156,7 @@ const PasswordModal: React.FC<PasswordModalProps> = ({
                 <div className="mb-4">
                   <label
                     htmlFor="modal-confirm-password"
-                    className="mb-2 block text-sm font-medium text-lavender-700"
+                    className="mb-2 block text-sm font-medium text-th-ink-muted"
                   >
                     Confirm Password
                   </label>
@@ -168,8 +168,8 @@ const PasswordModal: React.FC<PasswordModalProps> = ({
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       className={`w-full border px-3 py-2 pr-10 focus:outline-none focus:ring-1 ${
                         confirmPassword && !passwordsMatch
-                          ? "border-danger-300 focus:border-danger-500 focus:ring-danger-500"
-                          : "border-sand-200 focus:border-lavender-500 focus:ring-lavender-500"
+                          ? "border-th-danger focus:border-th-danger focus:ring-th-danger"
+                          : "border-th-line focus:border-th-primary focus:ring-th-primary"
                       }`}
                       placeholder="Confirm password"
                       required
@@ -177,7 +177,7 @@ const PasswordModal: React.FC<PasswordModalProps> = ({
                     <button
                       type="button"
                       onClick={() => setShowConfirm(!showConfirm)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-lavender-300 hover:text-lavender-700"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-th-line hover:text-th-ink"
                       aria-label={
                         showConfirm ? "Hide confirmation" : "Show confirmation"
                       }
@@ -190,7 +190,7 @@ const PasswordModal: React.FC<PasswordModalProps> = ({
                     </button>
                   </div>
                   {confirmPassword && !passwordsMatch && (
-                    <p className="mt-1 text-xs text-danger-700" role="alert">
+                    <p className="mt-1 text-xs text-th-danger" role="alert">
                       Passwords do not match
                     </p>
                   )}
@@ -204,14 +204,14 @@ const PasswordModal: React.FC<PasswordModalProps> = ({
             <button
               type="button"
               onClick={handleCancel}
-              className="border border-sand-200 px-4 py-2 text-sm font-medium text-lavender-700 hover:bg-sand-100 focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:ring-offset-2"
+              className="border border-th-line px-4 py-2 text-sm font-medium text-th-ink-muted hover:bg-th-paper-soft focus:outline-none focus:ring-2 focus:ring-th-primary focus:ring-offset-2"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={!canSubmit && (shouldEncrypt || mode === "enter")}
-              className="bg-lavender-700 px-4 py-2 text-sm font-medium text-white hover:bg-lavender-900 focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:ring-offset-2 disabled:bg-lavender-200 disabled:cursor-not-allowed"
+              className="bg-th-primary px-4 py-2 text-sm font-medium text-white hover:bg-th-primary-hover focus:outline-none focus:ring-2 focus:ring-th-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {mode === "set"
                 ? shouldEncrypt

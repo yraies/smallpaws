@@ -24,7 +24,7 @@ const Box: React.FC<BoxProps> = ({
   return (
     // biome-ignore lint/a11y/useAriaPropsSupportedByRole: role is always a valid landmark (e.g. "region") when aria-label is provided
     <div
-      className={`paper-panel flex w-full flex-col items-center gap-2 bg-[var(--accent-block)] p-2 text-white ${className}`}
+      className={`paper-panel flex w-full flex-col items-center gap-2 bg-th-block p-2 text-white ${className}`}
       role={role}
       aria-label={ariaLabel}
     >
@@ -49,7 +49,7 @@ const Box: React.FC<BoxProps> = ({
           </div>
         )}
       </header>
-      <div className="w-full bg-sand-50 p-1 text-lavender-900">{children}</div>
+      <div className="w-full bg-th-paper p-1 text-th-ink">{children}</div>
     </div>
   );
 };

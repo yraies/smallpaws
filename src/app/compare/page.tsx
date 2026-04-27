@@ -13,6 +13,7 @@ import DocumentPhaseNotice from "../../components/DocumentPhaseNotice";
 import EdgeActionButton from "../../components/EdgeActionButton";
 import LoadingState from "../../components/LoadingState";
 import PasswordModal from "../../components/PasswordModal";
+import { useTheme } from "../../contexts/ThemeContext";
 import { decryptFormData } from "../../lib/crypto";
 import {
   type AnswerOption,
@@ -21,27 +22,27 @@ import {
   getEffectiveAnswerOptions,
   getUnsetKey,
 } from "../../types/Form";
+import { getCompareIdentity } from "../../utils/compareIdentity";
 import {
   buildComparison,
   type ComparisonEntry,
   type ComparisonResult,
 } from "../../utils/compareLogic";
-import { printCurrentView } from "../../utils/formActions";
 import {
   createCompareSession,
   loadCompareSession,
   removeCompareSession,
   saveCompareSession,
 } from "../../utils/compareSession";
+import { printCurrentView } from "../../utils/formActions";
 import {
   computeStructureFingerprint,
   loadRecentForms,
   loadRecentSharedForms,
-  replaceRecentSharedForms,
   type RecentItemMeta,
   type RecentSharedFormMeta,
+  replaceRecentSharedForms,
 } from "../../utils/recentForms";
-import { getCompareIdentity } from "../../utils/compareIdentity";
 
 // ── Types ──
 
@@ -55,7 +56,10 @@ function getFormLabel(form: Form, fallbackName: string): string {
   );
 }
 
-function getSuggestionPrimaryLabel(name: string, respondentName?: string): string {
+function getSuggestionPrimaryLabel(
+  name: string,
+  respondentName?: string,
+): string {
   return respondentName?.trim() || name;
 }
 
@@ -63,14 +67,19 @@ function getLocalCompareIdentity(item: RecentItemMeta): string {
   return item.compareIdentity ?? getCompareIdentity(item.id);
 }
 
-function getSharedCompareIdentity(item: RecentSharedFormMeta): string | undefined {
-  const legacyFormId = (item as RecentSharedFormMeta & { formId?: string }).formId;
+function getSharedCompareIdentity(
+  item: RecentSharedFormMeta,
+): string | undefined {
+  const legacyFormId = (item as RecentSharedFormMeta & { formId?: string })
+    .formId;
   if (item.compareIdentity) return item.compareIdentity;
   if (legacyFormId) return getCompareIdentity(legacyFormId);
   return undefined;
 }
 
-function stripLegacySharedFields(item: RecentSharedFormMeta): RecentSharedFormMeta {
+function stripLegacySharedFields(
+  item: RecentSharedFormMeta,
+): RecentSharedFormMeta {
   const { formId: _legacyFormId, ...rest } = item as RecentSharedFormMeta & {
     formId?: string;
   };
@@ -119,7 +128,7 @@ function upsertLoadedForm(prev: LoadedForm[], next: LoadedForm): LoadedForm[] {
 async function loadLocalPublishedForm(
   formId: string,
 ): Promise<
-  { form: Form; name: string; encrypted: boolean; compareIdentity: string }
+  | { form: Form; name: string; encrypted: boolean; compareIdentity: string }
   | string
 > {
   const res = await fetch(`/api/forms/${formId}`);
@@ -135,9 +144,7 @@ async function loadLocalPublishedForm(
   };
 }
 
-async function loadSharedForm(
-  shareId: string,
-): Promise<
+async function loadSharedForm(shareId: string): Promise<
   | { form: Form; name: string; encrypted: false; compareIdentity: string }
   | {
       requiresPassword: true;
@@ -205,18 +212,30 @@ function SelectionCell({
   selectionKey: string;
   answerOptions: AnswerOption[] | undefined;
 }) {
+  const { getChipColor } = useTheme();
   const options = getEffectiveAnswerOptions(answerOptions);
   const unsetKey = getUnsetKey(answerOptions);
   const option =
     options.find((o) => o.key === selectionKey) ?? options[options.length - 1];
   const isUnset = selectionKey === unsetKey;
 
+  // Resolve colors: prefer theme-derived semantic colors, fall back to raw option.color
+  const chipColor = option.semantic
+    ? getChipColor(option.semantic)
+    : isUnset
+      ? getChipColor(undefined)
+      : null;
+  const bgColor = chipColor ? chipColor.bg : option.color;
+  const textColor = chipColor ? chipColor.text : "#ffffff";
+
   return (
     <span
       className={`inline-block rounded-sm px-2 py-0.5 text-xs font-semibold ${
-        isUnset ? "bg-sand-100 text-lavender-500" : "text-white"
+        isUnset ? "bg-th-paper-soft text-th-ink-muted" : ""
       }`}
-      style={isUnset ? undefined : { backgroundColor: option.color }}
+      style={
+        isUnset ? undefined : { backgroundColor: bgColor, color: textColor }
+      }
       title={option.label}
     >
       {option.shortLabel}
@@ -236,17 +255,17 @@ function ComparisonTable({
       {result.categories.map((cat) => (
         <section
           key={cat.categoryId}
-          className="paper-panel border border-sand-200"
+          className="paper-panel border border-th-line"
           aria-label={`${cat.categoryName} comparison`}
         >
-          <div className="bg-[var(--accent-block)] px-3 py-2">
+          <div className="bg-th-block px-3 py-2">
             <h2 className="small-caps text-lg font-semibold tracking-widest text-white">
               {cat.categoryName}
             </h2>
           </div>
-          <div className="bg-sand-50 p-1">
+          <div className="bg-th-paper p-1">
             {/* Header row */}
-            <div className="flex items-center gap-2 border-b border-sand-200 px-2 py-1.5 text-xs font-semibold text-lavender-700">
+            <div className="flex items-center gap-2 border-b border-th-line px-2 py-1.5 text-xs font-semibold text-th-ink-muted">
               <span className="min-w-0 flex-1">Question</span>
               {labels.map((label) => (
                 <span
@@ -315,7 +334,9 @@ function FormSelector({
       const sharedItems = loadRecentSharedForms(localStorage);
       setRecentShared(sharedItems);
 
-      const staleSharedItems = sharedItems.filter((item) => !item.compareIdentity);
+      const staleSharedItems = sharedItems.filter(
+        (item) => !item.compareIdentity,
+      );
       if (staleSharedItems.length === 0) return;
 
       void (async () => {
@@ -373,9 +394,7 @@ function FormSelector({
     () =>
       recentLocal.filter(
         (item) =>
-          item.kind === "form" &&
-          item.phase === "published" &&
-          !item.encrypted,
+          item.kind === "form" && item.phase === "published" && !item.encrypted,
       ),
     [recentLocal],
   );
@@ -409,7 +428,8 @@ function FormSelector({
 
   const availableShared = dedupedShared.filter((item) => {
     const compareIdentity = getSharedCompareIdentity(item);
-    if (compareIdentity && existingCanonicalIds.has(compareIdentity)) return false;
+    if (compareIdentity && existingCanonicalIds.has(compareIdentity))
+      return false;
     if (compareIdentity && localCanonicalIds.has(compareIdentity)) return false;
     if (
       activeFingerprint &&
@@ -425,8 +445,8 @@ function FormSelector({
     availableLocal.length > 0 || availableShared.length > 0;
 
   return (
-    <div className="document-sheet mb-3 border border-sand-200 bg-sand-50 px-4 py-3">
-      <p className="mb-2 text-sm font-semibold text-lavender-700">
+    <div className="document-sheet mb-3 border border-th-line bg-th-paper px-4 py-3">
+      <p className="mb-2 text-sm font-semibold text-th-ink-muted">
         Add forms to compare
       </p>
 
@@ -434,7 +454,7 @@ function FormSelector({
       <div className="mb-3">
         <label
           htmlFor="share-url-input"
-          className="mb-1 block text-xs text-lavender-500"
+          className="mb-1 block text-xs text-th-ink-muted"
         >
           Paste a share link or share ID
         </label>
@@ -449,11 +469,11 @@ function FormSelector({
             }}
             onKeyDown={(e) => e.key === "Enter" && handleAddShare()}
             placeholder="https://...share/... or share ID"
-            className="min-w-0 flex-1 border-b border-sand-200 bg-transparent px-1 py-0.5 text-sm focus:outline-none"
+            className="min-w-0 flex-1 border-b border-th-line bg-transparent px-1 py-0.5 text-sm focus:outline-none"
           />
           <button
             type="button"
-            className="flex items-center gap-1 text-xs text-complement-700 hover:text-complement-900"
+            className="flex items-center gap-1 text-xs text-th-info hover:text-th-info"
             onClick={handleAddShare}
           >
             <PlusIcon className="h-3 w-3" aria-hidden="true" />
@@ -461,14 +481,14 @@ function FormSelector({
           </button>
         </div>
         {shareError && (
-          <p className="mt-1 text-xs text-danger-700">{shareError}</p>
+          <p className="mt-1 text-xs text-th-danger">{shareError}</p>
         )}
       </div>
 
       {/* Recently viewed forms */}
       {hasAnySuggestions && (
         <div>
-          <p className="mb-1 text-xs text-lavender-500">
+          <p className="mb-1 text-xs text-th-ink-muted">
             Or add from forms you've viewed in this browser
             {activeFingerprint ? " (showing compatible forms)" : ""}
           </p>
@@ -477,15 +497,16 @@ function FormSelector({
               <button
                 key={`local:${item.id}`}
                 type="button"
-                className="flex flex-col items-start gap-0.5 border border-sand-200 bg-sand-50 px-2 py-1 text-left text-xs text-lavender-700 hover:bg-sand-100"
+                className="flex flex-col items-start gap-0.5 border border-th-line bg-th-paper px-2 py-1 text-left text-xs text-th-ink-muted hover:bg-th-paper-soft"
                 onClick={() => onAddLocal(item.id)}
               >
                 <span className="flex items-center gap-1 font-semibold">
                   <PlusIcon className="h-3 w-3" aria-hidden="true" />
                   {getSuggestionPrimaryLabel(item.name, item.respondentName)}
                 </span>
-                {(item.templateName || (item.respondentName ? item.name : undefined)) && (
-                  <span className="text-[11px] text-lavender-500">
+                {(item.templateName ||
+                  (item.respondentName ? item.name : undefined)) && (
+                  <span className="text-[11px] text-th-ink-muted">
                     {item.templateName || item.name}
                   </span>
                 )}
@@ -495,7 +516,7 @@ function FormSelector({
               <button
                 key={`share:${item.shareId}`}
                 type="button"
-                className="flex flex-col items-start gap-0.5 border border-sand-200 bg-sand-50 px-2 py-1 text-left text-xs text-lavender-700 hover:bg-sand-100"
+                className="flex flex-col items-start gap-0.5 border border-th-line bg-th-paper px-2 py-1 text-left text-xs text-th-ink-muted hover:bg-th-paper-soft"
                 onClick={() => onAddShare(item.shareId)}
               >
                 <span className="flex items-center gap-1 font-semibold">
@@ -503,7 +524,7 @@ function FormSelector({
                   {getSuggestionPrimaryLabel(item.name, item.respondentName)}
                 </span>
                 {item.templateName && (
-                  <span className="text-[11px] text-lavender-500">
+                  <span className="text-[11px] text-th-ink-muted">
                     {item.templateName}
                   </span>
                 )}
@@ -525,7 +546,9 @@ function ComparePageContent() {
   const [loadedForms, setLoadedForms] = React.useState<LoadedForm[]>([]);
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-  const [localSessionId, setLocalSessionId] = React.useState<string | null>(null);
+  const [localSessionId, setLocalSessionId] = React.useState<string | null>(
+    null,
+  );
   const [hasHydratedUrlState, setHasHydratedUrlState] = React.useState(false);
   const [pendingPassword, setPendingPassword] =
     React.useState<PendingPassword | null>(null);
@@ -545,7 +568,9 @@ function ComparePageContent() {
           setError(result);
           return;
         }
-        if (loadedForms.some((f) => f.compareIdentity === result.compareIdentity)) {
+        if (
+          loadedForms.some((f) => f.compareIdentity === result.compareIdentity)
+        ) {
           if (!options?.silentDuplicate) {
             setError("This form is already in the comparison");
           }
@@ -581,7 +606,11 @@ function ComparePageContent() {
           return;
         }
         if ("requiresPassword" in result) {
-          if (loadedForms.some((f) => f.compareIdentity === result.compareIdentity)) {
+          if (
+            loadedForms.some(
+              (f) => f.compareIdentity === result.compareIdentity,
+            )
+          ) {
             if (!options?.silentDuplicate) {
               setError("This form is already in the comparison");
             }
@@ -594,7 +623,9 @@ function ComparePageContent() {
           });
           return;
         }
-        if (loadedForms.some((f) => f.compareIdentity === result.compareIdentity)) {
+        if (
+          loadedForms.some((f) => f.compareIdentity === result.compareIdentity)
+        ) {
           if (!options?.silentDuplicate) {
             setError("This form is already in the comparison");
           }
@@ -759,7 +790,8 @@ function ComparePageContent() {
     const bySource = loadedForms.map((f, i) => {
       if ((counts.get(rawLabels[i]) ?? 0) <= 1) return rawLabels[i];
       const hasMixedSources = loadedForms.some(
-        (other, j) => j !== i && other.label === rawLabels[i] && other.source !== f.source,
+        (other, j) =>
+          j !== i && other.label === rawLabels[i] && other.source !== f.source,
       );
       if (!hasMixedSources) return rawLabels[i];
       return `${rawLabels[i]} (${f.source === "share" ? "shared" : "local"})`;
@@ -825,7 +857,7 @@ function ComparePageContent() {
           title="Home"
           aria-label="Go home"
         >
-          <HomeIcon className="h-6 w-6 text-lavender-700 hover:text-lavender-900" />
+          <HomeIcon className="h-6 w-6 text-th-ink hover:text-th-ink" />
         </button>
 
         {comparison && (
@@ -846,7 +878,7 @@ function ComparePageContent() {
             Compare Forms
           </h2>
           {templateTitle && (
-            <p className="mt-1 text-sm text-lavender-500">{templateTitle}</p>
+            <p className="mt-1 text-sm text-th-ink-muted">{templateTitle}</p>
           )}
         </div>
       </div>
@@ -873,21 +905,21 @@ function ComparePageContent() {
 
       {/* Loaded forms list */}
       {loadedForms.length > 0 && (
-        <div className="document-sheet mb-3 border border-sand-200 bg-sand-50 px-4 py-3 print:hidden">
-          <p className="mb-2 text-sm font-semibold text-lavender-700">
+        <div className="document-sheet mb-3 border border-th-line bg-th-paper px-4 py-3 print:hidden">
+          <p className="mb-2 text-sm font-semibold text-th-ink-muted">
             Forms in comparison ({loadedForms.length})
           </p>
           <div className="flex flex-wrap gap-2">
             {loadedForms.map((f, i) => (
               <span
                 key={f.id}
-                className="inline-flex items-center gap-1 border border-sand-200 bg-sand-50 px-2 py-1 text-sm"
+                className="inline-flex items-center gap-1 border border-th-line bg-th-paper px-2 py-1 text-sm"
               >
                 {displayLabels[i]}
                 <button
                   type="button"
                   onClick={() => removeForm(i)}
-                  className="ml-1 text-danger-500 hover:text-danger-700"
+                  className="ml-1 text-th-danger hover:text-th-danger"
                   title={`Remove ${displayLabels[i]}`}
                   aria-label={`Remove ${displayLabels[i]} from comparison`}
                 >
@@ -911,7 +943,7 @@ function ComparePageContent() {
 
       {/* Error display */}
       {error && (
-        <div className="mb-3 border border-danger-300 bg-danger-50 px-4 py-2 text-sm text-danger-700 print:hidden">
+        <div className="mb-3 border border-th-danger bg-th-danger-soft px-4 py-2 text-sm text-th-danger print:hidden">
           {error}
           <button
             type="button"
@@ -948,7 +980,7 @@ function ComparePageContent() {
 
       {/* Not enough forms message */}
       {loadedForms.length < 2 && !isLoading && (
-        <div className="mb-3 text-center text-sm text-lavender-500 print:hidden">
+        <div className="mb-3 text-center text-sm text-th-ink-muted print:hidden">
           {loadedForms.length === 0
             ? "Add at least 2 forms to start comparing."
             : "Add one more form to start comparing."}
@@ -957,7 +989,7 @@ function ComparePageContent() {
 
       {/* Compatibility warning */}
       {comparison && !comparison.isCompatible && (
-        <div className="mb-3 border border-danger-300 bg-danger-50 px-4 py-2 text-sm text-danger-700">
+        <div className="mb-3 border border-th-danger bg-th-danger-soft px-4 py-2 text-sm text-th-danger">
           These forms don't share any questions. They may not be from the same
           template.
         </div>
@@ -966,7 +998,7 @@ function ComparePageContent() {
       {/* Compatibility info */}
       {comparison?.isCompatible &&
         comparison.overlapCount < comparison.totalQuestionCount && (
-          <div className="mb-3 border border-sand-300 bg-sand-50 px-4 py-2 text-sm text-sand-700 print:hidden">
+          <div className="mb-3 border border-th-line bg-th-paper px-4 py-2 text-sm text-th-ink-muted print:hidden">
             {comparison.overlapCount} of {comparison.totalQuestionCount}{" "}
             questions overlap across all forms. Non-overlapping questions show
             as unanswered for forms that don't have them.
@@ -975,10 +1007,7 @@ function ComparePageContent() {
 
       {/* Comparison table */}
       {comparison?.isCompatible && (
-        <ComparisonTable
-          result={comparison}
-          labels={displayLabels}
-        />
+        <ComparisonTable result={comparison} labels={displayLabels} />
       )}
     </>
   );

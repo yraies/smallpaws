@@ -1,9 +1,9 @@
 import {
+  type AnswerOption,
   Category,
   Form,
   getUnsetKey,
   Question,
-  type AnswerOption,
 } from "../Form";
 
 const CUSTOM_OPTIONS: AnswerOption[] = [

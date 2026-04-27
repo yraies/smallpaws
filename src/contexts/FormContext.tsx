@@ -9,6 +9,7 @@ import {
   useState,
 } from "react";
 import { Form } from "../types/Form";
+import { getCompareIdentity } from "../utils/compareIdentity";
 import {
   computeStructureFingerprint,
   hasLocalDraft,
@@ -17,7 +18,6 @@ import {
   saveLocalDraft,
   saveRecentFormMeta,
 } from "../utils/recentForms";
-import { getCompareIdentity } from "../utils/compareIdentity";
 import { consumePendingFormDraft } from "../utils/templateLifecycle";
 
 type FormContextType = {

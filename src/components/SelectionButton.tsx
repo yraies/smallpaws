@@ -11,6 +11,7 @@ import {
 import dynamic from "next/dynamic";
 import type React from "react";
 import { useDisplayPreferences } from "../contexts/DisplayPreferencesContext";
+import { useTheme } from "../contexts/ThemeContext";
 import {
   type AnswerOption,
   getEffectiveAnswerOptions,
@@ -69,6 +70,7 @@ const ICON_MAP: Record<string, IconComponent> = Object.fromEntries(
 const LEGACY_KEY_TO_ICON: Record<string, string> = {
   must: "exclamation",
   like: "check",
+  open: "thumbsup",
   maybe: "question",
   off_limits: "minus",
   unset: "empty",
@@ -105,6 +107,7 @@ const SelectionButtonComponent: React.FC<SelectionButtonProps> = ({
   answerOptions,
 }) => {
   const { showIcon } = useDisplayPreferences();
+  const { getChipColor } = useTheme();
   const options = getEffectiveAnswerOptions(answerOptions);
   const unsetKey = getUnsetKey(answerOptions);
 
@@ -113,6 +116,16 @@ const SelectionButtonComponent: React.FC<SelectionButtonProps> = ({
 
   const Icon = getIconForOption(option);
   const isSelected = selection !== unsetKey;
+
+  // Resolve colors: prefer theme-derived semantic colors, fall back to raw option.color
+  const isUnset = selection === unsetKey;
+  const chipColor = option.semantic
+    ? getChipColor(option.semantic)
+    : isUnset
+      ? getChipColor(undefined)
+      : null;
+  const bgColor = chipColor ? chipColor.bg : option.color;
+  const textColor = chipColor ? chipColor.text : "#ffffff";
 
   // Icon button rendering
   if (showIcon) {
@@ -130,7 +143,7 @@ const SelectionButtonComponent: React.FC<SelectionButtonProps> = ({
       >
         <Icon
           className={`${className}`}
-          style={{ color: option.color }}
+          style={{ color: bgColor }}
           aria-hidden="true"
         />
       </button>
@@ -141,7 +154,7 @@ const SelectionButtonComponent: React.FC<SelectionButtonProps> = ({
   return (
     <button
       type="button"
-      className={`selection-button h-8 w-16 cursor-pointer font-extrabold text-white ${className} ${disabled ? "cursor-not-allowed" : ""}`}
+      className={`selection-button h-8 w-16 cursor-pointer font-extrabold ${className} ${disabled ? "cursor-not-allowed" : ""}`}
       onClick={disabled ? undefined : onClick}
       title={option.label}
       disabled={disabled}
@@ -149,7 +162,7 @@ const SelectionButtonComponent: React.FC<SelectionButtonProps> = ({
       aria-pressed={isSelected}
       data-selected={isSelected}
       data-label={option.shortLabel}
-      style={{ backgroundColor: option.color }}
+      style={{ backgroundColor: bgColor, color: textColor }}
     >
       {option.shortLabel}
     </button>

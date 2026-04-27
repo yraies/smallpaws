@@ -27,7 +27,10 @@ describe("compare session storage", () => {
 
     const sessionId = createCompareSession(storage, ["form_a", "form_b"]);
 
-    expect(loadCompareSession(storage, sessionId)).toEqual(["form_a", "form_b"]);
+    expect(loadCompareSession(storage, sessionId)).toEqual([
+      "form_a",
+      "form_b",
+    ]);
   });
 
   test("updates an existing compare session", () => {
@@ -36,7 +39,10 @@ describe("compare session storage", () => {
     const sessionId = createCompareSession(storage, ["form_a"]);
     saveCompareSession(storage, sessionId, ["form_b", "form_c"]);
 
-    expect(loadCompareSession(storage, sessionId)).toEqual(["form_b", "form_c"]);
+    expect(loadCompareSession(storage, sessionId)).toEqual([
+      "form_b",
+      "form_c",
+    ]);
   });
 
   test("removes a compare session", () => {

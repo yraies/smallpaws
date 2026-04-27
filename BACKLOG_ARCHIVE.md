@@ -4,6 +4,10 @@ This file stores completed, cancelled, and superseded backlog items.
 
 ## done
 
+### Seasonal Theme System (Apr 2026)
+
+- **B-050** — Four seasonal color themes with global theme switcher (F-021, F-024). Replaced hardcoded palette families with semantic CSS custom properties, created Spring/Summer/Autumn/Winter themes with distinct visual character, added ThemeContext with localStorage persistence, ThemeSelector UI, flash-of-wrong-theme prevention, and migrated all 18 UI components to semantic `th-*` tokens. Added `AnswerSemantic` type for future theme-aware answer chip coloring (full integration deferred).
+
 ### Standalone Features (Apr 2026)
 
 - **B-033** — Multi-form comparison view (REQ-28). Users can compare 2 or more published forms side by side on `/compare`. Forms from the same template are aligned by matching category/question TypeIDs. The comparison shows raw answers side by side without automated agreement scoring. Supports adding forms via share links (with password handling for encrypted forms) or from recent published/shared forms. Entry points: "Compare" button on published form pages, shared form pages, and home page. Client-side only; no server-side parent-template tracking.

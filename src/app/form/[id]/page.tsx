@@ -23,12 +23,12 @@ import {
   hashPassword,
 } from "../../../lib/crypto";
 import { Form, type FormPOJO } from "../../../types/Form";
+import { getCompareIdentity } from "../../../utils/compareIdentity";
 import {
   computeStructureFingerprint,
   removeLocalDraft,
   saveRecentFormMeta,
 } from "../../../utils/recentForms";
-import { getCompareIdentity } from "../../../utils/compareIdentity";
 
 function FormPageContent() {
   const { form, setForm } = useFormContext();

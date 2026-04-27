@@ -2,11 +2,30 @@ import { TypeID, typeid } from "typeid-js";
 
 enum Selection {
   MUST_HAVE = "must",
-  WOULD_LIKE = "like",
+  LIKE = "like",
+  OPEN_TO_IT = "open",
   MAYBE = "maybe",
   OFF_LIMITS = "off_limits",
   UNSET = "unset",
 }
+
+/**
+ * Semantic tier for answer options. Used by the seasonal theme system
+ * to provide appropriate colors for each answer state.
+ * - "must": strong positive / essential answers
+ * - "like": moderate positive / affirmative answers
+ * - "neutral": no strong opinion either way
+ * - "maybe": uncertain / slight hesitation
+ * - "dislike": negative / boundary answers
+ * - "misc": special / attention-needed answers
+ */
+export type AnswerSemantic =
+  | "must"
+  | "like"
+  | "neutral"
+  | "maybe"
+  | "dislike"
+  | "misc";
 
 /**
  * Defines one answer option in a template-wide answer schema.
@@ -16,9 +35,12 @@ export type AnswerOption = {
   key: string;
   label: string;
   shortLabel: string;
+  /** Fallback color hex used when no theme is active or no semantic tier is set. */
   color: string;
   /** Optional icon identifier. See AVAILABLE_ICONS in AnswerSchemaEditor. */
   icon?: string;
+  /** Semantic tier for theme-aware coloring. */
+  semantic?: AnswerSemantic;
 };
 
 /**
@@ -41,7 +63,7 @@ export const PRESET_COLORS: { name: string; hex: string }[] = [
   { name: "Grey", hex: "#908A82" },
 ];
 
-/** The built-in default answer options matching the original Selection enum. */
+/** The built-in default answer options: a 5-point scale from strong positive to hard boundary. */
 export const DEFAULT_ANSWER_OPTIONS: AnswerOption[] = [
   {
     key: "must",
@@ -49,20 +71,31 @@ export const DEFAULT_ANSWER_OPTIONS: AnswerOption[] = [
     shortLabel: "Must",
     color: "#8d4f3f",
     icon: "exclamation",
+    semantic: "must",
   },
   {
     key: "like",
-    label: "Would Like",
+    label: "Like",
     shortLabel: "Like",
     color: "#7c4f73",
     icon: "check",
+    semantic: "like",
+  },
+  {
+    key: "open",
+    label: "Open to It",
+    shortLabel: "Open",
+    color: "#6a9878",
+    icon: "thumbsup",
+    semantic: "neutral",
   },
   {
     key: "maybe",
     label: "Maybe",
     shortLabel: "Maybe",
-    color: "#c69055",
+    color: "#c6a055",
     icon: "question",
+    semantic: "maybe",
   },
   {
     key: "off_limits",
@@ -70,6 +103,7 @@ export const DEFAULT_ANSWER_OPTIONS: AnswerOption[] = [
     shortLabel: "Limit",
     color: "#aa6c67",
     icon: "minus",
+    semantic: "dislike",
   },
   {
     key: "unset",
@@ -184,8 +218,10 @@ class Question {
   static nextSelection(selection: Selection): Selection {
     switch (selection) {
       case Selection.MUST_HAVE:
-        return Selection.WOULD_LIKE;
-      case Selection.WOULD_LIKE:
+        return Selection.LIKE;
+      case Selection.LIKE:
+        return Selection.OPEN_TO_IT;
+      case Selection.OPEN_TO_IT:
         return Selection.MAYBE;
       case Selection.MAYBE:
         return Selection.OFF_LIMITS;
@@ -499,13 +535,14 @@ class Form {
     return new Form("Test Form", [
       Category.new("First Category", [
         Question.new("Must Have Question").withSelection(Selection.MUST_HAVE),
-        Question.new("Would Like Question").withSelection(Selection.WOULD_LIKE),
+        Question.new("Like Question").withSelection(Selection.LIKE),
+        Question.new("Open to It Question").withSelection(Selection.OPEN_TO_IT),
         Question.new("Maybe Question").withSelection(Selection.MAYBE),
         Question.new("Off Limits Question").withSelection(Selection.OFF_LIMITS),
       ]),
       Category.new("Second Category", [
         Question.new("First Question").withSelection(Selection.MUST_HAVE),
-        Question.new("Second Question").withSelection(Selection.WOULD_LIKE),
+        Question.new("Second Question").withSelection(Selection.LIKE),
         Question.new("Third Question").withSelection(Selection.MAYBE),
       ]),
     ]);

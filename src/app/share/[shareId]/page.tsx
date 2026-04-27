@@ -263,7 +263,10 @@ function SharedFormPageContent() {
     if (!form) return;
 
     const newTemplateId = typeid("template").toString();
-    setPendingTemplateDraft(createTemplateDraftFromStructure(form), newTemplateId);
+    setPendingTemplateDraft(
+      createTemplateDraftFromStructure(form),
+      newTemplateId,
+    );
     router.push(`/template/${newTemplateId}`);
   };
 

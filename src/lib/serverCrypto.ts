@@ -1,4 +1,9 @@
-import { createCipheriv, createDecipheriv, createHash, randomBytes } from "node:crypto";
+import {
+  createCipheriv,
+  createDecipheriv,
+  createHash,
+  randomBytes,
+} from "node:crypto";
 
 const ENCRYPTION_PREFIX = "gwenc:v1:";
 const DEV_FALLBACK_KEY = "garden-walk-dev-master-key";
@@ -20,7 +25,10 @@ function getMasterKey(): Buffer {
 export function encryptStoredString(value: string): string {
   const iv = randomBytes(12);
   const cipher = createCipheriv("aes-256-gcm", getMasterKey(), iv);
-  const encrypted = Buffer.concat([cipher.update(value, "utf8"), cipher.final()]);
+  const encrypted = Buffer.concat([
+    cipher.update(value, "utf8"),
+    cipher.final(),
+  ]);
   const tag = cipher.getAuthTag();
 
   return `${ENCRYPTION_PREFIX}${Buffer.from(
@@ -38,7 +46,9 @@ export function decryptStoredString(value: string): string {
   }
 
   const payload = JSON.parse(
-    Buffer.from(value.slice(ENCRYPTION_PREFIX.length), "base64").toString("utf8"),
+    Buffer.from(value.slice(ENCRYPTION_PREFIX.length), "base64").toString(
+      "utf8",
+    ),
   ) as {
     iv: string;
     tag: string;

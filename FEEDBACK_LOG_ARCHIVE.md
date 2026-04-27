@@ -36,6 +36,21 @@ Required fields for new entries:
 
 ## Entries
 
+### F-024 (2026-04-27) - Theme work should start as a standalone concept page
+
+- **Date**: 2026-04-27
+- **Source**: Stakeholder chat
+- **Exact Quote**: "afterwards please make a concept regarding theming. I dont want you to change the main app yet. instead please create a tiny static page which showcases the color schemes/themes."
+- **Normalized Intent**: Theming exploration should start as an isolated concept artifact rather than direct integration into the main application. Create a small static page that showcases candidate color schemes/themes first.
+- **Feedback**: Do not apply theme changes to the main app yet. Use a standalone preview surface to compare theme concepts before choosing an integration direction.
+- **Action taken**: Added a standalone `/theme-preview` page that showcases four seasonal theme concepts with sample document surfaces, answer chips, and semantic side-rail button colors, without changing the main app flow.
+- **Follow-up (2026-04-27):** Stakeholder clarified, "I missing more colors for the answers. which fit the theme. also: summer and winter feel too samey. In general the color schemes look like the seasons all fit with each other, instead I would have expected them to diverge more, with more significant indiviudal characteristics."
+- **Normalized Intent (follow-up)**: The theme preview should show a richer answer-state palette, and the seasonal concepts should diverge more strongly in personality and visual character. Summer and winter in particular should not read as near-neighbors.
+- **Action taken (follow-up)**: Expanded each preview theme to show a fuller answer palette, increased seasonal separation in page/paper/ink/block/semantic colors, and pushed summer toward sunlit citrus/coastal warmth while making winter colder, sharper, and more severe.
+- **Follow-up (2026-04-27):** Stakeholder approved direction with two refinements: "I would suggest the delete/destruct button in spring to be more reddish instead of pink (think tulips?). Winter should also be more pastel and light."
+- **Normalized Intent (follow-up):** Spring's danger/destructive color should be a warm red (tulip red) rather than a soft pink. Winter should shift from dark/severe to pastel and light.
+- **Action taken (follow-up):** Changed Spring danger from `#d68da2` (pink) to `#c24040` (tulip red) for both the delete button and Off Limits chip. Lightened Winter's entire palette: raised page/paper backgrounds, softened ink, and shifted all accent/chip/semantic colors to pastel tones. Updated character from "nocturnal / severe" to "luminous / gentle."
+
 ### F-023 (2026-04-24) - Form identity: respondent name, template name, comparison UX, recently viewed shared forms
 
 - **Date**: 2026-04-24

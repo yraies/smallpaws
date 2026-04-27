@@ -14,6 +14,7 @@ Detailed historical notes are preserved in `CHANGELOG_ARCHIVE.md`.
 
 ### Added
 
+- Four seasonal color themes (Spring, Summer, Autumn, Winter) selectable via a global theme switcher below the "Garden Walk" brand. Theme persists in browser localStorage with flash-free hydration. All UI components use semantic color tokens that resolve per theme.
 - Recent forms now persist entirely via browser storage metadata, including published-form recents without storing published plaintext locally.
 - Screen reader users can now navigate the app with proper ARIA landmarks, dialog roles on modals, labeled form inputs, status announcements for loading states, and live error regions.
 - Template creators can now define custom answer options (label, short label, color) that apply to all questions in a template. Custom options carry into forms and exports. Built-in defaults are used when no custom options are set.
@@ -24,6 +25,7 @@ Detailed historical notes are preserved in `CHANGELOG_ARCHIVE.md`.
 
 ### Changed
 
+- The entire UI color system now uses semantic CSS custom properties (`th-paper`, `th-ink`, `th-primary`, `th-danger`, etc.) instead of hardcoded Tailwind palette families, enabling runtime theme switching across all components.
 - Stored form and template names plus payloads are now encrypted at rest by default before reaching SQLite, while optional user-password protection remains available as an additional inner layer.
 
 - App renamed from "Small Paws" to "Garden Walk" across all user-facing surfaces, documentation, and technical identifiers.

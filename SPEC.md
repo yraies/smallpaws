@@ -27,6 +27,7 @@ Pre-release (~75% complete). No compatibility obligations.
 
 - **Standard mode**: Interactive workflow across template creation, form filling, and reading results.
 - **Print mode**: Browser print plus print CSS provide a printable layout with space for handwritten responses. Status: ✅ implemented.
+- **Seasonal themes**: Four seasonal color themes (Spring, Summer, Autumn, Winter) selectable via a global theme switcher. Theme persists in browser localStorage. Status: ✅ implemented.
 - **High contrast mode** (planned): Accessibility-focused display.
 - **Simplified mode** (planned): Minimal UI for focus/reading.
 

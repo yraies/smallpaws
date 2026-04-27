@@ -19,11 +19,11 @@ const EncryptionStatus: React.FC<EncryptionStatusProps> = ({
       {isEncrypted ? (
         <>
           <LockClosedIcon
-            className={`${className} text-pistachio-700`}
+            className={`${className} text-th-success`}
             aria-hidden="true"
           />
           {showText ? (
-            <span className="text-sm text-pistachio-700 font-medium">
+            <span className="text-sm text-th-success font-medium">
               Encrypted
             </span>
           ) : (
@@ -33,11 +33,11 @@ const EncryptionStatus: React.FC<EncryptionStatusProps> = ({
       ) : (
         <>
           <LockOpenIcon
-            className={`${className} text-lavender-200`}
+            className={`${className} text-th-line`}
             aria-hidden="true"
           />
           {showText ? (
-            <span className="text-sm text-lavender-500">Not encrypted</span>
+            <span className="text-sm text-th-ink-muted">Not encrypted</span>
           ) : (
             <span className="sr-only">{label}</span>
           )}

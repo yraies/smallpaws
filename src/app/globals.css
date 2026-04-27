@@ -2,63 +2,112 @@
 @import "tailwindcss";
 
 @theme {
-  /* ── Palette: Sand (primary) ── */
-  --color-sand-50: #FFFDF8;
-  --color-sand-100: #FFF4D4;
-  --color-sand-200: #FFEAAB;
-  --color-sand-300: #FFE08A;
-  --color-sand-500: #C5A958;
-  --color-sand-700: #776224;
-  --color-sand-900: #4A3C15;
+  /* ── Semantic theme tokens ── */
 
-  /* ── Palette: Pistachio (secondary #1) ── */
-  --color-pistachio-50: #FFFEF5;
-  --color-pistachio-100: #FFFDD4;
-  --color-pistachio-200: #FFFCAB;
-  --color-pistachio-500: #C5C158;
-  --color-pistachio-700: #777424;
-  --color-pistachio-900: #4A4815;
+  /* Surface */
+  --color-th-page: var(--th-page);
+  --color-th-paper: var(--th-paper);
+  --color-th-paper-soft: var(--th-paper-soft);
 
-  /* ── Palette: Lavender (secondary #2) ── */
-  --color-lavender-50: #F3EBF8;
-  --color-lavender-100: #E3D2EE;
-  --color-lavender-200: #C7B4D6;
-  --color-lavender-300: #B89DCA;
-  --color-lavender-500: #9C7DB5;
-  --color-lavender-700: #664084;
-  --color-lavender-900: #391C50;
+  /* Text */
+  --color-th-ink: var(--th-ink);
+  --color-th-ink-muted: var(--th-ink-muted);
 
-  /* ── Palette: Complement (blue-violet) ── */
-  --color-complement-50: #EDEDF5;
-  --color-complement-100: #D5D5E9;
-  --color-complement-200: #BABAD9;
-  --color-complement-500: #8787BB;
-  --color-complement-700: #49498A;
-  --color-complement-900: #222254;
+  /* Borders */
+  --color-th-line: var(--th-line);
 
-  /* ── Semantic: derived from palette ── */
-  --color-danger-50: #FDF2F1;
-  --color-danger-100: #F5D5D3;
-  --color-danger-300: #D4908B;
-  --color-danger-500: #AA6C67;
-  --color-danger-700: #7D3E3A;
-  --color-danger-900: #4E2523;
+  /* Blocks / accents */
+  --color-th-block: var(--th-block);
+  --color-th-block-soft: var(--th-block-soft);
+
+  /* Semantic actions */
+  --color-th-primary: var(--th-primary);
+  --color-th-primary-hover: var(--th-primary-hover);
+  --color-th-success: var(--th-success);
+  --color-th-info: var(--th-info);
+  --color-th-danger: var(--th-danger);
+  --color-th-danger-soft: var(--th-danger-soft);
 }
 
+/* ═══════════════════════════════════
+   Season themes — CSS custom properties
+   ═══════════════════════════════════ */
+
+/* ── Spring (default) ── */
 :root {
-  --page-bg: #fff8e8;
-  --ink: #391c50;
-  --muted-ink: #664084;
-  --accent-block: #9c7db5;
-  --accent-block-dark: #664084;
-  --paper: #fffdf8;
-  --paper-line: #ffeaab;
-  --plum: #c7b4d6;
-  --paper-accent: #f3ebf8;
-  --warning: #c5a958;
-  --success: #c5c158;
-  --info: #8787bb;
+  --th-page: #f6f4e2;
+  --th-paper: #fffdf3;
+  --th-paper-soft: #edf2d7;
+  --th-ink: #324430;
+  --th-ink-muted: #647564;
+  --th-line: #ddd8b6;
+  --th-block: #b7d38b;
+  --th-block-soft: #edf2d7;
+  --th-primary: #9a73bb;
+  --th-primary-hover: #7c5a9a;
+  --th-success: #8eb85d;
+  --th-info: #73a8b5;
+  --th-danger: #c24040;
+  --th-danger-soft: #fde8e8;
 }
+
+/* ── Summer ── */
+[data-theme="summer"] {
+  --th-page: #fff1d9;
+  --th-paper: #fffaf0;
+  --th-paper-soft: #dff6f2;
+  --th-ink: #5a3a17;
+  --th-ink-muted: #86664a;
+  --th-line: #efcb8f;
+  --th-block: #56b6c2;
+  --th-block-soft: #dff6f2;
+  --th-primary: #2f82c5;
+  --th-primary-hover: #1f6ba5;
+  --th-success: #4fae77;
+  --th-info: #45b9c9;
+  --th-danger: #e07d57;
+  --th-danger-soft: #fdeee8;
+}
+
+/* ── Autumn ── */
+[data-theme="autumn"] {
+  --th-page: #f8efe1;
+  --th-paper: #fff9f1;
+  --th-paper-soft: #f1dfc3;
+  --th-ink: #4a2d1b;
+  --th-ink-muted: #7a5a49;
+  --th-line: #e0c9a2;
+  --th-block: #d5a45b;
+  --th-block-soft: #f1dfc3;
+  --th-primary: #8a5b78;
+  --th-primary-hover: #6d4860;
+  --th-success: #8c8b4f;
+  --th-info: #7d7bb0;
+  --th-danger: #b46351;
+  --th-danger-soft: #fbe9e5;
+}
+
+/* ── Winter ── */
+[data-theme="winter"] {
+  --th-page: #edf2f7;
+  --th-paper: #f9fbfe;
+  --th-paper-soft: #e6ecf3;
+  --th-ink: #2d3a47;
+  --th-ink-muted: #7b8c9a;
+  --th-line: #cdd8e2;
+  --th-block: #8faabe;
+  --th-block-soft: #e6ecf3;
+  --th-primary: #7694ba;
+  --th-primary-hover: #5a7a9e;
+  --th-success: #79a995;
+  --th-info: #9dc1d5;
+  --th-danger: #b88595;
+  --th-danger-soft: #f5eaed;
+}
+
+/* ═══════════════════════════════════
+   Base styles
+   ═══════════════════════════════════ */
 
 html,
 body {
@@ -67,8 +116,8 @@ body {
   font-family: "Outfit Variable", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: var(--ink);
-  background-color: var(--page-bg);
+  color: var(--th-ink);
+  background-color: var(--th-page);
 }
 
 #__next {
@@ -109,11 +158,11 @@ body {
 }
 
 .app-brand {
-  margin: 1rem 0 1.25rem;
+  margin: 1rem 0 0.5rem;
   text-align: center;
   font-size: 2.25rem;
   font-weight: 800;
-  color: var(--ink);
+  color: var(--th-ink);
 }
 
 .page-shell {
@@ -142,12 +191,12 @@ body {
 }
 
 .paper-field::placeholder {
-  color: var(--muted-ink);
+  color: var(--th-ink-muted);
 }
 
 .paper-field:focus {
   outline: none;
-  border-bottom-color: var(--accent-block-dark);
+  border-bottom-color: var(--th-primary-hover);
 }
 
 .tactile-button {
@@ -157,7 +206,7 @@ body {
 }
 
 .ink-muted {
-  color: var(--muted-ink);
+  color: var(--th-ink-muted);
 }
 
 /* ===================================
@@ -250,7 +299,7 @@ body {
     width: 100%;
     max-width: 100%;
     display: block;
-    border: 1.5pt solid #9c7db5;
+    border: 1.5pt solid #666;
   }
 
   [class*="CategoryPage"] h2,
@@ -385,30 +434,23 @@ body {
     page-break-after: avoid;
   }
 
-  /* Reset semantic palette colors for print */
-  [class*="text-pistachio"],
-  [class*="text-complement"],
-  [class*="text-sand"],
-  [class*="text-danger"] {
+  /* Reset all theme colors for print */
+  [class*="text-th-"] {
     color: #000;
   }
 
-  [class*="border-pistachio"],
-  [class*="border-complement"],
-  [class*="border-sand"],
-  [class*="border-danger"] {
+  [class*="border-th-"] {
     border-color: #666;
   }
 
-  [class*="bg-pistachio"],
-  [class*="bg-complement"],
-  [class*="bg-danger"],
-  [class*="bg-sand"] {
+  [class*="bg-th-paper"],
+  [class*="bg-th-danger"],
+  [class*="bg-th-block-soft"] {
     background-color: white;
   }
 
-  .category[class*="bg-lavender"] {
-    background-color: #e3d2ee;
+  .category[class*="bg-th-block"] {
+    background-color: #ddd;
   }
 
   input[type="text"],

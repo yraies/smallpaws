@@ -6,7 +6,7 @@ import {
 } from "@heroicons/react/16/solid";
 import type { Dispatch, SetStateAction } from "react";
 import type { AnswerOption } from "../types/Form";
-import { getUnsetKey, type Category, type Form, Question } from "../types/Form";
+import { type Category, type Form, getUnsetKey, Question } from "../types/Form";
 import Box from "./Box";
 import IconButton from "./IconButton";
 import QuestionLine from "./QuestionsLine";
@@ -62,7 +62,7 @@ function CategoryBox({
         title="Add question"
       >
         <PlusIcon
-          className="h-4 w-4 text-[var(--plum)] transition-transform group-hover:scale-90"
+          className="h-4 w-4 text-th-primary transition-transform group-hover:scale-90"
           aria-hidden="true"
         />
       </IconButton>
@@ -76,7 +76,7 @@ function CategoryBox({
         title="Move category up"
       >
         <ArrowUpIcon
-          className="h-4 w-4 text-[var(--plum)] transition-transform group-hover:scale-90"
+          className="h-4 w-4 text-th-primary transition-transform group-hover:scale-90"
           aria-hidden="true"
         />
       </IconButton>
@@ -90,7 +90,7 @@ function CategoryBox({
         title="Move category down"
       >
         <ArrowDownIcon
-          className="h-4 w-4 text-[var(--plum)] transition-transform group-hover:scale-90"
+          className="h-4 w-4 text-th-primary transition-transform group-hover:scale-90"
           aria-hidden="true"
         />
       </IconButton>
@@ -104,7 +104,7 @@ function CategoryBox({
         title={`Delete category`}
       >
         <TrashIcon
-          className="h-4 w-4 text-[var(--paper-accent)] transition-transform group-hover:scale-90"
+          className="h-4 w-4 text-th-danger transition-transform group-hover:scale-90"
           aria-hidden="true"
         />
       </IconButton>
@@ -124,7 +124,7 @@ function CategoryBox({
         );
       }}
       buttons={structureEditable ? buttons : null}
-      className="category border border-sand-200"
+      className="category border border-th-line"
       role="region"
       aria-label={`${category.name} category`}
     >

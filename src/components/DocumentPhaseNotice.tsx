@@ -6,10 +6,10 @@ interface DocumentPhaseNoticeProps {
 }
 
 const toneClasses = {
-  draft: "border-sand-500 text-sand-700",
-  finalized: "border-lavender-500 text-lavender-700",
-  published: "border-pistachio-500 text-pistachio-700",
-  shared: "border-complement-500 text-complement-700",
+  draft: "border-th-block text-th-ink-muted",
+  finalized: "border-th-primary text-th-ink",
+  published: "border-th-success text-th-success",
+  shared: "border-th-info text-th-info",
 } as const;
 
 export default function DocumentPhaseNotice({
@@ -20,11 +20,11 @@ export default function DocumentPhaseNotice({
 }: DocumentPhaseNoticeProps) {
   return (
     <div
-      className={`mb-3 w-full max-w-lg border-l-4 bg-sand-50 px-3 py-2 print:hidden ${toneClasses[tone]}`}
+      className={`mb-3 w-full max-w-lg border-l-4 bg-th-paper px-3 py-2 print:hidden ${toneClasses[tone]}`}
     >
       <p className="text-sm font-semibold uppercase tracking-widest">{label}</p>
-      <p className="text-sm text-lavender-700">{description}</p>
-      {meta && <p className="mt-1 text-xs text-lavender-500">{meta}</p>}
+      <p className="text-sm text-th-ink">{description}</p>
+      {meta && <p className="mt-1 text-xs text-th-ink-muted">{meta}</p>}
     </div>
   );
 }

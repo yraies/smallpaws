@@ -12,9 +12,9 @@ export default function ErrorMessage({
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center max-w-md mx-auto px-6">
-        <div className="bg-danger-100 w-16 h-16 flex items-center justify-center mx-auto mb-4">
+        <div className="bg-th-danger-soft w-16 h-16 flex items-center justify-center mx-auto mb-4">
           <svg
-            className="w-8 h-8 text-danger-700"
+            className="w-8 h-8 text-th-danger"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -29,13 +29,13 @@ export default function ErrorMessage({
             />
           </svg>
         </div>
-        <h1 className="text-2xl font-bold text-lavender-900 mb-2">{title}</h1>
-        <p className="text-lavender-700 mb-6">{message}</p>
+        <h1 className="text-2xl font-bold text-th-ink mb-2">{title}</h1>
+        <p className="text-th-ink mb-6">{message}</p>
         {onGoHome && (
           <button
             type="button"
             onClick={onGoHome}
-            className="inline-flex items-center px-4 py-2 bg-lavender-700 text-white hover:bg-lavender-900 transition-colors"
+            className="inline-flex items-center px-4 py-2 bg-th-primary text-white hover:bg-th-primary-hover transition-colors"
           >
             Go Home
           </button>

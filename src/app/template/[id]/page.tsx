@@ -312,7 +312,9 @@ function TemplatePageContent() {
         onAddCategory={() =>
           setTemplate((prev) =>
             prev.addCategory(
-              Category.new("", [Question.new("", getUnsetKey(prev.answerOptions))]),
+              Category.new("", [
+                Question.new("", getUnsetKey(prev.answerOptions)),
+              ]),
             ),
           )
         }

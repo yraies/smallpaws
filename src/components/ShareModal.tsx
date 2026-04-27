@@ -1,8 +1,8 @@
 import {
+  ArrowPathIcon,
   CalendarIcon,
   CheckIcon,
   DocumentDuplicateIcon,
-  ArrowPathIcon,
   ShareIcon,
   XMarkIcon,
 } from "@heroicons/react/16/solid";
@@ -64,7 +64,9 @@ const ShareModal: React.FC<ShareModalProps> = ({
       if (!data.success) return;
 
       setShareInfo(data.share);
-      setAutoDeleteInDays(getAutoDeleteSelection(data.share?.autoDeleteAt ?? null));
+      setAutoDeleteInDays(
+        getAutoDeleteSelection(data.share?.autoDeleteAt ?? null),
+      );
     } catch (fetchError) {
       console.error("Error fetching share link:", fetchError);
     }
@@ -208,17 +210,14 @@ const ShareModal: React.FC<ShareModalProps> = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby="share-modal-title"
-        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto border border-sand-200 bg-sand-50"
+        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto border border-th-line bg-th-paper"
       >
         <div className="flex items-center justify-between border-b px-5 py-4">
           <div className="flex items-center gap-3">
-            <ShareIcon
-              className="h-6 w-6 text-complement-700"
-              aria-hidden="true"
-            />
+            <ShareIcon className="h-6 w-6 text-th-info" aria-hidden="true" />
             <h2
               id="share-modal-title"
-              className="text-xl font-semibold text-lavender-900"
+              className="text-xl font-semibold text-th-ink"
             >
               Share &quot;{formName}&quot;
             </h2>
@@ -226,7 +225,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
           <button
             type="button"
             onClick={handleClose}
-            className="text-lavender-300 transition-colors hover:text-lavender-700"
+            className="text-th-line transition-colors hover:text-th-ink"
             aria-label="Close"
           >
             <XMarkIcon className="h-6 w-6" />
@@ -234,12 +233,12 @@ const ShareModal: React.FC<ShareModalProps> = ({
         </div>
 
         <div className="space-y-5 px-5 py-4">
-          <p className="text-sm text-lavender-700">
+          <p className="text-sm text-th-ink-muted">
             Shared links are read-only. Anyone opening them will see the same
             published form results.
           </p>
 
-          <div className="border-l-4 border-complement-500 bg-complement-50 px-3 py-2 text-sm text-complement-900">
+          <div className="border-l-4 border-th-info bg-th-paper-soft px-3 py-2 text-sm text-th-ink">
             Shared links use the form&apos;s own protection settings.
             <br />
             {requiresPassword || shareInfo?.requiresPassword
@@ -248,14 +247,10 @@ const ShareModal: React.FC<ShareModalProps> = ({
           </div>
 
           {shareInfo ? (
-            <div className="space-y-3 border border-sand-200 bg-sand-100 px-3 py-3">
+            <div className="space-y-3 border border-th-line bg-th-paper-soft px-3 py-3">
               <div>
                 <p className="text-sm font-semibold">Shared view URL</p>
-                <p className="mt-1 text-sm text-lavender-700">
-                  This published form always has a read-only shared view. You can
-                  copy the current URL, configure auto-delete, or regenerate a
-                  new one.
-                </p>
+                <p className="mt-1 text-sm text-th-ink-muted"></p>
               </div>
 
               <div className="flex items-center gap-2">
@@ -267,15 +262,15 @@ const ShareModal: React.FC<ShareModalProps> = ({
                   type="text"
                   value={shareInfo.shareUrl}
                   readOnly
-                  className="flex-1 border border-sand-200 bg-sand-50 px-3 py-2 text-sm"
+                  className="flex-1 border border-th-line bg-th-paper px-3 py-2 text-sm"
                 />
                 <button
                   type="button"
                   onClick={() => copyToClipboard(shareInfo.shareUrl)}
                   className={`border px-3 py-2 ${
                     copied
-                      ? "border-pistachio-500 bg-pistachio-100 text-pistachio-700"
-                      : "border-complement-500 bg-sand-50 text-complement-700"
+                      ? "border-th-success bg-th-paper-soft text-th-success"
+                      : "border-th-info bg-th-paper text-th-info"
                   }`}
                   aria-label="Copy share link"
                 >
@@ -290,7 +285,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
               <div>
                 <label
                   htmlFor="share-auto-delete"
-                  className="mb-2 flex items-center gap-2 text-sm font-medium text-lavender-700"
+                  className="mb-2 flex items-center gap-2 text-sm font-medium text-th-ink-muted"
                 >
                   <CalendarIcon className="h-4 w-4" aria-hidden="true" />
                   Auto-delete underlying published form
@@ -303,7 +298,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
                       e.target.value ? Number(e.target.value) : "",
                     )
                   }
-                  className="w-full border border-sand-200 bg-sand-50 px-3 py-2 text-sm"
+                  className="w-full border border-th-line bg-th-paper px-3 py-2 text-sm"
                 >
                   <option value="">Never auto-delete</option>
                   <option value={1}>After 1 day</option>
@@ -313,7 +308,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
                 </select>
               </div>
 
-              <p className="text-xs text-lavender-700">
+              <p className="text-xs text-th-ink-muted">
                 Created {formatDate(shareInfo.createdAt)}
                 {shareInfo.autoDeleteAt
                   ? ` • Auto-deletes ${formatDate(shareInfo.autoDeleteAt)}`
@@ -321,10 +316,10 @@ const ShareModal: React.FC<ShareModalProps> = ({
               </p>
             </div>
           ) : (
-            <div className="space-y-3 border border-sand-200 bg-sand-50 px-3 py-3">
+            <div className="space-y-3 border border-th-line bg-th-paper px-3 py-3">
               <h3 className="text-base font-semibold">Loading shared view…</h3>
 
-              <p className="text-sm text-lavender-700">
+              <p className="text-sm text-th-ink-muted">
                 Loading the canonical shared view for this published form.
               </p>
             </div>
@@ -332,7 +327,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
 
           <div role="alert" aria-live="assertive">
             {error && (
-              <div className="border-l-4 border-danger-500 bg-danger-50 px-3 py-2 text-sm text-danger-700">
+              <div className="border-l-4 border-th-danger bg-th-danger-soft px-3 py-2 text-sm text-th-danger">
                 {error}
               </div>
             )}
@@ -343,7 +338,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
               type="button"
               onClick={saveShareSettings}
               disabled={isSaving || !shareInfo}
-              className="flex items-center justify-center gap-2 border border-sand-200 bg-sand-50 px-4 py-2 text-sm font-medium text-lavender-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex items-center justify-center gap-2 border border-th-line bg-th-paper px-4 py-2 text-sm font-medium text-th-ink-muted disabled:cursor-not-allowed disabled:opacity-50"
             >
               <ShareIcon className="h-4 w-4" />
               {isSaving ? "Saving..." : "Save auto-delete"}
@@ -352,7 +347,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
               type="button"
               onClick={regenerateShare}
               disabled={isRegenerating || isSaving || !shareInfo}
-              className="flex items-center justify-center gap-2 bg-complement-700 px-4 py-2 text-white disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex items-center justify-center gap-2 bg-th-info px-4 py-2 text-white disabled:cursor-not-allowed disabled:opacity-50"
             >
               <ArrowPathIcon className="h-4 w-4" />
               {isRegenerating ? "Regenerating..." : "Regenerate URL"}
@@ -363,7 +358,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
             <button
               type="button"
               onClick={handleClose}
-              className="border border-sand-200 bg-sand-50 px-4 py-2 text-sm font-medium text-lavender-700"
+              className="border border-th-line bg-th-paper px-4 py-2 text-sm font-medium text-th-ink-muted"
             >
               Done
             </button>

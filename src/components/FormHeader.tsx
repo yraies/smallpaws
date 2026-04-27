@@ -33,7 +33,7 @@ export default function FormHeader({
         title="Home"
         aria-label="Go home"
       >
-        <HomeIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-lavender-500" />
+        <HomeIcon className="h-6 w-6 transition-transform group-hover:scale-90 group-hover:text-th-ink-muted" />
       </IconButton>
 
       <div className="fixed top-6 left-6 z-10 hidden lg:flex xl:left-10">
@@ -81,7 +81,7 @@ export default function FormHeader({
         <div className="flex items-center justify-center gap-2 text-center">
           <label
             htmlFor="respondent-name"
-            className="text-sm text-lavender-500"
+            className="text-sm text-th-ink-muted"
           >
             Your Name
           </label>
@@ -99,7 +99,7 @@ export default function FormHeader({
 
       {/* Respondent name display for read-only forms */}
       {hasRespondentField && readOnly && respondentName && (
-        <div className="flex items-center justify-center gap-1 text-center text-sm text-lavender-500">
+        <div className="flex items-center justify-center gap-1 text-center text-sm text-th-ink-muted">
           Filled by {respondentName}
         </div>
       )}
