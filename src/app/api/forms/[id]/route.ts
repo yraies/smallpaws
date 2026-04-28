@@ -15,8 +15,23 @@ export async function GET(
       return NextResponse.json({ error: "Form not found" }, { status: 404 });
     }
 
+    // Password-protected forms require verification before returning data
+    if (form.encrypted) {
+      return NextResponse.json({
+        requiresPassword: true,
+        isEncrypted: true,
+        passwordSalt: form.password_salt ?? null,
+      });
+    }
+
+    // Return form data without modification_key (never needed client-side)
     return NextResponse.json({
-      ...form,
+      id: form.id,
+      encrypted: form.encrypted,
+      name: form.name,
+      data: form.data,
+      created_at: form.created_at,
+      updated_at: form.updated_at,
       compareIdentity: getCompareIdentity(form.id),
     });
   } catch (error) {
@@ -36,7 +51,13 @@ export async function POST(
     const { id } = await context.params;
     const body = await request.json();
 
-    const { name, data, encrypted = false, password_hash = null } = body;
+    const {
+      name,
+      data,
+      encrypted = false,
+      password_hash = null,
+      password_salt = null,
+    } = body;
 
     if (!name || !data) {
       return NextResponse.json(
@@ -52,6 +73,7 @@ export async function POST(
       modification_key,
       encrypted,
       password_hash,
+      password_salt,
       name,
       data: JSON.stringify(data),
     };
@@ -83,7 +105,6 @@ export async function POST(
     return NextResponse.json({
       success: true,
       id,
-      modification_key,
     });
   } catch (error) {
     console.error("Error saving form:", error);

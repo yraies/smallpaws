@@ -27,7 +27,7 @@ import {
   TemplateContextProvider,
   useTemplateContext,
 } from "../../../contexts/TemplateContext";
-import { encryptFormData, hashPassword } from "../../../lib/crypto";
+import { encryptFormData, hashPasswordWithSalt } from "../../../lib/crypto";
 import { Category, getUnsetKey, Question } from "../../../types/Form";
 import { hasValidStructure } from "../../../utils/documentStructure";
 import { exportFormAsJSON, printCurrentView } from "../../../utils/formActions";
@@ -82,7 +82,11 @@ function TemplatePageContent() {
           onSubmit={(password: string) => unlockTemplate(password)}
           mode="enter"
           title="Enter Password"
-          description={`Enter the password for "${templateName}".`}
+          description={
+            templateName
+              ? `Enter the password for "${templateName}".`
+              : "This template is protected and requires a password to view."
+          }
         />
       </div>
     );
@@ -101,6 +105,9 @@ function TemplatePageContent() {
     setIsFinalizing(true);
     try {
       const templateData = template.withoutAnswers();
+      const passwordCreds = shouldEncrypt
+        ? hashPasswordWithSalt(password)
+        : null;
       const response = await fetch(`/api/templates/${templateId}`, {
         method: "POST",
         headers: {
@@ -112,7 +119,8 @@ function TemplatePageContent() {
             ? encryptFormData(templateData, password)
             : templateData,
           encrypted: shouldEncrypt,
-          password_hash: shouldEncrypt ? hashPassword(password) : null,
+          password_hash: passwordCreds?.hash ?? null,
+          password_salt: passwordCreds?.salt ?? null,
         }),
       });
 

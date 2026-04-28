@@ -19,7 +19,7 @@ import PageActionRails, {
   type RailAction,
 } from "../../../../components/PageActionRails";
 import PasswordModal from "../../../../components/PasswordModal";
-import { decryptFormData } from "../../../../lib/crypto";
+import { computePasswordHash, decryptFormData } from "../../../../lib/crypto";
 import { Form, type FormPOJO } from "../../../../types/Form";
 import {
   exportFormAsJSON,
@@ -45,6 +45,7 @@ function SharedTemplatePageContent() {
   const [isEncrypted, setIsEncrypted] = React.useState(false);
   const [needsPasswordVerification, setNeedsPasswordVerification] =
     React.useState(false);
+  const [passwordSalt, setPasswordSalt] = React.useState<string | null>(null);
   const router = useRouter();
   const params = useParams();
   const shareId = params?.shareId as string;
@@ -62,10 +63,11 @@ function SharedTemplatePageContent() {
 
         const data = await response.json();
         if (data.requiresPassword) {
-          setTemplateName(data.templateName);
+          setTemplateName(data.templateName ?? "");
           setViewCount(data.viewCount ?? null);
           setIsEncrypted(true);
           setNeedsPasswordVerification(true);
+          setPasswordSalt(data.passwordSalt ?? null);
           return;
         }
 
@@ -87,12 +89,20 @@ function SharedTemplatePageContent() {
 
   const handlePasswordVerification = async (password: string) => {
     try {
+      // Build verification payload: use client-side hash if salt available
+      const verifyBody: Record<string, string> = {};
+      if (passwordSalt) {
+        verifyBody.passwordHash = computePasswordHash(password, passwordSalt);
+      } else {
+        verifyBody.password = password;
+      }
+
       const response = await fetch(`/api/template-share/${shareId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify(verifyBody),
       });
 
       if (!response.ok) {
@@ -134,7 +144,11 @@ function SharedTemplatePageContent() {
           onSubmit={(password: string) => handlePasswordVerification(password)}
           mode="enter"
           title="Enter Password"
-          description={`Enter the password for "${templateName}".`}
+          description={
+            templateName
+              ? `Enter the password for "${templateName}".`
+              : "This shared template requires a password to view."
+          }
         />
       </div>
     );

@@ -28,7 +28,7 @@ import {
   FormContextProvider,
   useFormContext,
 } from "../../../contexts/FormContext";
-import { decryptFormData } from "../../../lib/crypto";
+import { computePasswordHash, decryptFormData } from "../../../lib/crypto";
 import { Form, type FormPOJO } from "../../../types/Form";
 import {
   exportFormAsCSV,
@@ -67,6 +67,7 @@ function SharedFormPageContent() {
   const [isFormEncrypted, setIsFormEncrypted] = React.useState(false);
   const [formName, setFormName] = React.useState("");
   const [isDeleted, setIsDeleted] = React.useState(false);
+  const [passwordSalt, setPasswordSalt] = React.useState<string | null>(null);
 
   const params = useParams();
   const shareId = params?.shareId as string;
@@ -147,8 +148,9 @@ function SharedFormPageContent() {
 
       if (data.requiresPassword) {
         setNeedsPasswordVerification(true);
-        setFormName(data.formName);
+        setFormName(data.formName ?? "");
         setIsFormEncrypted(data.isEncrypted);
+        setPasswordSalt(data.passwordSalt ?? null);
         setShareInfo({
           shareId: data.shareId,
           viewCount: data.viewCount,
@@ -174,12 +176,20 @@ function SharedFormPageContent() {
   }, [shareId, loadSharedForm]);
 
   const handlePasswordVerification = async (password: string) => {
+    // Build verification payload: use client-side hash if salt available
+    const verifyBody: Record<string, string> = {};
+    if (passwordSalt) {
+      verifyBody.passwordHash = computePasswordHash(password, passwordSalt);
+    } else {
+      verifyBody.password = password;
+    }
+
     const response = await fetch(`/api/share/${shareId}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ password }),
+      body: JSON.stringify(verifyBody),
     });
 
     if (!response.ok) {
@@ -303,7 +313,11 @@ function SharedFormPageContent() {
           onSubmit={(password: string) => handlePasswordVerification(password)}
           mode="enter"
           title="Enter Password"
-          description={`Enter the password for "${formName || "Shared Form"}".`}
+          description={
+            formName
+              ? `Enter the password for "${formName}".`
+              : "This shared form requires a password to view."
+          }
           submitLabelEnter="Open Shared Form"
         />
       </DocumentPageShell>

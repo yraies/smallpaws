@@ -8,62 +8,71 @@ import CryptoJS from "crypto-js";
 export interface EncryptedData {
   encrypted: string;
   salt: string;
+  iv?: string; // Present in new format; absent in legacy data
+}
+
+export interface PasswordHashResult {
+  hash: string;
+  salt: string;
 }
 
 /**
- * Encrypts form data with a password
- * @param data - The data to encrypt (will be JSON.stringify'd)
- * @param password - The password to use for encryption
- * @returns Encrypted data object with salt
+ * Encrypts form data with a password.
+ * Uses PBKDF2 for key derivation and AES-CBC with the derived key passed
+ * as a WordArray (not a string) so CryptoJS uses it directly instead of
+ * re-deriving via the weak EVP_BytesToKey path.
  */
 export function encryptFormData(
   data: unknown,
   password: string,
 ): EncryptedData {
-  // Generate a random salt for key derivation
   const salt = CryptoJS.lib.WordArray.random(256 / 8).toString();
+  const iv = CryptoJS.lib.WordArray.random(128 / 8);
 
-  // Derive key from password and salt using PBKDF2
   const key = CryptoJS.PBKDF2(password, salt, {
     keySize: 256 / 32,
     iterations: 10000,
   });
 
-  // Encrypt the data
-  const encrypted = CryptoJS.AES.encrypt(
-    JSON.stringify(data),
-    key.toString(),
-  ).toString();
+  // Pass key as WordArray + explicit IV so CryptoJS uses the key directly
+  const encrypted = CryptoJS.AES.encrypt(JSON.stringify(data), key, {
+    iv,
+  });
 
   return {
-    encrypted,
+    encrypted: encrypted.toString(),
     salt,
+    iv: iv.toString(),
   };
 }
 
 /**
- * Decrypts form data with a password
- * @param encryptedData - The encrypted data object
- * @param password - The password to use for decryption
- * @returns The decrypted data
- * @throws Error if decryption fails (wrong password or corrupted data)
+ * Decrypts form data with a password.
+ * Supports both the new format (with iv field) and the legacy format
+ * (without iv, where key.toString() triggered EVP_BytesToKey).
  */
 export function decryptFormData(
   encryptedData: EncryptedData,
   password: string,
 ): unknown {
   try {
-    // Derive the same key using the stored salt
     const key = CryptoJS.PBKDF2(password, encryptedData.salt, {
       keySize: 256 / 32,
       iterations: 10000,
     });
 
-    // Decrypt the data
-    const decrypted = CryptoJS.AES.decrypt(
-      encryptedData.encrypted,
-      key.toString(),
-    );
+    let decrypted: CryptoJS.lib.WordArray;
+
+    if (encryptedData.iv) {
+      // New format: key as WordArray with explicit IV
+      decrypted = CryptoJS.AES.decrypt(encryptedData.encrypted, key, {
+        iv: CryptoJS.enc.Hex.parse(encryptedData.iv),
+      });
+    } else {
+      // Legacy format: key.toString() triggers EVP_BytesToKey
+      decrypted = CryptoJS.AES.decrypt(encryptedData.encrypted, key.toString());
+    }
+
     const decryptedString = decrypted.toString(CryptoJS.enc.Utf8);
 
     if (!decryptedString) {
@@ -77,22 +86,54 @@ export function decryptFormData(
 }
 
 /**
- * Hashes a password for storage (server-side verification)
- * @param password - The password to hash
- * @returns SHA-256 hash of the password
+ * Creates a salted password hash for server-side storage.
+ * Uses HMAC-SHA256 with a random salt to prevent rainbow table attacks.
+ * Returns both the hash and salt so both can be stored.
  */
-export function hashPassword(password: string): string {
+export function hashPasswordWithSalt(password: string): PasswordHashResult {
+  const salt = CryptoJS.lib.WordArray.random(128 / 8).toString();
+  const hash = CryptoJS.HmacSHA256(password, salt).toString();
+  return { hash, salt };
+}
+
+/**
+ * Computes a password hash given the password and a known salt.
+ * Used client-side before sending to the server for verification,
+ * so the plaintext password never leaves the client.
+ */
+export function computePasswordHash(password: string, salt: string): string {
+  return CryptoJS.HmacSHA256(password, salt).toString();
+}
+
+/**
+ * Legacy: Hashes a password without salt (SHA-256).
+ * Kept only for verifying passwords on artifacts that were created
+ * before the salted hashing migration. Do not use for new artifacts.
+ */
+export function hashPasswordLegacy(password: string): string {
   return CryptoJS.SHA256(password).toString();
 }
 
 /**
- * Verifies a password against a hash
- * @param password - The password to verify
- * @param hash - The stored hash to compare against
- * @returns True if password matches hash
+ * Verifies a password against a stored hash.
+ * Supports both salted (new) and unsalted (legacy) hashes.
  */
-export function verifyPassword(password: string, hash: string): boolean {
-  return hashPassword(password) === hash;
+export function verifyPasswordHash(
+  passwordHash: string,
+  storedHash: string,
+): boolean {
+  return passwordHash === storedHash;
+}
+
+/**
+ * Legacy: Verifies a plaintext password against an unsalted SHA-256 hash.
+ * Only used for backward compatibility with pre-migration artifacts.
+ */
+export function verifyPasswordLegacy(
+  password: string,
+  storedHash: string,
+): boolean {
+  return hashPasswordLegacy(password) === storedHash;
 }
 
 /**
@@ -131,8 +172,11 @@ export function validatePassword(password: string): {
 const cryptoUtils = {
   encryptFormData,
   decryptFormData,
-  hashPassword,
-  verifyPassword,
+  hashPasswordWithSalt,
+  computePasswordHash,
+  hashPasswordLegacy,
+  verifyPasswordHash,
+  verifyPasswordLegacy,
   validatePassword,
 };
 

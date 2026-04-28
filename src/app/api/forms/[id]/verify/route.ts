@@ -1,6 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { verifyPassword } from "../../../../../lib/crypto";
+import {
+  verifyPasswordHash,
+  verifyPasswordLegacy,
+} from "../../../../../lib/crypto";
 import { FormStorage } from "../../../../../lib/database";
+import {
+  checkRateLimit,
+  getRateLimitRetryAfter,
+} from "../../../../../lib/rateLimit";
 import { getCompareIdentity } from "../../../../../utils/compareIdentity";
 
 export async function POST(
@@ -9,11 +16,28 @@ export async function POST(
 ) {
   try {
     const { id } = await context.params;
+
+    // Rate limiting
+    const clientIp =
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      "unknown";
+    const rateLimitKey = `verify:form:${id}:${clientIp}`;
+    if (!checkRateLimit(rateLimitKey)) {
+      const retryAfter = getRateLimitRetryAfter(rateLimitKey);
+      return NextResponse.json(
+        { error: "Too many attempts. Please try again later." },
+        {
+          status: 429,
+          headers: { "Retry-After": String(retryAfter) },
+        },
+      );
+    }
+
     const body = await request.json();
+    const { password, passwordHash } = body;
 
-    const { password } = body;
-
-    if (!password) {
+    // Accept either a pre-computed hash (new flow) or plaintext password (legacy)
+    if (!password && !passwordHash) {
       return NextResponse.json(
         { error: "Password is required" },
         { status: 400 },
@@ -33,7 +57,20 @@ export async function POST(
       );
     }
 
-    const isPasswordValid = verifyPassword(password, form.password_hash);
+    // Verify: new salted flow or legacy unsalted flow
+    let isPasswordValid: boolean;
+    if (passwordHash) {
+      isPasswordValid = verifyPasswordHash(passwordHash, form.password_hash);
+    } else if (form.password_salt) {
+      // Artifact has salt but client sent plaintext — reject
+      return NextResponse.json(
+        { error: "Password hash required" },
+        { status: 400 },
+      );
+    } else {
+      // Legacy artifact without salt: accept plaintext for backward compat
+      isPasswordValid = verifyPasswordLegacy(password, form.password_hash);
+    }
 
     if (!isPasswordValid) {
       return NextResponse.json({ error: "Invalid password" }, { status: 401 });

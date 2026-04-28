@@ -71,6 +71,18 @@ try {
   // Column already exists, ignore error
 }
 
+try {
+  db.exec(`ALTER TABLE forms ADD COLUMN password_salt TEXT`);
+} catch {
+  // Column already exists, ignore error
+}
+
+try {
+  db.exec(`ALTER TABLE templates ADD COLUMN password_salt TEXT`);
+} catch {
+  // Column already exists, ignore error
+}
+
 db.exec(`
   CREATE TABLE IF NOT EXISTS form_meta (
     id TEXT PRIMARY KEY,
@@ -114,6 +126,7 @@ export interface StoredForm {
   modification_key: string;
   encrypted: boolean;
   password_hash?: string;
+  password_salt?: string;
   name: string;
   data: string;
   cloned_from?: string;
@@ -125,6 +138,7 @@ export interface StoredTemplate {
   id: string;
   encrypted: boolean;
   password_hash?: string | null;
+  password_salt?: string | null;
   name: string;
   data: string;
   created_at: string;
@@ -165,6 +179,7 @@ function decodeStoredForm(
     modification_key: result.modification_key,
     encrypted: Boolean(result.encrypted),
     password_hash: result.password_hash,
+    password_salt: result.password_salt,
     name: decryptStoredString(result.name),
     data: decryptStoredString(result.data),
     cloned_from: result.cloned_from,
@@ -184,6 +199,7 @@ function decodeStoredTemplate(
     id: result.id,
     encrypted: Boolean(result.encrypted),
     password_hash: result.password_hash,
+    password_salt: result.password_salt,
     name: decryptStoredString(result.name),
     data: decryptStoredString(result.data),
     created_at: result.created_at,
@@ -229,8 +245,8 @@ export class FormStorage {
     }
 
     const stmt = db.prepare(`
-      INSERT INTO forms (id, modification_key, encrypted, password_hash, name, data, cloned_from, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
+      INSERT INTO forms (id, modification_key, encrypted, password_hash, password_salt, name, data, cloned_from, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
     `);
     // Convert boolean to integer for SQLite
     stmt.run(
@@ -238,6 +254,7 @@ export class FormStorage {
       form.modification_key,
       form.encrypted ? 1 : 0,
       form.password_hash || null,
+      form.password_salt || null,
       encryptStoredString(form.name),
       encryptStoredString(form.data),
       form.cloned_from || null,
@@ -471,14 +488,15 @@ export class TemplateStorage {
     }
 
     const stmt = db.prepare(`
-      INSERT INTO templates (id, encrypted, password_hash, name, data, updated_at)
-      VALUES (?, ?, ?, ?, ?, datetime('now'))
+      INSERT INTO templates (id, encrypted, password_hash, password_salt, name, data, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
     `);
 
     stmt.run(
       template.id,
       template.encrypted ? 1 : 0,
       template.password_hash || null,
+      template.password_salt || null,
       encryptStoredString(template.name),
       encryptStoredString(template.data),
     );

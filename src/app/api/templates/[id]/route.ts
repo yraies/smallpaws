@@ -19,10 +19,11 @@ export async function GET(
     }
 
     if (template.encrypted) {
+      // Don't leak the template name before password verification
       return NextResponse.json({
         requiresPassword: true,
-        templateName: template.name,
         isEncrypted: true,
+        passwordSalt: template.password_salt ?? null,
       });
     }
 
@@ -44,7 +45,13 @@ export async function POST(
     const { id } = await context.params;
     const body = await request.json();
 
-    const { name, data, encrypted = false, password_hash = null } = body;
+    const {
+      name,
+      data,
+      encrypted = false,
+      password_hash = null,
+      password_salt = null,
+    } = body;
 
     if (!name || !data) {
       return NextResponse.json(
@@ -71,6 +78,7 @@ export async function POST(
         id,
         encrypted,
         password_hash,
+        password_salt,
         name,
         data: JSON.stringify(data),
       });

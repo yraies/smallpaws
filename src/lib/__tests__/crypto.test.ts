@@ -1,10 +1,13 @@
 import {
+  computePasswordHash,
   decryptFormData,
   type EncryptedData,
   encryptFormData,
-  hashPassword,
+  hashPasswordLegacy,
+  hashPasswordWithSalt,
   validatePassword,
-  verifyPassword,
+  verifyPasswordHash,
+  verifyPasswordLegacy,
 } from "../crypto";
 
 describe("Crypto Functions", () => {
@@ -56,28 +59,71 @@ describe("Crypto Functions", () => {
     });
   });
 
-  describe("Password Hashing", () => {
+  describe("Salted Password Hashing", () => {
+    test("produces hash and salt", () => {
+      const result = hashPasswordWithSalt(testPassword);
+      expect(result).toHaveProperty("hash");
+      expect(result).toHaveProperty("salt");
+      expect(result.hash).toBeTruthy();
+      expect(result.salt).toBeTruthy();
+      expect(typeof result.hash).toBe("string");
+      expect(typeof result.salt).toBe("string");
+    });
+
+    test("produces different salts and hashes each time", () => {
+      const result1 = hashPasswordWithSalt(testPassword);
+      const result2 = hashPasswordWithSalt(testPassword);
+      expect(result1.salt).not.toBe(result2.salt);
+      expect(result1.hash).not.toBe(result2.hash);
+    });
+
+    test("computePasswordHash reproduces the same hash given salt", () => {
+      const { hash, salt } = hashPasswordWithSalt(testPassword);
+      const recomputed = computePasswordHash(testPassword, salt);
+      expect(recomputed).toBe(hash);
+    });
+
+    test("computePasswordHash produces different hash for wrong password", () => {
+      const { hash, salt } = hashPasswordWithSalt(testPassword);
+      const wrongHash = computePasswordHash(differentPassword, salt);
+      expect(wrongHash).not.toBe(hash);
+    });
+
+    test("verifyPasswordHash matches correct hash", () => {
+      const { hash, salt } = hashPasswordWithSalt(testPassword);
+      const clientHash = computePasswordHash(testPassword, salt);
+      expect(verifyPasswordHash(clientHash, hash)).toBe(true);
+    });
+
+    test("verifyPasswordHash rejects wrong hash", () => {
+      const { hash, salt } = hashPasswordWithSalt(testPassword);
+      const wrongHash = computePasswordHash(differentPassword, salt);
+      expect(verifyPasswordHash(wrongHash, hash)).toBe(false);
+    });
+  });
+
+  describe("Legacy Password Hashing (backward compat)", () => {
     test("hashes password consistently", () => {
-      const hash1 = hashPassword(testPassword);
-      const hash2 = hashPassword(testPassword);
+      const hash1 = hashPasswordLegacy(testPassword);
+      const hash2 = hashPasswordLegacy(testPassword);
       expect(hash1).toBe(hash2);
       expect(hash1).toHaveLength(64); // SHA-256 produces 64-character hex string
     });
 
     test("produces different hashes for different passwords", () => {
-      const hash1 = hashPassword(testPassword);
-      const hash2 = hashPassword(differentPassword);
+      const hash1 = hashPasswordLegacy(testPassword);
+      const hash2 = hashPasswordLegacy(differentPassword);
       expect(hash1).not.toBe(hash2);
     });
 
     test("verifies correct password", () => {
-      const hash = hashPassword(testPassword);
-      expect(verifyPassword(testPassword, hash)).toBe(true);
+      const hash = hashPasswordLegacy(testPassword);
+      expect(verifyPasswordLegacy(testPassword, hash)).toBe(true);
     });
 
     test("rejects incorrect password", () => {
-      const hash = hashPassword(testPassword);
-      expect(verifyPassword(differentPassword, hash)).toBe(false);
+      const hash = hashPasswordLegacy(testPassword);
+      expect(verifyPasswordLegacy(differentPassword, hash)).toBe(false);
     });
   });
 
@@ -88,8 +134,10 @@ describe("Crypto Functions", () => {
       const encrypted = encryptFormData(testData, testPassword);
       expect(encrypted).toHaveProperty("encrypted");
       expect(encrypted).toHaveProperty("salt");
+      expect(encrypted).toHaveProperty("iv");
       expect(typeof encrypted.encrypted).toBe("string");
       expect(typeof encrypted.salt).toBe("string");
+      expect(typeof encrypted.iv).toBe("string");
       expect(encrypted.encrypted).not.toBe(testData);
 
       const decrypted = decryptFormData(encrypted, testPassword);
@@ -100,6 +148,7 @@ describe("Crypto Functions", () => {
       const encrypted = encryptFormData(sampleForm, testPassword);
       expect(encrypted).toHaveProperty("encrypted");
       expect(encrypted).toHaveProperty("salt");
+      expect(encrypted).toHaveProperty("iv");
 
       const decrypted = decryptFormData(encrypted, testPassword);
       expect(decrypted).toEqual(sampleForm);
@@ -143,9 +192,10 @@ describe("Crypto Functions", () => {
       const encrypted1 = encryptFormData(sampleForm, testPassword);
       const encrypted2 = encryptFormData(sampleForm, testPassword);
 
-      // Should have different encrypted strings due to random salt
+      // Should have different encrypted strings due to random salt and IV
       expect(encrypted1.encrypted).not.toBe(encrypted2.encrypted);
       expect(encrypted1.salt).not.toBe(encrypted2.salt);
+      expect(encrypted1.iv).not.toBe(encrypted2.iv);
 
       // But both should decrypt to the same data
       const decrypted1 = decryptFormData(encrypted1, testPassword);
@@ -167,6 +217,7 @@ describe("Crypto Functions", () => {
       const corrupted: EncryptedData = {
         encrypted: "corrupted_data",
         salt: encrypted.salt,
+        iv: encrypted.iv,
       };
 
       expect(() => {
@@ -179,6 +230,7 @@ describe("Crypto Functions", () => {
       const corruptedSalt: EncryptedData = {
         encrypted: encrypted.encrypted,
         salt: "corrupted_salt",
+        iv: encrypted.iv,
       };
 
       expect(() => {
@@ -236,14 +288,16 @@ describe("Crypto Functions", () => {
       expect(decrypted).toEqual(nestedData);
     });
 
-    test("encryption produces consistent structure", () => {
+    test("encryption produces consistent structure with iv field", () => {
       const encrypted = encryptFormData(sampleForm, testPassword);
 
       expect(typeof encrypted).toBe("object");
       expect(encrypted).toHaveProperty("encrypted");
       expect(encrypted).toHaveProperty("salt");
-      expect(Object.keys(encrypted)).toHaveLength(2);
+      expect(encrypted).toHaveProperty("iv");
+      expect(Object.keys(encrypted)).toHaveLength(3);
       expect(encrypted.salt).toMatch(/^[a-f0-9]+$/); // Should be hex string
+      expect(encrypted.iv).toMatch(/^[a-f0-9]+$/); // Should be hex string
       expect(encrypted.encrypted).toBeTruthy();
     });
 
@@ -251,9 +305,9 @@ describe("Crypto Functions", () => {
       const password1 = "password1";
       const password2 = "password2";
 
-      const hash1 = hashPassword(password1);
-      const hash2 = hashPassword(password2);
-      expect(hash1).not.toBe(hash2);
+      const creds1 = hashPasswordWithSalt(password1);
+      const creds2 = hashPasswordWithSalt(password2);
+      expect(creds1.hash).not.toBe(creds2.hash);
 
       const encrypted1 = encryptFormData(sampleForm, password1);
       const encrypted2 = encryptFormData(sampleForm, password2);
@@ -269,7 +323,7 @@ describe("Crypto Functions", () => {
       expect(() => decryptFormData(encrypted2, password1)).toThrow();
     });
 
-    test("salt randomness ensures different encryptions", () => {
+    test("salt and IV randomness ensures different encryptions", () => {
       const encryptions = [];
       for (let i = 0; i < 10; i++) {
         encryptions.push(encryptFormData(sampleForm, testPassword));
@@ -279,6 +333,11 @@ describe("Crypto Functions", () => {
       const salts = encryptions.map((e) => e.salt);
       const uniqueSalts = new Set(salts);
       expect(uniqueSalts.size).toBe(10);
+
+      // All IVs should be different
+      const ivs = encryptions.map((e) => e.iv);
+      const uniqueIVs = new Set(ivs);
+      expect(uniqueIVs.size).toBe(10);
 
       // All encrypted data should be different
       const encryptedData = encryptions.map((e) => e.encrypted);
@@ -293,8 +352,30 @@ describe("Crypto Functions", () => {
     });
   });
 
+  describe("Legacy Decryption (backward compat)", () => {
+    test("decrypts data encrypted without iv (legacy format)", () => {
+      // Simulate legacy encrypted data (without iv field)
+      // Legacy format: key.toString() was passed as string to AES.encrypt
+      const CryptoJS = require("crypto-js");
+      const salt = CryptoJS.lib.WordArray.random(256 / 8).toString();
+      const key = CryptoJS.PBKDF2(testPassword, salt, {
+        keySize: 256 / 32,
+        iterations: 10000,
+      });
+      const encrypted = CryptoJS.AES.encrypt(
+        JSON.stringify(sampleForm),
+        key.toString(),
+      ).toString();
+
+      const legacyData: EncryptedData = { encrypted, salt };
+
+      const decrypted = decryptFormData(legacyData, testPassword);
+      expect(decrypted).toEqual(sampleForm);
+    });
+  });
+
   describe("End-to-End Form Storage Simulation", () => {
-    test("simulates complete form save/load cycle", () => {
+    test("simulates complete form save/load cycle with salted hashing", () => {
       const originalForm = {
         name: "Product Planning Form",
         categories: [
@@ -314,23 +395,26 @@ describe("Crypto Functions", () => {
 
       // Step 1: Encrypt the form (as would happen in FormPage)
       const encryptedData = encryptFormData(originalForm, password);
-      const passwordHash = hashPassword(password);
+      const { hash: passwordHash, salt: passwordSalt } =
+        hashPasswordWithSalt(password);
 
       // Step 2: Simulate API storage (JSON.stringify as done in API)
       const storedData = JSON.stringify(encryptedData);
 
-      // Step 3: Simulate API retrieval and verification
-      const retrievedData = JSON.parse(storedData) as EncryptedData;
-      const isPasswordValid = verifyPassword(password, passwordHash);
-      expect(isPasswordValid).toBe(true);
+      // Step 3: Simulate client-side password hashing before verification
+      const clientHash = computePasswordHash(password, passwordSalt);
 
-      // Step 4: Decrypt the form (as would happen in FormPage)
+      // Step 4: Simulate server-side hash verification
+      expect(verifyPasswordHash(clientHash, passwordHash)).toBe(true);
+
+      // Step 5: Simulate API retrieval and decryption
+      const retrievedData = JSON.parse(storedData) as EncryptedData;
       const decryptedFormData = decryptFormData(
         retrievedData,
         password,
       ) as typeof originalForm;
 
-      // Step 5: Verify the decrypted data matches original
+      // Step 6: Verify the decrypted data matches original
       expect(decryptedFormData).toHaveProperty("name", "Product Planning Form");
       expect(decryptedFormData).toHaveProperty("categories");
 
@@ -348,21 +432,23 @@ describe("Crypto Functions", () => {
       expect(categories[0].questions[0]).toHaveProperty("selection", "like");
     });
 
-    test("simulates wrong password scenario", () => {
+    test("simulates wrong password scenario with salted hashing", () => {
       const formData = { name: "Secret Form", data: "secret information" };
       const correctPassword = "correct123";
       const wrongPassword = "wrong456";
 
       // Encrypt with correct password
       const encrypted = encryptFormData(formData, correctPassword);
-      const passwordHash = hashPassword(correctPassword);
+      const { hash: passwordHash, salt: passwordSalt } =
+        hashPasswordWithSalt(correctPassword);
 
       // Simulate storage and retrieval
       const stored = JSON.stringify(encrypted);
       const retrieved = JSON.parse(stored) as EncryptedData;
 
-      // Wrong password should fail verification
-      expect(verifyPassword(wrongPassword, passwordHash)).toBe(false);
+      // Wrong password hash should fail verification
+      const wrongHash = computePasswordHash(wrongPassword, passwordSalt);
+      expect(verifyPasswordHash(wrongHash, passwordHash)).toBe(false);
 
       // Wrong password should fail decryption
       expect(() => {
@@ -381,6 +467,7 @@ describe("Crypto Functions", () => {
       const corruptedData = JSON.stringify({
         encrypted: `${encrypted.encrypted.substring(0, -5)}XXXXX`, // Corrupt end of encrypted data
         salt: encrypted.salt,
+        iv: encrypted.iv,
       });
 
       const retrievedCorruptedData = JSON.parse(corruptedData) as EncryptedData;

@@ -8,7 +8,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { decryptFormData } from "../lib/crypto";
+import { computePasswordHash, decryptFormData } from "../lib/crypto";
 import { Form, type FormPOJO } from "../types/Form";
 import {
   loadLocalDraft,
@@ -53,6 +53,7 @@ function TemplateContextProvider({ children }: { children: React.ReactNode }) {
   const [isEncrypted, setIsEncrypted] = useState(false);
   const [needsPasswordVerification, setNeedsPasswordVerification] =
     useState(false);
+  const [passwordSalt, setPasswordSalt] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const unlockTemplate = useCallback(
@@ -60,12 +61,21 @@ function TemplateContextProvider({ children }: { children: React.ReactNode }) {
       if (!id) return;
 
       try {
+        // Build verification payload: use client-side hash if salt available
+        const verifyBody: Record<string, string> = {};
+        if (passwordSalt) {
+          verifyBody.passwordHash = computePasswordHash(password, passwordSalt);
+        } else {
+          // Legacy artifact without salt: send plaintext for backward compat
+          verifyBody.password = password;
+        }
+
         const response = await fetch(`/api/templates/${id}/verify`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ password }),
+          body: JSON.stringify(verifyBody),
         });
 
         if (!response.ok) {
@@ -101,7 +111,7 @@ function TemplateContextProvider({ children }: { children: React.ReactNode }) {
         alert("Failed to unlock template.");
       }
     },
-    [id],
+    [id, passwordSalt],
   );
 
   useEffect(() => {
@@ -117,6 +127,7 @@ function TemplateContextProvider({ children }: { children: React.ReactNode }) {
       setIsFinalized,
       setIsEncrypted,
       setNeedsPasswordVerification,
+      setPasswordSalt,
       setIsLoading,
     );
   }, [id]);
@@ -169,6 +180,7 @@ async function loadTemplate(
   setIsFinalized: (value: boolean) => void,
   setIsEncrypted: (value: boolean) => void,
   setNeedsPasswordVerification: (value: boolean) => void,
+  setPasswordSalt: (salt: string | null) => void,
   setIsLoading: (value: boolean) => void,
 ) {
   try {
@@ -179,18 +191,12 @@ async function loadTemplate(
 
       if (storedTemplate.requiresPassword) {
         setTemplate(undefined);
-        setTemplateName(storedTemplate.templateName);
+        // Name is no longer returned before password verification
+        setTemplateName("");
         setIsFinalized(true);
         setIsEncrypted(true);
         setNeedsPasswordVerification(true);
-        saveRecentFormMeta(localStorage, {
-          id,
-          name: storedTemplate.templateName,
-          encrypted: true,
-          kind: "template",
-          phase: "finalized",
-        });
-        removeLocalDraft(localStorage, id);
+        setPasswordSalt(storedTemplate.passwordSalt ?? null);
         setIsLoading(false);
         return;
       }

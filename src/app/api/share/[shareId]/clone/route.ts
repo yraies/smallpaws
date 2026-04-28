@@ -36,31 +36,15 @@ export async function POST(
 
     // Generate a new ID for the cloned form
     const newFormId = typeid("form").toString();
-    const modification_key = typeid("key").toString();
 
-    // Create the cloned form with attribution
-    const clonedForm = {
-      id: newFormId,
-      modification_key,
-      encrypted: false, // Cloned forms start unencrypted
-      password_hash: null,
-      name: `${originalForm.name} (Copy)`,
-      data: originalForm.data, // Copy the form structure
-      cloned_from: sharedForm.form_id, // Track the original
-    };
-
-    // Save the cloned form as a new unpublished draft
-    // Note: This will NOT save to the forms table yet (user needs to publish it)
-    // Instead, we'll return the form data so the frontend can work with it
-
+    // Return clone data without exposing the original form's admin ID
     return NextResponse.json({
       success: true,
       formId: newFormId,
       formData: {
         id: newFormId,
-        name: clonedForm.name,
+        name: `${originalForm.name} (Copy)`,
         data: originalForm.data,
-        cloned_from: sharedForm.form_id,
         original_form_name: originalForm.name,
       },
     });

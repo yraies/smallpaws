@@ -18,9 +18,10 @@ import {
   useFormContext,
 } from "../../../contexts/FormContext";
 import {
+  computePasswordHash,
   decryptFormData,
   encryptFormData,
-  hashPassword,
+  hashPasswordWithSalt,
 } from "../../../lib/crypto";
 import { Form, type FormPOJO } from "../../../types/Form";
 import { getCompareIdentity } from "../../../utils/compareIdentity";
@@ -39,6 +40,7 @@ function FormPageContent() {
   const [_isPublishing, setIsPublishing] = React.useState(false);
   const [needsPasswordVerification, setNeedsPasswordVerification] =
     React.useState(false);
+  const [passwordSalt, setPasswordSalt] = React.useState<string | null>(null);
   const [isLoadingForm, setIsLoadingForm] = React.useState(true);
   const [isDeleted, setIsDeleted] = React.useState(false);
   const router = useRouter();
@@ -51,6 +53,16 @@ function FormPageContent() {
       if (response.ok) {
         const storedForm = await response.json();
 
+        // Password-protected forms now return requiresPassword without full data
+        if (storedForm.requiresPassword) {
+          setIsPublished(true);
+          setNeedsPasswordVerification(true);
+          setIsEncrypted(true);
+          setPasswordSalt(storedForm.passwordSalt ?? null);
+          setIsLoadingForm(false);
+          return;
+        }
+
         // Check if form has been deleted (soft delete)
         if (storedForm.name === "[Deleted]" || storedForm.data === "{}") {
           setIsDeleted(true);
@@ -60,10 +72,7 @@ function FormPageContent() {
         }
 
         setIsPublished(true); // Form exists in database, so it's published
-        if (storedForm.encrypted) {
-          setNeedsPasswordVerification(true);
-          setIsEncrypted(true);
-        }
+        setIsEncrypted(Boolean(storedForm.encrypted));
       } else {
         // Form not found in API, not published yet
         setIsPublished(false);
@@ -95,29 +104,34 @@ function FormPageContent() {
     if (!formId) return;
 
     try {
+      // Build verification payload: use client-side hash if salt available
+      const verifyBody: Record<string, string> = {};
+      if (passwordSalt) {
+        verifyBody.passwordHash = computePasswordHash(password, passwordSalt);
+      } else {
+        // Legacy artifact without salt: send plaintext for backward compat
+        verifyBody.password = password;
+      }
+
       const response = await fetch(`/api/forms/${formId}/verify`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify(verifyBody),
       });
 
       if (response.ok) {
         const result = await response.json();
-        console.log("Decryption - raw result:", result.form.data);
         // Parse the stored data - it's been JSON.stringify'd by the API
         const storedData = JSON.parse(result.form.data);
-        console.log("Decryption - parsed data:", storedData);
         // storedData should now be the EncryptedData object with encrypted and salt
         const decryptedFormData = decryptFormData(storedData, password);
-        console.log("Decryption - decrypted successfully");
         const loadedForm = Form.fromPOJO(decryptedFormData as FormPOJO);
         setForm(loadedForm);
         setNeedsPasswordVerification(false);
       } else {
         console.error("Invalid password");
-        // Could show error message to user
       }
     } catch (error) {
       console.error("Error verifying password:", error);
@@ -170,15 +184,16 @@ function FormPageContent() {
       let formData = form;
       let encrypted = false;
       let password_hash = null;
+      let password_salt = null;
 
       if (shouldEncrypt && password) {
         // Encrypt form data
-        console.log("Encryption - original form:", form);
         const encryptedData = encryptFormData(form, password);
-        console.log("Encryption - encrypted data:", encryptedData);
         formData = encryptedData as unknown as typeof form; // Store entire encrypted data object
         encrypted = true;
-        password_hash = hashPassword(password);
+        const creds = hashPasswordWithSalt(password);
+        password_hash = creds.hash;
+        password_salt = creds.salt;
       }
 
       const response = await fetch(`/api/forms/${formId}`, {
@@ -191,6 +206,7 @@ function FormPageContent() {
           data: formData,
           encrypted,
           password_hash,
+          password_salt,
         }),
       });
 

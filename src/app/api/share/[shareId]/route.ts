@@ -1,6 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { verifyPassword } from "../../../../lib/crypto";
+import {
+  verifyPasswordHash,
+  verifyPasswordLegacy,
+} from "../../../../lib/crypto";
 import { FormStorage } from "../../../../lib/database";
+import {
+  checkRateLimit,
+  getRateLimitRetryAfter,
+} from "../../../../lib/rateLimit";
 import { getCompareIdentity } from "../../../../utils/compareIdentity";
 
 export async function GET(
@@ -36,12 +43,13 @@ export async function GET(
     FormStorage.incrementShareViewCount(shareId);
 
     if (form.encrypted) {
+      // Don't leak the form name before password verification
       return NextResponse.json({
         requiresPassword: true,
         compareIdentity: getCompareIdentity(form.id),
-        formName: form.name,
         shareId: shareId,
         isEncrypted: form.encrypted,
+        passwordSalt: form.password_salt ?? null,
         viewCount: sharedForm.view_count + 1,
         createdAt: sharedForm.created_at,
         autoDeleteAt: sharedForm.expires_at,
@@ -82,10 +90,27 @@ export async function POST(
 ) {
   try {
     const { shareId } = await context.params;
-    const body = await request.json();
-    const { password } = body;
 
-    if (!password) {
+    // Rate limiting
+    const clientIp =
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      "unknown";
+    const rateLimitKey = `verify:share:${shareId}:${clientIp}`;
+    if (!checkRateLimit(rateLimitKey)) {
+      const retryAfter = getRateLimitRetryAfter(rateLimitKey);
+      return NextResponse.json(
+        { error: "Too many attempts. Please try again later." },
+        {
+          status: 429,
+          headers: { "Retry-After": String(retryAfter) },
+        },
+      );
+    }
+
+    const body = await request.json();
+    const { password, passwordHash } = body;
+
+    if (!password && !passwordHash) {
       return NextResponse.json(
         { error: "Password is required" },
         { status: 400 },
@@ -121,7 +146,20 @@ export async function POST(
       );
     }
 
-    if (!verifyPassword(password, form.password_hash)) {
+    // Verify: new salted flow or legacy unsalted flow
+    let isPasswordValid: boolean;
+    if (passwordHash) {
+      isPasswordValid = verifyPasswordHash(passwordHash, form.password_hash);
+    } else if (form.password_salt) {
+      return NextResponse.json(
+        { error: "Password hash required" },
+        { status: 400 },
+      );
+    } else {
+      isPasswordValid = verifyPasswordLegacy(password, form.password_hash);
+    }
+
+    if (!isPasswordValid) {
       return NextResponse.json({ error: "Invalid password" }, { status: 401 });
     }
 

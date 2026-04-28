@@ -36,6 +36,15 @@ Required fields for new entries:
 
 ## Entries
 
+### F-025 (2026-04-28) - Authorization model: admin URL is the auth key
+
+- **Date**: 2026-04-28
+- **Source**: Stakeholder chat
+- **Exact Quote**: "Items 1 and 2 are by design, since we do not want to save any user id or passwords. the id _is_ the auth-key. That of course means item 3 requires some kind of rework/fix. items 10, 11, and 13 should be fixed together with the remaining critical items in a first pass. the rest should be logged for a second pass."
+- **Normalized Intent**: The authorization model is intentionally URL-based: possessing the admin URL is sufficient authorization to delete or manage an artifact. No user accounts, passwords, or modification keys are required for admin operations. This makes it critical that share endpoints never leak admin IDs, since the admin ID is the sole authorization credential.
+- **Feedback**: (1) No-auth DELETE/POST on admin URLs (audit items 1, 2) are by design — the admin URL ID is the auth key. (2) Share endpoints leaking admin IDs (item 3) is critical since admin ID = auth key. (3) First security pass should cover items 3, 4, 5, 6, 7, 8, 10, 11, 13. (4) Remaining items logged for second pass.
+- **Action taken**: Classified items 1 and 2 as by-design, prioritized first-pass security fixes accordingly.
+
 ### F-024 (2026-04-27) - Theme work should start as a standalone concept page
 
 - **Date**: 2026-04-27

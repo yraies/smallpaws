@@ -33,6 +33,7 @@ Detailed chronological history is preserved in `FEEDBACK_LOG_ARCHIVE.md`.
 - **Prioritization**: Display modes (high contrast, simplified) and keyboard navigation are lower priority than custom answer enumerations and data portability features. (F-019)
 - **Answer option customization UX**: Preset pastel color swatches (12 named colors harmonizing with the app aesthetic) should be offered alongside the free color picker. Icons should be selectable via clickable picker (5-10 options) rather than text entry. (F-020)
 - **Product name and theming direction**: The app is now "Garden Walk" (evoking a walk through a mental garden of thoughts, expectations, wants, and needs). Four seasonal color themes (Spring, Summer, Autumn, Winter) are now implemented as a global theme switcher with localStorage persistence. Future direction includes per-template customizable block/background colors, semantic side-rail button colors derived from the active theme, and full semantic answer chip coloring via theme tiers. Spring's destructive color uses a warm tulip red. Winter is pastel and light. (F-021, F-024)
+- **Authorization model**: The admin URL ID is the sole auth key for artifacts. No user accounts, modification keys, or separate authorization mechanisms are required. This makes it critical that share endpoints never leak admin IDs, since possessing the admin URL is sufficient to delete or manage the artifact. (F-025)
 
 ## Severity Scale
 
