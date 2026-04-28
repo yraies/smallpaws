@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 describe("database share links", () => {
   const originalDataDir = process.env.DATA_DIR;
 
@@ -12,7 +14,7 @@ describe("database share links", () => {
   });
 
   test("forms keep one canonical share link", async () => {
-    process.env.DATA_DIR = `/tmp/garden-walk-test-form-share-${Date.now()}-${Math.random()}`;
+    process.env.DATA_DIR = `/tmp/garden-walk-test-form-share-${randomUUID()}`;
 
     const { FormStorage } = await import("../database");
 
@@ -54,7 +56,7 @@ describe("database share links", () => {
   });
 
   test("expired auto-delete share marks underlying form deleted", async () => {
-    process.env.DATA_DIR = `/tmp/garden-walk-test-form-autodelete-${Date.now()}-${Math.random()}`;
+    process.env.DATA_DIR = `/tmp/garden-walk-test-form-autodelete-${randomUUID()}`;
 
     const { FormStorage } = await import("../database");
 
@@ -82,7 +84,7 @@ describe("database share links", () => {
   });
 
   test("templates keep one canonical share link", async () => {
-    process.env.DATA_DIR = `/tmp/garden-walk-test-template-share-${Date.now()}-${Math.random()}`;
+    process.env.DATA_DIR = `/tmp/garden-walk-test-template-share-${randomUUID()}`;
 
     const { TemplateStorage } = await import("../database");
 

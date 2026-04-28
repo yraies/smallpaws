@@ -1,6 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { typeid } from "typeid-js";
+import { logApiError } from "../../../../lib/apiLogging";
 import { FormStorage } from "../../../../lib/database";
+import { isValidArtifactId } from "../../../../lib/idValidation";
 import { getCompareIdentity } from "../../../../utils/compareIdentity";
 
 export async function GET(
@@ -9,6 +11,10 @@ export async function GET(
 ) {
   try {
     const { id } = await context.params;
+    if (!isValidArtifactId(id, "form")) {
+      return NextResponse.json({ error: "Invalid form ID" }, { status: 400 });
+    }
+
     const form = FormStorage.getForm(id);
 
     if (!form) {
@@ -35,7 +41,7 @@ export async function GET(
       compareIdentity: getCompareIdentity(form.id),
     });
   } catch (error) {
-    console.error("Error retrieving form:", error);
+    logApiError("Error retrieving form", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -49,6 +55,10 @@ export async function POST(
 ) {
   try {
     const { id } = await context.params;
+    if (!isValidArtifactId(id, "form")) {
+      return NextResponse.json({ error: "Invalid form ID" }, { status: 400 });
+    }
+
     const body = await request.json();
 
     const {
@@ -107,7 +117,7 @@ export async function POST(
       id,
     });
   } catch (error) {
-    console.error("Error saving form:", error);
+    logApiError("Error saving form", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -121,11 +131,15 @@ export async function DELETE(
 ) {
   try {
     const { id } = await context.params;
+    if (!isValidArtifactId(id, "form")) {
+      return NextResponse.json({ error: "Invalid form ID" }, { status: 400 });
+    }
+
     FormStorage.deleteForm(id);
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting form:", error);
+    logApiError("Error deleting form", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

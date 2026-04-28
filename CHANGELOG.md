@@ -30,6 +30,7 @@ Detailed historical notes are preserved in `CHANGELOG_ARCHIVE.md`.
 - Client-side encryption now passes the PBKDF2-derived key as a WordArray directly to AES instead of converting it to a string, which previously triggered CryptoJS's weaker EVP_BytesToKey path. Legacy encrypted data is still decryptable.
 - Password hashing for artifact protection now uses HMAC-SHA256 with a random per-artifact salt instead of unsalted SHA256, preventing rainbow table attacks. Legacy unsalted hashes are still verifiable.
 - Password verification now hashes client-side before sending to the server, so plaintext passwords no longer leave the browser.
+- Password verification now uses timing-safe server-side comparisons, reducing timing-attack exposure on both salted and legacy verification paths.
 - API responses for password-protected artifacts no longer leak the artifact name before password verification.
 - Form GET on admin URLs now gates password-protected forms the same way template GET does, returning only `{ requiresPassword: true }` instead of the full encrypted data blob.
 - Share endpoints no longer return admin template/form IDs in their responses, preventing share-link holders from deriving admin/delete URLs.
@@ -37,6 +38,8 @@ Detailed historical notes are preserved in `CHANGELOG_ARCHIVE.md`.
 - HTTP security headers (CSP, X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy, X-DNS-Prefetch-Control, HSTS in production) are now set via Next.js middleware on all responses.
 - Password verification endpoints now enforce per-IP rate limiting (10 attempts per minute) and return 429 with Retry-After on excess.
 - API routes now reject request bodies larger than 5 MB via middleware Content-Length check.
+- New client-encrypted artifacts now derive keys with 600,000 PBKDF2 iterations while preserving decryption support for older 10,000-iteration payloads.
+- API routes now reject malformed form/template/share IDs early, sanitize server-side error logs, and Docker builds exclude `.env*` files plus `data/` from the build context. A new `.env.example` documents deploy-time secrets.
 - Removed console.log statements that leaked decrypted form data in the browser console.
 
 - App renamed from "Small Paws" to "Garden Walk" across all user-facing surfaces, documentation, and technical identifiers.

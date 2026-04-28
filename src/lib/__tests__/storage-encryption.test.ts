@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import path from "node:path";
 import Database from "better-sqlite3";
 
@@ -26,7 +27,7 @@ describe("storage encryption at rest", () => {
   }
 
   test("form rows are encrypted at rest but read back decrypted", async () => {
-    process.env.DATA_DIR = `/tmp/garden-walk-test-storage-form-${Date.now()}-${Math.random()}`;
+    process.env.DATA_DIR = `/tmp/garden-walk-test-storage-form-${randomUUID()}`;
     process.env.ARTIFACT_ENCRYPTION_KEY = "test-master-key";
 
     const { FormStorage } = await import("../database");
@@ -62,7 +63,7 @@ describe("storage encryption at rest", () => {
   });
 
   test("deleted form tombstones remain encrypted at rest", async () => {
-    process.env.DATA_DIR = `/tmp/garden-walk-test-storage-delete-${Date.now()}-${Math.random()}`;
+    process.env.DATA_DIR = `/tmp/garden-walk-test-storage-delete-${randomUUID()}`;
     process.env.ARTIFACT_ENCRYPTION_KEY = "test-master-key";
 
     const { FormStorage } = await import("../database");
@@ -92,7 +93,7 @@ describe("storage encryption at rest", () => {
   });
 
   test("template rows are encrypted at rest but read back decrypted", async () => {
-    process.env.DATA_DIR = `/tmp/garden-walk-test-storage-template-${Date.now()}-${Math.random()}`;
+    process.env.DATA_DIR = `/tmp/garden-walk-test-storage-template-${randomUUID()}`;
     process.env.ARTIFACT_ENCRYPTION_KEY = "test-master-key";
 
     const { TemplateStorage } = await import("../database");
@@ -125,7 +126,7 @@ describe("storage encryption at rest", () => {
   });
 
   test("legacy plaintext rows remain readable", async () => {
-    process.env.DATA_DIR = `/tmp/garden-walk-test-storage-legacy-${Date.now()}-${Math.random()}`;
+    process.env.DATA_DIR = `/tmp/garden-walk-test-storage-legacy-${randomUUID()}`;
     process.env.ARTIFACT_ENCRYPTION_KEY = "test-master-key";
 
     const { FormStorage } = await import("../database");

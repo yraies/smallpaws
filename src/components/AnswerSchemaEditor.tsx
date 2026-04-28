@@ -210,7 +210,7 @@ export default function AnswerSchemaEditor({
   const addOption = () => {
     // Insert before the last option (which is always "unset")
     const newOption: AnswerOption = {
-      key: `opt_${Math.random().toString(36).slice(2, 8)}`,
+      key: `opt_${crypto.randomUUID().replace(/-/g, "").slice(0, 8)}`,
       label: "",
       shortLabel: "",
       color: "#888888",
@@ -253,7 +253,7 @@ export default function AnswerSchemaEditor({
 
   if (disabled) {
     return (
-      <div className="document-sheet mb-2 border border-th-line bg-th-paper px-4 py-3">
+      <div className="document-sheet no-print mb-2 border border-th-line bg-th-paper px-4 py-3 print:hidden">
         <p className="text-sm font-semibold text-th-ink-muted">
           Answer Options
         </p>
@@ -285,7 +285,7 @@ export default function AnswerSchemaEditor({
   }
 
   return (
-    <div className="document-sheet mb-2 border border-th-line bg-th-paper px-4 py-3">
+    <div className="document-sheet no-print mb-2 border border-th-line bg-th-paper px-4 py-3 print:hidden">
       <div className="flex items-center justify-between">
         <button
           type="button"

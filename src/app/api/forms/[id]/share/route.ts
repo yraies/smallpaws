@@ -1,6 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { typeid } from "typeid-js";
+import { logApiError } from "../../../../../lib/apiLogging";
 import { FormStorage } from "../../../../../lib/database";
+import { isValidArtifactId } from "../../../../../lib/idValidation";
 
 export async function POST(
   request: NextRequest,
@@ -8,6 +10,10 @@ export async function POST(
 ) {
   try {
     const { id } = await context.params;
+    if (!isValidArtifactId(id, "form")) {
+      return NextResponse.json({ error: "Invalid form ID" }, { status: 400 });
+    }
+
     const body = await request.json().catch(() => ({}));
     const { regenerate = false, autoDeleteInDays } = body as {
       regenerate?: boolean;
@@ -56,7 +62,7 @@ export async function POST(
       createdAt: sharedForm.created_at,
     });
   } catch (error) {
-    console.error("Error creating shared form:", error);
+    logApiError("Error creating shared form", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -70,6 +76,9 @@ export async function GET(
 ) {
   try {
     const { id } = await context.params;
+    if (!isValidArtifactId(id, "form")) {
+      return NextResponse.json({ error: "Invalid form ID" }, { status: 400 });
+    }
 
     const form = FormStorage.getForm(id);
     if (!form) {
@@ -99,7 +108,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error("Error retrieving shared forms:", error);
+    logApiError("Error retrieving shared forms", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -111,7 +120,11 @@ export async function DELETE(
   _request: NextRequest,
   context: { params: Promise<{ id: string }> },
 ) {
-  void context;
+  const { id } = await context.params;
+  if (!isValidArtifactId(id, "form")) {
+    return NextResponse.json({ error: "Invalid form ID" }, { status: 400 });
+  }
+
   return NextResponse.json(
     { error: "Removing the shared view is no longer supported for forms" },
     { status: 405 },

@@ -1,5 +1,8 @@
 import CryptoJS from "crypto-js";
 
+export const PBKDF2_ITERATIONS = 600_000;
+export const LEGACY_PBKDF2_ITERATIONS = 10_000;
+
 /**
  * Client-side encryption utilities for Garden Walk forms
  * Provides AES encryption with password-based key derivation
@@ -31,7 +34,7 @@ export function encryptFormData(
 
   const key = CryptoJS.PBKDF2(password, salt, {
     keySize: 256 / 32,
-    iterations: 10000,
+    iterations: PBKDF2_ITERATIONS,
   });
 
   // Pass key as WordArray + explicit IV so CryptoJS uses the key directly
@@ -56,9 +59,12 @@ export function decryptFormData(
   password: string,
 ): unknown {
   try {
+    const iterations = encryptedData.iv
+      ? PBKDF2_ITERATIONS
+      : LEGACY_PBKDF2_ITERATIONS;
     const key = CryptoJS.PBKDF2(password, encryptedData.salt, {
       keySize: 256 / 32,
-      iterations: 10000,
+      iterations,
     });
 
     let decrypted: CryptoJS.lib.WordArray;

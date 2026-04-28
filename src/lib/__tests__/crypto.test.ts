@@ -5,6 +5,8 @@ import {
   encryptFormData,
   hashPasswordLegacy,
   hashPasswordWithSalt,
+  LEGACY_PBKDF2_ITERATIONS,
+  PBKDF2_ITERATIONS,
   validatePassword,
   verifyPasswordHash,
   verifyPasswordLegacy,
@@ -360,7 +362,7 @@ describe("Crypto Functions", () => {
       const salt = CryptoJS.lib.WordArray.random(256 / 8).toString();
       const key = CryptoJS.PBKDF2(testPassword, salt, {
         keySize: 256 / 32,
-        iterations: 10000,
+        iterations: LEGACY_PBKDF2_ITERATIONS,
       });
       const encrypted = CryptoJS.AES.encrypt(
         JSON.stringify(sampleForm),
@@ -375,6 +377,10 @@ describe("Crypto Functions", () => {
   });
 
   describe("End-to-End Form Storage Simulation", () => {
+    test("uses hardened PBKDF2 iterations for new encryptions", () => {
+      expect(PBKDF2_ITERATIONS).toBeGreaterThanOrEqual(600_000);
+    });
+
     test("simulates complete form save/load cycle with salted hashing", () => {
       const originalForm = {
         name: "Product Planning Form",

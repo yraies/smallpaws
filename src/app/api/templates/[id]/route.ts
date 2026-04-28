@@ -1,5 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { logApiError } from "../../../../lib/apiLogging";
 import { TemplateStorage } from "../../../../lib/database";
+import { isValidArtifactId } from "../../../../lib/idValidation";
 import { Form, type FormPOJO } from "../../../../types/Form";
 import { hasValidStructure } from "../../../../utils/documentStructure";
 
@@ -9,6 +11,13 @@ export async function GET(
 ) {
   try {
     const { id } = await context.params;
+    if (!isValidArtifactId(id, "template")) {
+      return NextResponse.json(
+        { error: "Invalid template ID" },
+        { status: 400 },
+      );
+    }
+
     const template = TemplateStorage.getTemplate(id);
 
     if (!template) {
@@ -29,7 +38,7 @@ export async function GET(
 
     return NextResponse.json(template);
   } catch (error) {
-    console.error("Error retrieving template:", error);
+    logApiError("Error retrieving template", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -43,6 +52,13 @@ export async function POST(
 ) {
   try {
     const { id } = await context.params;
+    if (!isValidArtifactId(id, "template")) {
+      return NextResponse.json(
+        { error: "Invalid template ID" },
+        { status: 400 },
+      );
+    }
+
     const body = await request.json();
 
     const {
@@ -94,7 +110,7 @@ export async function POST(
 
     return NextResponse.json({ success: true, id });
   } catch (error) {
-    console.error("Error finalizing template:", error);
+    logApiError("Error finalizing template", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -108,11 +124,18 @@ export async function DELETE(
 ) {
   try {
     const { id } = await context.params;
+    if (!isValidArtifactId(id, "template")) {
+      return NextResponse.json(
+        { error: "Invalid template ID" },
+        { status: 400 },
+      );
+    }
+
     TemplateStorage.deleteTemplate(id);
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting template:", error);
+    logApiError("Error deleting template", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

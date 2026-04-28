@@ -17,6 +17,7 @@ function QuestionLine({
   onChange,
   answerMode,
   structureEditable,
+  showPrintResponseSpace,
   answerOptions,
 }: {
   question: Question;
@@ -24,6 +25,7 @@ function QuestionLine({
   onChange: (mapper: (category: Category) => Category) => void;
   answerMode: "hidden" | "editable" | "readonly";
   structureEditable: boolean;
+  showPrintResponseSpace: boolean;
   answerOptions?: AnswerOption[];
 }) {
   return (
@@ -72,7 +74,7 @@ function QuestionLine({
       </span>
 
       {/* Handwritten response space (print only) */}
-      {answerMode !== "hidden" && (
+      {showPrintResponseSpace && (
         <div
           className="print-only print-response-space"
           aria-hidden="true"

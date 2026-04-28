@@ -22,6 +22,7 @@ import PageActionRails, {
   type RailAction,
 } from "../../../components/PageActionRails";
 import PasswordModal from "../../../components/PasswordModal";
+import PrintAnswerLegend from "../../../components/PrintAnswerLegend";
 import TemplateShareModal from "../../../components/TemplateShareModal";
 import {
   TemplateContextProvider,
@@ -310,6 +311,8 @@ function TemplatePageContent() {
         }
         disabled={isFinalized}
       />
+
+      <PrintAnswerLegend answerOptions={template.answerOptions} />
 
       <FormCategoryList
         setDocument={setTemplate}

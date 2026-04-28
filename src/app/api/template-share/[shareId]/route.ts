@@ -1,13 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server";
-import {
-  verifyPasswordHash,
-  verifyPasswordLegacy,
-} from "../../../../lib/crypto";
+import { logApiError } from "../../../../lib/apiLogging";
 import { TemplateStorage } from "../../../../lib/database";
+import { isValidArtifactId } from "../../../../lib/idValidation";
 import {
   checkRateLimit,
   getRateLimitRetryAfter,
 } from "../../../../lib/rateLimit";
+import {
+  verifyPasswordHashSecure,
+  verifyPasswordLegacySecure,
+} from "../../../../lib/serverPassword";
 
 export async function GET(
   _request: NextRequest,
@@ -15,6 +17,10 @@ export async function GET(
 ) {
   try {
     const { shareId } = await context.params;
+    if (!isValidArtifactId(shareId, "share")) {
+      return NextResponse.json({ error: "Invalid share ID" }, { status: 400 });
+    }
+
     const sharedTemplate = TemplateStorage.getSharedTemplate(shareId);
 
     if (!sharedTemplate) {
@@ -62,7 +68,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error("Error retrieving shared template:", error);
+    logApiError("Error retrieving shared template", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -76,6 +82,9 @@ export async function POST(
 ) {
   try {
     const { shareId } = await context.params;
+    if (!isValidArtifactId(shareId, "share")) {
+      return NextResponse.json({ error: "Invalid share ID" }, { status: 400 });
+    }
 
     // Rate limiting
     const clientIp =
@@ -129,7 +138,7 @@ export async function POST(
     // Verify: new salted flow or legacy unsalted flow
     let isPasswordValid: boolean;
     if (passwordHash) {
-      isPasswordValid = verifyPasswordHash(
+      isPasswordValid = verifyPasswordHashSecure(
         passwordHash,
         template.password_hash,
       );
@@ -139,7 +148,10 @@ export async function POST(
         { status: 400 },
       );
     } else {
-      isPasswordValid = verifyPasswordLegacy(password, template.password_hash);
+      isPasswordValid = verifyPasswordLegacySecure(
+        password,
+        template.password_hash,
+      );
     }
 
     if (!isPasswordValid) {
@@ -165,7 +177,7 @@ export async function POST(
       },
     });
   } catch (error) {
-    console.error("Error verifying shared template password:", error);
+    logApiError("Error verifying shared template password", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

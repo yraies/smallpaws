@@ -4,6 +4,17 @@ This file stores completed, cancelled, and superseded backlog items.
 
 ## done
 
+### Phase 6: Security Hardening Pass 2 (Apr 2026)
+
+- **B-050** — Timing-safe password comparison (audit item 9). Password verification routes now use `crypto.timingSafeEqual()`-backed comparison helpers for both salted client-hash verification and legacy plaintext-hash fallback paths.
+- **B-051** — Increase PBKDF2 iterations (audit item 12). New artifact encryption now uses 600,000 PBKDF2 iterations while legacy no-IV payloads still decrypt with the historical 10,000-iteration path for compatibility.
+- **B-053** — ID format validation (audit item 16). Form, template, and share API routes now reject malformed artifact IDs with 400 responses before database work.
+- **B-054** — Remove `clearAllForms()` export (audit item 17). Removed the bulk database wipe helper from `database.ts` so it is no longer available for accidental use.
+- **B-055** — Add `.env*` and `data/` to `.dockerignore` (audit item 18). Docker builds now exclude environment files and the runtime data directory from the build context.
+- **B-056** — Create `.env.example` (audit item 19). Added a deployer-facing example environment file documenting `ARTIFACT_ENCRYPTION_KEY` and `DATA_DIR`.
+- **B-057** — Use stronger random ID generation (audit item 20). Replaced remaining `Math.random()`-based runtime/test ID generation with `typeid()` or `crypto.randomUUID()` as appropriate.
+- **B-058** — Remove verbose `console.error` from API routes (audit item 23). API routes now log sanitized error names instead of raw error objects.
+
 ### Seasonal Theme System (Apr 2026)
 
 - **B-050** — Four seasonal color themes with global theme switcher (F-021, F-024). Replaced hardcoded palette families with semantic CSS custom properties, created Spring/Summer/Autumn/Winter themes with distinct visual character, added ThemeContext with localStorage persistence, ThemeSelector UI, flash-of-wrong-theme prevention, and migrated all 18 UI components to semantic `th-*` tokens. Added `AnswerSemantic` type for future theme-aware answer chip coloring (full integration deferred).

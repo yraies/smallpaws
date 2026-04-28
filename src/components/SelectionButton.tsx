@@ -140,6 +140,13 @@ const SelectionButtonComponent: React.FC<SelectionButtonProps> = ({
         aria-pressed={isSelected}
         data-selected={isSelected}
         data-label={option.shortLabel}
+        style={
+          {
+            "--selection-print-bg": isSelected ? bgColor : "transparent",
+            "--selection-print-text": isSelected ? textColor : "#666666",
+            "--selection-print-border": isSelected ? bgColor : "#666666",
+          } as React.CSSProperties
+        }
       >
         <Icon
           className={`${className}`}
@@ -162,7 +169,15 @@ const SelectionButtonComponent: React.FC<SelectionButtonProps> = ({
       aria-pressed={isSelected}
       data-selected={isSelected}
       data-label={option.shortLabel}
-      style={{ backgroundColor: bgColor, color: textColor }}
+      style={
+        {
+          backgroundColor: bgColor,
+          color: textColor,
+          "--selection-print-bg": isSelected ? bgColor : "transparent",
+          "--selection-print-text": isSelected ? textColor : "#666666",
+          "--selection-print-border": isSelected ? bgColor : "#666666",
+        } as React.CSSProperties
+      }
     >
       {option.shortLabel}
     </button>

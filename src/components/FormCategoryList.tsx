@@ -8,6 +8,7 @@ interface FormCategoryListProps {
   categories: Category[];
   answerMode: "hidden" | "editable" | "readonly";
   structureEditable: boolean;
+  showPrintResponseSpace?: boolean;
   showAddButton?: boolean;
   onAddCategory?: () => void;
   answerOptions?: AnswerOption[];
@@ -18,6 +19,7 @@ export default function FormCategoryList({
   categories,
   answerMode,
   structureEditable,
+  showPrintResponseSpace = true,
   showAddButton = false,
   onAddCategory,
   answerOptions,
@@ -34,6 +36,7 @@ export default function FormCategoryList({
           setDocument={setDocument}
           answerMode={answerMode}
           structureEditable={structureEditable}
+          showPrintResponseSpace={showPrintResponseSpace}
           answerOptions={answerOptions}
         />
       ))}

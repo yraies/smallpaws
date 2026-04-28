@@ -1,3 +1,4 @@
+import { typeid } from "typeid-js";
 import {
   Form,
   type FormPOJO,
@@ -18,7 +19,7 @@ import { setPendingFormDraft } from "./templateLifecycle";
  */
 export function prepareFormClone(form: Form): string {
   // Generate a new form ID
-  const newFormId = `form_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  const newFormId = typeid("form").toString();
 
   // Create a copy of the current form with new name
   const clonedForm = form.withName(`${form.name} (Copy)`);

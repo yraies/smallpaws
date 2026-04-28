@@ -1,13 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server";
-import {
-  verifyPasswordHash,
-  verifyPasswordLegacy,
-} from "../../../../../lib/crypto";
+import { logApiError } from "../../../../../lib/apiLogging";
 import { FormStorage } from "../../../../../lib/database";
+import { isValidArtifactId } from "../../../../../lib/idValidation";
 import {
   checkRateLimit,
   getRateLimitRetryAfter,
 } from "../../../../../lib/rateLimit";
+import {
+  verifyPasswordHashSecure,
+  verifyPasswordLegacySecure,
+} from "../../../../../lib/serverPassword";
 import { getCompareIdentity } from "../../../../../utils/compareIdentity";
 
 export async function POST(
@@ -16,6 +18,9 @@ export async function POST(
 ) {
   try {
     const { id } = await context.params;
+    if (!isValidArtifactId(id, "form")) {
+      return NextResponse.json({ error: "Invalid form ID" }, { status: 400 });
+    }
 
     // Rate limiting
     const clientIp =
@@ -60,7 +65,10 @@ export async function POST(
     // Verify: new salted flow or legacy unsalted flow
     let isPasswordValid: boolean;
     if (passwordHash) {
-      isPasswordValid = verifyPasswordHash(passwordHash, form.password_hash);
+      isPasswordValid = verifyPasswordHashSecure(
+        passwordHash,
+        form.password_hash,
+      );
     } else if (form.password_salt) {
       // Artifact has salt but client sent plaintext — reject
       return NextResponse.json(
@@ -69,7 +77,10 @@ export async function POST(
       );
     } else {
       // Legacy artifact without salt: accept plaintext for backward compat
-      isPasswordValid = verifyPasswordLegacy(password, form.password_hash);
+      isPasswordValid = verifyPasswordLegacySecure(
+        password,
+        form.password_hash,
+      );
     }
 
     if (!isPasswordValid) {
@@ -90,7 +101,7 @@ export async function POST(
       },
     });
   } catch (error) {
-    console.error("Error verifying password:", error);
+    logApiError("Error verifying password", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

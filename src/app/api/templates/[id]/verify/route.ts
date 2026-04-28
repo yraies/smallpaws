@@ -1,13 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server";
-import {
-  verifyPasswordHash,
-  verifyPasswordLegacy,
-} from "../../../../../lib/crypto";
+import { logApiError } from "../../../../../lib/apiLogging";
 import { TemplateStorage } from "../../../../../lib/database";
+import { isValidArtifactId } from "../../../../../lib/idValidation";
 import {
   checkRateLimit,
   getRateLimitRetryAfter,
 } from "../../../../../lib/rateLimit";
+import {
+  verifyPasswordHashSecure,
+  verifyPasswordLegacySecure,
+} from "../../../../../lib/serverPassword";
 
 export async function POST(
   request: NextRequest,
@@ -15,6 +17,12 @@ export async function POST(
 ) {
   try {
     const { id } = await context.params;
+    if (!isValidArtifactId(id, "template")) {
+      return NextResponse.json(
+        { error: "Invalid template ID" },
+        { status: 400 },
+      );
+    }
 
     // Rate limiting
     const clientIp =
@@ -61,7 +69,7 @@ export async function POST(
     // Verify: new salted flow or legacy unsalted flow
     let isPasswordValid: boolean;
     if (passwordHash) {
-      isPasswordValid = verifyPasswordHash(
+      isPasswordValid = verifyPasswordHashSecure(
         passwordHash,
         template.password_hash,
       );
@@ -71,7 +79,10 @@ export async function POST(
         { status: 400 },
       );
     } else {
-      isPasswordValid = verifyPasswordLegacy(password, template.password_hash);
+      isPasswordValid = verifyPasswordLegacySecure(
+        password,
+        template.password_hash,
+      );
     }
 
     if (!isPasswordValid) {
@@ -90,7 +101,7 @@ export async function POST(
       },
     });
   } catch (error) {
-    console.error("Error verifying template password:", error);
+    logApiError("Error verifying template password", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

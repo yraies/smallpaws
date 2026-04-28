@@ -310,14 +310,6 @@ export class FormStorage {
     })) as FormMeta[];
   }
 
-  static clearAllForms(): void {
-    db.exec("DELETE FROM forms");
-    db.exec("DELETE FROM form_meta");
-    db.exec("DELETE FROM shared_forms");
-    db.exec("DELETE FROM templates");
-    db.exec("DELETE FROM shared_templates");
-  }
-
   // Shared Forms Operations
   static createSharedForm(shareData: {
     shareId: string;

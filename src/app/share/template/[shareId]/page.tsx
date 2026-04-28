@@ -19,6 +19,7 @@ import PageActionRails, {
   type RailAction,
 } from "../../../../components/PageActionRails";
 import PasswordModal from "../../../../components/PasswordModal";
+import PrintAnswerLegend from "../../../../components/PrintAnswerLegend";
 import { computePasswordHash, decryptFormData } from "../../../../lib/crypto";
 import { Form, type FormPOJO } from "../../../../types/Form";
 import {
@@ -248,6 +249,8 @@ function SharedTemplatePageContent() {
         />
       }
     >
+      <PrintAnswerLegend answerOptions={template.answerOptions} />
+
       <FormCategoryList
         categories={template.categories}
         answerMode="hidden"

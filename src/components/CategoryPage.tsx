@@ -16,12 +16,14 @@ function CategoryBox({
   setDocument,
   answerMode,
   structureEditable,
+  showPrintResponseSpace,
   answerOptions,
 }: {
   category: Category;
   setDocument?: Dispatch<SetStateAction<Form>>;
   answerMode: "hidden" | "editable" | "readonly";
   structureEditable: boolean;
+  showPrintResponseSpace: boolean;
   answerOptions?: AnswerOption[];
 }) {
   const questionBlock = category.questions.map((question) => (
@@ -40,6 +42,7 @@ function CategoryBox({
       }
       answerMode={answerMode}
       structureEditable={structureEditable}
+      showPrintResponseSpace={showPrintResponseSpace}
       answerOptions={answerOptions}
     />
   ));

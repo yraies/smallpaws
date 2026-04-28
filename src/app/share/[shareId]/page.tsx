@@ -22,6 +22,7 @@ import PageActionRails, {
   type RailAction,
 } from "../../../components/PageActionRails";
 import PasswordModal from "../../../components/PasswordModal";
+import PrintAnswerLegend from "../../../components/PrintAnswerLegend";
 import ShareInfoOverlay from "../../../components/ShareInfoOverlay";
 import { DisplayPreferencesProvider } from "../../../contexts/DisplayPreferencesContext";
 import {
@@ -416,6 +417,8 @@ function SharedFormPageContent() {
       notice={<FormPhaseBanner phase="shared" />}
       overlay={shareInfo ? <ShareInfoOverlay shareInfo={shareInfo} /> : null}
     >
+      <PrintAnswerLegend answerOptions={form.answerOptions} />
+
       <FormCategoryList
         categories={form.categories}
         answerMode="readonly"

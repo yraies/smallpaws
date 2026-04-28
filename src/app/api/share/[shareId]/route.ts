@@ -1,13 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server";
-import {
-  verifyPasswordHash,
-  verifyPasswordLegacy,
-} from "../../../../lib/crypto";
+import { logApiError } from "../../../../lib/apiLogging";
 import { FormStorage } from "../../../../lib/database";
+import { isValidArtifactId } from "../../../../lib/idValidation";
 import {
   checkRateLimit,
   getRateLimitRetryAfter,
 } from "../../../../lib/rateLimit";
+import {
+  verifyPasswordHashSecure,
+  verifyPasswordLegacySecure,
+} from "../../../../lib/serverPassword";
 import { getCompareIdentity } from "../../../../utils/compareIdentity";
 
 export async function GET(
@@ -16,6 +18,9 @@ export async function GET(
 ) {
   try {
     const { shareId } = await context.params;
+    if (!isValidArtifactId(shareId, "share")) {
+      return NextResponse.json({ error: "Invalid share ID" }, { status: 400 });
+    }
 
     // Get shared form record
     const sharedForm = FormStorage.getSharedForm(shareId);
@@ -76,7 +81,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error("Error accessing shared form:", error);
+    logApiError("Error accessing shared form", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -90,6 +95,9 @@ export async function POST(
 ) {
   try {
     const { shareId } = await context.params;
+    if (!isValidArtifactId(shareId, "share")) {
+      return NextResponse.json({ error: "Invalid share ID" }, { status: 400 });
+    }
 
     // Rate limiting
     const clientIp =
@@ -149,14 +157,20 @@ export async function POST(
     // Verify: new salted flow or legacy unsalted flow
     let isPasswordValid: boolean;
     if (passwordHash) {
-      isPasswordValid = verifyPasswordHash(passwordHash, form.password_hash);
+      isPasswordValid = verifyPasswordHashSecure(
+        passwordHash,
+        form.password_hash,
+      );
     } else if (form.password_salt) {
       return NextResponse.json(
         { error: "Password hash required" },
         { status: 400 },
       );
     } else {
-      isPasswordValid = verifyPasswordLegacy(password, form.password_hash);
+      isPasswordValid = verifyPasswordLegacySecure(
+        password,
+        form.password_hash,
+      );
     }
 
     if (!isPasswordValid) {
@@ -185,7 +199,7 @@ export async function POST(
       },
     });
   } catch (error) {
-    console.error("Error verifying shared form password:", error);
+    logApiError("Error verifying shared form password", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

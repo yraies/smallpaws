@@ -1,6 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { typeid } from "typeid-js";
+import { logApiError } from "../../../../../lib/apiLogging";
 import { FormStorage } from "../../../../../lib/database";
+import { isValidArtifactId } from "../../../../../lib/idValidation";
 
 export async function POST(
   _request: NextRequest,
@@ -8,6 +10,9 @@ export async function POST(
 ) {
   try {
     const { shareId } = await context.params;
+    if (!isValidArtifactId(shareId, "share")) {
+      return NextResponse.json({ error: "Invalid share ID" }, { status: 400 });
+    }
 
     // Get shared form record
     const sharedForm = FormStorage.getSharedForm(shareId);
@@ -49,7 +54,7 @@ export async function POST(
       },
     });
   } catch (error) {
-    console.error("Error cloning form:", error);
+    logApiError("Error cloning form", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

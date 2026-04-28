@@ -36,6 +36,25 @@ Required fields for new entries:
 
 ## Entries
 
+### F-026 (2026-04-28) - Print mode should keep answer fields, keep color in PDF, and hide answer legends
+
+- **Date**: 2026-04-28
+- **Source**: Stakeholder chat
+- **Exact Quote**: "when trying to print forms/templates via the browser print function, I noticed that the fields into which people should write their answers, are missing on all pages but the form filling page. Even on that page, though, everything is also in grayscale even though I am printing to PDF, so colors should be avabilable. The answer options are also always printed at the top. they should be hidden in prints."
+- **Normalized Intent**: Print mode should preserve handwritten answer boxes across printable artifact views, keep meaningful color when printing to PDF/browser print where color is available, and suppress the answer-options legend from printed output.
+- **Feedback**: Current print CSS is incomplete. Printable templates and read-only views should still provide visible handwritten answer fields, printed/PDF output should not force a grayscale-only rendering, and the answer option legend should be hidden in print.
+- **Action taken**: Updated print CSS and question rendering so printable views show explicit handwritten answer boxes, printable answer chips can retain color, and the AnswerSchemaEditor legend is marked `no-print`.
+- **Validation**: Verified in real Chrome by forcing print-media rules onto finalized template and published form pages: templates now show right-side answer boxes, published forms retain colored answer marks and category accents, and the answer-options legend no longer appears in print preview.
+- **Follow-up (2026-04-28):** Stakeholder clarified, "actually I think I may have told you something stupid: besides the unset option, it would of course be useful to have the general/expected answer options as a sort of legend on the printed page. Although the colors are not needed there."
+- **Normalized Intent (follow-up)**: Printouts should keep a plain text legend for the normal answer options, but omit the unset option and avoid depending on color in the legend itself.
+- **Action taken (follow-up)**: Added a shared `PrintAnswerLegend` component to template, shared-template, form, and shared-form pages. The legend is print-only, text-based, and excludes the unset option.
+- **Follow-up (2026-04-28):** Stakeholder further clarified, "okay, now we should center these and make the legend more compact, so it does not waste a 10th of the page with empty space. One line should suffice, I think."
+- **Normalized Intent (follow-up)**: The print legend should be horizontally centered and compressed into a single compact line so it uses minimal vertical space.
+- **Action taken (follow-up)**: Collapsed the print legend into a centered one-line row with a short `Legend:` label and compact answer tokens.
+- **Follow-up (2026-04-28):** Stakeholder asked to remove the outer black border around the legend and restore the old behavior where disabling browser `Background graphics` removes fills while preserving outlines.
+- **Normalized Intent (follow-up)**: The print legend should stay visually light without an enclosing border, and print CSS should respect the browser's `Background graphics` toggle instead of forcing filled backgrounds.
+- **Action taken (follow-up)**: Removed the outer legend border and dropped the `print-color-adjust: exact` overrides so browser print settings can control background fills again while the outline-based layout remains readable.
+
 ### F-025 (2026-04-28) - Authorization model: admin URL is the auth key
 
 - **Date**: 2026-04-28

@@ -1,6 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { typeid } from "typeid-js";
+import { logApiError } from "../../../../../lib/apiLogging";
 import { TemplateStorage } from "../../../../../lib/database";
+import { isValidArtifactId } from "../../../../../lib/idValidation";
 
 export async function POST(
   request: NextRequest,
@@ -8,6 +10,13 @@ export async function POST(
 ) {
   try {
     const { id } = await context.params;
+    if (!isValidArtifactId(id, "template")) {
+      return NextResponse.json(
+        { error: "Invalid template ID" },
+        { status: 400 },
+      );
+    }
+
     const template = TemplateStorage.getTemplate(id);
 
     if (!template) {
@@ -37,7 +46,7 @@ export async function POST(
       createdAt: sharedTemplate.created_at,
     });
   } catch (error) {
-    console.error("Error creating shared template:", error);
+    logApiError("Error creating shared template", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -51,6 +60,13 @@ export async function GET(
 ) {
   try {
     const { id } = await context.params;
+    if (!isValidArtifactId(id, "template")) {
+      return NextResponse.json(
+        { error: "Invalid template ID" },
+        { status: 400 },
+      );
+    }
+
     const share = TemplateStorage.getCanonicalSharedTemplateForTemplate(id);
     const template = TemplateStorage.getTemplate(id);
     const requiresPassword = !!template?.encrypted;
@@ -70,7 +86,7 @@ export async function GET(
         : null,
     });
   } catch (error) {
-    console.error("Error retrieving shared templates:", error);
+    logApiError("Error retrieving shared templates", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -84,6 +100,13 @@ export async function DELETE(
 ) {
   try {
     const { id } = await context.params;
+    if (!isValidArtifactId(id, "template")) {
+      return NextResponse.json(
+        { error: "Invalid template ID" },
+        { status: 400 },
+      );
+    }
+
     const template = TemplateStorage.getTemplate(id);
 
     if (!template) {
@@ -97,7 +120,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting shared template:", error);
+    logApiError("Error deleting shared template", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

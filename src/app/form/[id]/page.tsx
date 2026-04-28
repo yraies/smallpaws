@@ -10,6 +10,7 @@ import FormCategoryList from "../../../components/FormCategoryList";
 import FormPhaseBanner from "../../../components/FormPhaseBanner";
 import LoadingState from "../../../components/LoadingState";
 import PasswordModal from "../../../components/PasswordModal";
+import PrintAnswerLegend from "../../../components/PrintAnswerLegend";
 import ShareModal from "../../../components/ShareModal";
 import { DisplayPreferencesProvider } from "../../../contexts/DisplayPreferencesContext";
 import { FormActionsProvider } from "../../../contexts/FormActionsContext";
@@ -277,6 +278,8 @@ function FormPageContent() {
         actions={<FormActionButtons />}
         notice={<FormPhaseBanner phase={isPublished ? "published" : "draft"} />}
       >
+        <PrintAnswerLegend answerOptions={form.answerOptions} />
+
         <FormCategoryList
           setDocument={setForm}
           categories={form.categories}

@@ -11,6 +11,19 @@ Normalization policy:
 
 ## Historical Rollup
 
+### Security Hardening Pass 2 (Apr 2026)
+
+Finished the second pass of audit-driven security cleanup across password verification, route input validation, and deployment hygiene.
+
+- Replaced direct hash equality checks with `crypto.timingSafeEqual()`-backed helpers on all artifact password verification routes.
+- Raised PBKDF2 iterations for newly encrypted artifacts to 600,000 while keeping the legacy 10,000-iteration decryption path for older no-IV payloads.
+- Added early form/template/share ID validation across API routes to reject malformed route params before touching SQLite.
+- Replaced verbose API `console.error(..., error)` logging with sanitized error-name logging.
+- Removed the exported bulk-wipe helper from `database.ts`.
+- Added `.env.example` with `ARTIFACT_ENCRYPTION_KEY` and `DATA_DIR` guidance.
+- Updated `.dockerignore` to exclude `.env*` files and the `data/` runtime directory.
+- Replaced remaining `Math.random()`-based runtime and test ID generation with `typeid()` or `crypto.randomUUID()`.
+
 ### Seasonal Theme System (Apr 2026)
 
 Replaced the hardcoded 5-family Tailwind palette with a semantic CSS custom property system enabling runtime theme switching across all components.
