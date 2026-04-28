@@ -36,6 +36,16 @@ Required fields for new entries:
 
 ## Entries
 
+### F-027 (2026-04-28) - Autumn theme needs a stronger identity distinct from summer
+
+- **Date**: 2026-04-28
+- **Source**: Stakeholder chat
+- **Exact Quote**: "looking at the app and themes, I feel like the autumn theme is kind of missing an identity. its too similar to summer, especially."
+- **Normalized Intent**: Autumn should have a stronger seasonal identity and diverge more clearly from summer in the shipped theme system.
+- **Feedback**: The current autumn palette reads too close to summer. Autumn should feel more like harvest/woodland/dried leaves and less like another sunlit warm pastel variant.
+- **Action taken**: Shifted autumn toward a duskier harvest palette with deeper rust block color, more parchment-like page/paper surfaces, darker brown ink, muted olive success, smoky slate info, and mulberry primary accents.
+- **Validation**: Verified in real Chrome on the home page by comparing summer and autumn directly. Autumn now reads as more burnt, woody, and dusk-toned instead of adjacent to summer.
+
 ### F-026 (2026-04-28) - Print mode should keep answer fields, keep color in PDF, and hide answer legends
 
 - **Date**: 2026-04-28

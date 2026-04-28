@@ -71,20 +71,20 @@
 
 /* ── Autumn ── */
 [data-theme="autumn"] {
-  --th-page: #f8efe1;
-  --th-paper: #fff9f1;
-  --th-paper-soft: #f1dfc3;
-  --th-ink: #4a2d1b;
-  --th-ink-muted: #7a5a49;
-  --th-line: #e0c9a2;
-  --th-block: #d5a45b;
-  --th-block-soft: #f1dfc3;
-  --th-primary: #8a5b78;
-  --th-primary-hover: #6d4860;
-  --th-success: #8c8b4f;
-  --th-info: #7d7bb0;
-  --th-danger: #b46351;
-  --th-danger-soft: #fbe9e5;
+  --th-page: #efe2c7;
+  --th-paper: #fbf5e8;
+  --th-paper-soft: #e7cfab;
+  --th-ink: #452718;
+  --th-ink-muted: #6b4c3d;
+  --th-line: #c99d6c;
+  --th-block: #b66b3a;
+  --th-block-soft: #e7cfab;
+  --th-primary: #7c4f64;
+  --th-primary-hover: #5f3b4d;
+  --th-success: #6f7640;
+  --th-info: #6f768c;
+  --th-danger: #9f4f3f;
+  --th-danger-soft: #f6e3dc;
 }
 
 /* ── Winter ── */
